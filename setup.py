@@ -34,7 +34,8 @@ setup(
     install_requires=[
         'Flask',
         'Babel',
-        'pytz'
+        'pytz',
+        'Jinja2>=2.5'
     ],
     classifiers=[
         'Development Status :: 4 - Beta',

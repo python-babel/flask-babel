@@ -1,8 +1,15 @@
+# -*- coding: utf-8 -*-
 from __future__ import with_statement
+
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 import unittest
 import flask
 from datetime import datetime
 from flaskext import babel
+from flaskext.babel import gettext, ngettext
 
 
 class DateFormattingTestCase(unittest.TestCase):
@@ -75,6 +82,36 @@ class DateFormattingTestCase(unittest.TestCase):
             app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europe/Vienna'
             babel.refresh()
             assert babel.format_datetime(d) == 'Apr 12, 2010 3:46:00 PM'
+
+
+class GettextTestCase(unittest.TestCase):
+
+    def test_basics(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app, default_locale='de_DE')
+
+        with app.test_request_context():
+            assert gettext(u'Hello %(name)s!', name='Peter') == 'Hallo Peter!'
+            assert ngettext(u'%(num)s Apple', u'%(num)s Apples', 3) == u'3 Äpfel'
+            assert ngettext(u'%(num)s Apple', u'%(num)s Apples', 1) == u'1 Apfel'
+
+    def test_template_basics(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app, default_locale='de_DE')
+
+        t = lambda x: flask.render_template_string('{{ %s }}' % x)
+
+        with app.test_request_context():
+            assert t("gettext('Hello %(name)s!', name='Peter')") == 'Hallo Peter!'
+            assert t("ngettext('%(num)s Apple', '%(num)s Apples', 3)") == u'3 Äpfel'
+            assert t("ngettext('%(num)s Apple', '%(num)s Apples', 1)") == u'1 Apfel'
+            assert flask.render_template_string('''
+                {% trans %}Hello {{ name }}!{% endtrans %}
+            ''', name='Peter').strip() == 'Hallo Peter!'
+            assert flask.render_template_string('''
+                {% trans num=3 %}{{ num }} Apple
+                {%- pluralize %}{{ num }} Apples{% endtrans %}
+            ''', name='Peter').strip() == u'3 Äpfel'
 
 
 if __name__ == '__main__':

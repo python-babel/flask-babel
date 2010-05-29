@@ -18,9 +18,10 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
 
 from datetime import datetime
 from flask import _request_ctx_stack
-from babel import dates, Locale
+from babel import dates, support, Locale
 from pytz import timezone, UTC
 from werkzeug import ImmutableDict
+from jinja2.environment import load_extensions
 
 
 class Babel(object):
@@ -46,7 +47,8 @@ class Babel(object):
         'datetime.long':    None,
     })
 
-    def __init__(self, app, default_locale='en', date_formats=None):
+    def __init__(self, app, default_locale='en', date_formats=None,
+                 configure_jinja=True):
         self.app = app
         app.babel_instance = self
 
@@ -58,6 +60,20 @@ class Babel(object):
 
         self.locale_selector_func = None
         self.timezone_selector_func = None
+
+        if configure_jinja:
+            app.jinja_env.filters.update(
+                datetimeformat=format_datetime,
+                dateformat=format_date,
+                timeformat=format_time,
+                timedeltaformat=format_timedelta
+            )
+            app.jinja_env.add_extension('jinja2.ext.i18n')
+            app.jinja_env.install_gettext_callables(
+                lambda x: get_translations().ugettext(x),
+                lambda s, p, n: get_translations().ungettext(s, p, n),
+                newstyle=True
+            )
 
     def localeselector(self, f):
         self.locale_selector_func = f
@@ -76,6 +92,17 @@ class Babel(object):
         return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
 
 
+def get_translations():
+    """Returns the correct gettext translations"""
+    ctx = _request_ctx_stack.top
+    translations = getattr(ctx, 'babel_translations', None)
+    if translations is None:
+        dirname = os.path.join(ctx.app.root_path, 'translations')
+        translations = support.Translations.load(dirname, [get_locale()])
+        ctx.babel_translations = translations
+    return translations
+
+
 def get_locale():
     """Returns the locale that should be used."""
     ctx = _request_ctx_stack.top
@@ -90,7 +117,7 @@ def get_locale():
                 locale = self.default_locale
             else:
                 locale = Locale.parse(rv)
-    ctx.babel_locale = locale
+        ctx.babel_locale = locale
     return locale
 
 
@@ -111,14 +138,14 @@ def get_timezone():
                     tzinfo = timezone(rv)
                 else:
                     tzinfo = rv
-    ctx.babel_tzinfo = tzinfo
+        ctx.babel_tzinfo = tzinfo
     return tzinfo
 
 
 def refresh():
     """Refreshes the cached timezones and locale information"""
     ctx = _request_ctx_stack.top
-    for key in 'babel_locale', 'babel_tzinfo':
+    for key in 'babel_locale', 'babel_tzinfo', 'babel_translations':
         if hasattr(ctx, key):
             delattr(ctx, key)
 
@@ -191,3 +218,13 @@ def _date_format(formatter, obj, format, rebase, **extra):
     if formatter is not dates.format_date and rebase:
         extra['tzinfo'] = get_timezone()
     return formatter(obj, format, locale=locale, **extra)
+
+
+def gettext(string, **variables):
+    return get_translations().ugettext(string) % variables
+_ = gettext
+
+
+def ngettext(singular, plural, num, **variables):
+    variables.setdefault('num', num)
+    return get_translations().ungettext(singular, plural, num) % variables

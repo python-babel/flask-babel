@@ -3,7 +3,7 @@
 all: clean-pyc test
 
 test:
-	python tests.py
+	cd tests; python tests.py
 
 clean-pyc:
 	find . -name '*.pyc' -exec rm -f {} +
