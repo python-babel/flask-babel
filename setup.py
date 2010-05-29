@@ -10,7 +10,7 @@ Links
 
 * `documentation <http://packages.python.org/Flask-Babel>`_
 * `development version
-  <http://github.com/USERNAME/REPOSITORY/zipball/master#egg=Flask-Babel-dev>`_
+  <http://github.com/mitsuhiko/flask-babel/zipball/master#egg=Flask-Babel-dev>`_
 
 .. _Babel: http://babel.edgewall.org/
 
@@ -20,7 +20,7 @@ from setuptools import setup
 
 setup(
     name='Flask-Babel',
-    version='1.0',
+    version='0.5.1',
     url='http://github.com/mitsuhiko/flask-babel',
     license='BSD',
     author='Armin Ronacher',

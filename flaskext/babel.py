@@ -47,13 +47,13 @@ class Babel(object):
         'datetime.long':    None,
     })
 
-    def __init__(self, app, default_locale='en', date_formats=None,
-                 configure_jinja=True):
+    def __init__(self, app, default_locale='en', default_timezone='UTC',
+                 date_formats=None, configure_jinja=True):
         self.app = app
         app.babel_instance = self
 
         self.app.config.setdefault('BABEL_DEFAULT_LOCALE', default_locale)
-        self.app.config.setdefault('BABEL_DEFAULT_TIMEZONE', 'UTC')
+        self.app.config.setdefault('BABEL_DEFAULT_TIMEZONE', default_timezone)
         if date_formats is None:
             date_formats = self.default_date_formats.copy()
         self.date_formats = date_formats
@@ -114,7 +114,7 @@ def get_locale():
         else:
             rv = babel.locale_selector_func()
             if rv is None:
-                locale = self.default_locale
+                locale = babel.default_locale
             else:
                 locale = Locale.parse(rv)
         ctx.babel_locale = locale
