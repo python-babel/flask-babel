@@ -4,9 +4,10 @@ Flask-Babel
 .. module:: flaskext.babel
 
 Flask-Babel is an extension to `Flask`_ that adds i18n and l10n support to
-any Flask application with the help of `babel`_ and `pytz`_.  It has
-builtin support for date formatting with timezone support as well as a
-very simple and friendly interface to :mod:`gettext` translations.
+any Flask application with the help of `babel`_, `pytz`_ and
+`speaklater`_.  It has builtin support for date formatting with timezone
+support as well as a very simple and friendly interface to :mod:`gettext`
+translations.
 
 Installation
 ------------
@@ -17,7 +18,7 @@ Install the extension with one of the following commands::
 
 or alternatively if you have pip installed::
 
-    $ pip install Flask-babel
+    $ pip install Flask-Babel
 
 Please note that Flask-Babel requires Jinja 2.5.  If you are using an
 older version you will have to upgrade or disable the Jinja support.
@@ -149,6 +150,16 @@ to translate strings that might become plural.  Here some examples::
     gettext(u'Value: %(value)s', value=42)
     ngettext(u'%(num)s Apple', u'%(num)s Apples', number_of_apples)
 
+Additionally if you want to use constant strings somewhere in your
+application and define them outside of a request, you can use a lazy
+strings.  Lazy strings will not be evaluated until they are actually used.
+To use such a lazy string, use the :func:`lazy_gettext` function::
+
+    from flask import lazy_gettext
+
+    class MyForm(formlibrary.FormBase):
+        success_message = lazy_gettext(u'The form was successfully saved.')
+
 So how does Flask-Babel find the translations?  Well first you have to
 create some.  Here is how you do it:
 
@@ -175,7 +186,12 @@ Save it as ``babel.cfg`` or something similar next to your application.
 Then it's time to run the `pybabel` command that comes with Babel to
 extract your strings::
 
-    $ pybabel -F babel.cfg -o messages.pot
+    $ pybabel extract -F babel.cfg -o messages.pot
+
+If you are using the :func:`lazy_gettext` function you should tell pybabel
+that it should also look for such function calls::
+
+    $ pybabel extract -F babel.cfg -k lazy_gettext -o messages.pot
 
 This will use the mapping from the ``babel.cfg`` file and store the
 generated template in ``messages.pot``.  Now we can create the first
@@ -220,7 +236,14 @@ your ``~/.profile`` file::
 
 Then restart your terminal.
 
+API
+---
+
+.. automodule:: flaskext.babel
+   :members:
+
 
 .. _Flask: http://flask.pocoo.org/
 .. _babel: http://babel.edgewall.org/
 .. _pytz: http://pytz.sourceforge.net/
+.. _speaklater: http://pypi.python.org/pypi/speaklater

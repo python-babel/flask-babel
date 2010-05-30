@@ -35,6 +35,7 @@ setup(
         'Flask',
         'Babel',
         'pytz',
+        'speaklater>=1.2',
         'Jinja2>=2.5'
     ],
     classifiers=[

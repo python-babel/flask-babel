@@ -9,7 +9,7 @@ import unittest
 import flask
 from datetime import datetime
 from flaskext import babel
-from flaskext.babel import gettext, ngettext
+from flaskext.babel import gettext, ngettext, lazy_gettext
 
 
 class DateFormattingTestCase(unittest.TestCase):
@@ -112,6 +112,16 @@ class GettextTestCase(unittest.TestCase):
                 {% trans num=3 %}{{ num }} Apple
                 {%- pluralize %}{{ num }} Apples{% endtrans %}
             ''', name='Peter').strip() == u'3 Äpfel'
+
+    def test_lazy_gettext(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app, default_locale='de_DE')
+        yes = lazy_gettext(u'Yes')
+        with app.test_request_context():
+            assert unicode(yes) == 'Ja'
+        app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
+        with app.test_request_context():
+            assert unicode(yes) == 'Yes'
 
 
 if __name__ == '__main__':

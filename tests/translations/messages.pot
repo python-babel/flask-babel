@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2010-05-29 17:00+0200\n"
+"POT-Creation-Date: 2010-05-30 12:56+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,4 +28,8 @@ msgid "%(num)s Apple"
 msgid_plural "%(num)s Apples"
 msgstr[0] ""
 msgstr[1] ""
+
+#: tests.py:119
+msgid "Yes"
+msgstr ""
 

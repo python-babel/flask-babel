@@ -10,6 +10,7 @@
 """
 from __future__ import absolute_import
 import os
+import sys
 
 # this is a workaround for a snow leopard bug that babel does not
 # work around :)
@@ -95,6 +96,8 @@ class Babel(object):
 def get_translations():
     """Returns the correct gettext translations"""
     ctx = _request_ctx_stack.top
+    if ctx is None:
+        return None
     translations = getattr(ctx, 'babel_translations', None)
     if translations is None:
         dirname = os.path.join(ctx.app.root_path, 'translations')
@@ -106,6 +109,8 @@ def get_translations():
 def get_locale():
     """Returns the locale that should be used."""
     ctx = _request_ctx_stack.top
+    if ctx is None:
+        return None
     locale = getattr(ctx, 'babel_locale', None)
     if locale is None:
         babel = ctx.app.babel_instance
@@ -221,10 +226,34 @@ def _date_format(formatter, obj, format, rebase, **extra):
 
 
 def gettext(string, **variables):
-    return get_translations().ugettext(string) % variables
+    """Translates a string with the current locale and passes in the
+    given keyword arguments as mapping to a string formatting string.
+    """
+    t = get_translations()
+    if t is None:
+        return string % variables
+    return t.ugettext(string) % variables
 _ = gettext
 
 
 def ngettext(singular, plural, num, **variables):
+    """Translates a string with the current locale and passes in the
+    given keyword arguments as mapping to a string formatting string.
+    The `num` parameter is used to dispatch between singular and various
+    plural forms of the message.  It is available in the format string
+    as ``%(num)d`` or ``%(num)s``.  The source language should be
+    English or a similar language which only has one plural form.
+    """
     variables.setdefault('num', num)
-    return get_translations().ungettext(singular, plural, num) % variables
+    t = get_translations()
+    if t is None:
+        return (singular if num == 1 else plural) % variables
+    return t.ungettext(singular, plural, num) % variables
+
+
+def lazy_gettext(string, **variables):
+    """Like :func:`gettext` but the string returned is lazy which means
+    it will be translated when it is used as an actual string.
+    """
+    from speaklater import make_lazy_string
+    return make_lazy_string(gettext, string, **variables)
