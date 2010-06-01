@@ -239,8 +239,52 @@ Then restart your terminal.
 API
 ---
 
-.. automodule:: flaskext.babel
+This part of the documentation documents each and every public class or
+function from Flask-Babel.
+
+Configuration
+`````````````
+
+.. autoclass:: Babel
    :members:
+
+Context Functions
+`````````````````
+
+.. autofunction:: get_translations
+
+.. autofunction:: get_locale
+
+.. autofunction:: get_timezone
+
+Datetime Functions
+``````````````````
+
+.. autofunction:: to_user_timezone
+
+.. autofunction:: to_utc
+
+.. autofunction:: format_datetime
+
+.. autofunction:: format_date
+
+.. autofunction:: format_time
+
+.. autofunction:: format_timedelta
+
+Gettext Functions
+`````````````````
+
+.. autofunction:: gettext
+
+.. autofunction:: ngettext
+
+.. autofunction:: lazy_gettext
+
+Low-Level API
+`````````````
+
+.. autofunction:: refresh
 
 
 .. _Flask: http://flask.pocoo.org/

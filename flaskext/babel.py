@@ -27,7 +27,9 @@ from jinja2.environment import load_extensions
 
 class Babel(object):
     """Central controller class that can be used to configure how
-    babel behaves.
+    Flask-Babel behaves.  Each application that wants to use Flask-Babel
+    has to create an instance of this class after the configuration was
+    initialized.
     """
 
     default_date_formats = ImmutableDict({
@@ -57,6 +59,18 @@ class Babel(object):
         self.app.config.setdefault('BABEL_DEFAULT_TIMEZONE', default_timezone)
         if date_formats is None:
             date_formats = self.default_date_formats.copy()
+
+        #: a mapping of Babel datetime format strings that can be modified
+        #: to change the defaults.  If you invoke :func:`format_datetime`
+        #: and do not provide any format string Flask-Babel will do the
+        #: following things:
+        #:
+        #: 1.   look up ``date_formats['datetime']``.  By default ``'medium'``
+        #:      is returned to enforce medium length datetime formats.
+        #: 2.   ``date_formats['datetime.medium'] (if ``'medium'`` was
+        #:      returned in step one) is looked up.  If the return value
+        #:      is anything but `None` this is used as new format string.
+        #:      otherwise the default for that language is used.
         self.date_formats = date_formats
 
         self.locale_selector_func = None
@@ -77,24 +91,52 @@ class Babel(object):
             )
 
     def localeselector(self, f):
+        """Registers a callback function for locale selection.  The default
+        behaves as if a function was registered that returns `None` all the
+        time.  If `None` is returned, the locale falls back to the one from
+        the configuration.
+
+        This has to return the locale as string (eg: ``'de_AT'``, ''`en_US`'')
+        """
+        assert self.locale_selector_func is None, \
+            'a localeselector function is already registered'
         self.locale_selector_func = f
         return f
 
     def timezoneselector(self, f):
+        """Registers a callback function for timezone selection.  The default
+        behaves as if a function was registered that returns `None` all the
+        time.  If `None` is returned, the timezone falls back to the one from
+        the configuration.
+
+        This has to return the timezone as string (eg: ``'Europe/Vienna'``)
+        """
+        assert self.timezone_selector_func is None, \
+            'a timezoneselector function is already registered'
         self.timezone_selector_func = f
         return f
 
     @property
     def default_locale(self):
+        """The default locale from the configuration as instance of a
+        `babel.Locale` object.
+        """
         return Locale.parse(self.app.config['BABEL_DEFAULT_LOCALE'])
 
     @property
     def default_timezone(self):
+        """The default timezone from the configuration as instance of a
+        `pytz.timezone` object.
+        """
         return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
 
 
 def get_translations():
-    """Returns the correct gettext translations"""
+    """Returns the correct gettext translations that should be used for
+    ths request.  This will never fail and return a dummy translation
+    object if used outside of the request or if a translation cannot be
+    found.
+    """
     ctx = _request_ctx_stack.top
     if ctx is None:
         return None
@@ -107,7 +149,10 @@ def get_translations():
 
 
 def get_locale():
-    """Returns the locale that should be used."""
+    """Returns the locale that should be used for this request as
+    `babel.Locale` object.  This returns `None` if used outside of
+    a request.
+    """
     ctx = _request_ctx_stack.top
     if ctx is None:
         return None
@@ -127,7 +172,10 @@ def get_locale():
 
 
 def get_timezone():
-    """Returns the timezone that should be used."""
+    """Returns the timezone that should be used for this request as
+    `pytz.timezone` object.  This returns `None` if used outside of
+    a request.
+    """
     ctx = _request_ctx_stack.top
     tzinfo = getattr(ctx, 'babel_tzinfo', None)
     if tzinfo is None:
@@ -148,7 +196,18 @@ def get_timezone():
 
 
 def refresh():
-    """Refreshes the cached timezones and locale information"""
+    """Refreshes the cached timezones and locale information.  This can
+    be used to switch a translation between a request and if you want
+    the changes to take place immediately, not just with the next request::
+
+        user.timezone = request.form['timezone']
+        user.locale = request.form['locale']
+        refresh()
+        flash(gettext('Language was changed'))
+
+    Without that refresh, the :func:`~flask.flash` function would probably
+    return English text and a now German page.
+    """
     ctx = _request_ctx_stack.top
     for key in 'babel_locale', 'babel_tzinfo', 'babel_translations':
         if hasattr(ctx, key):
@@ -170,7 +229,11 @@ def _get_format(key, format):
 
 
 def to_user_timezone(datetime):
-    """Convert a datetime object to the user's timezone."""
+    """Convert a datetime object to the user's timezone.  This automatically
+    happens on all date formatting unless rebasing is disabled.  If you need
+    to convert a :class:`datetime.datetime` object at any time to the user's
+    timezone (as returned by :func:`get_timezone` this function can be used).
+    """
     if datetime.tzinfo is None:
         datetime = datetime.replace(tzinfo=UTC)
     tzinfo = get_timezone()
@@ -178,21 +241,43 @@ def to_user_timezone(datetime):
 
 
 def to_utc(datetime):
-    """Convert a datetime object to UTC and drop tzinfo."""
+    """Convert a datetime object to UTC and drop tzinfo.  This is the
+    opposite operation to :func:`to_user_timezone`.
+    """
     if datetime.tzinfo is None:
         datetime = get_timezone().localize(datetime)
     return datetime.astimezone(UTC).replace(tzinfo=None)
 
 
 def format_datetime(datetime=None, format=None, rebase=True):
-    """Return a date formatted according to the given pattern."""
+    """Return a date formatted according to the given pattern.  If no
+    :class:`~datetime.datetime` object is passed, the current time is
+    assumed.  By default rebasing happens which causes the object to
+    be converted to the users's timezone (as returned by
+    :func:`to_user_timezone`).  This function formats both date and
+    time.
+
+    The format parameter can either be ``'short'``, ``'medium'``,
+    ``'long'`` or ``'full'`` (in which cause the language's default for
+    that setting is used, or the default from the :attr:`Babel.date_formats`
+    mapping is used) or a format string as documented by Babel.
+    """
     format = _get_format('datetime', format)
     return _date_format(dates.format_datetime, datetime, format, rebase)
 
 
 def format_date(date=None, format=None, rebase=True):
-    """Return the date formatted according to the pattern.  Rebasing only
-    works for datetime objects passed to this function obviously.
+    """Return a date formatted according to the given pattern.  If no
+    :class:`~datetime.datetime` or :class:`~datetime.date` object is passed,
+    the current time is assumed.  By default rebasing happens which causes
+    the object to be converted to the users's timezone (as returned by
+    :func:`to_user_timezone`).  This function only formats the date part
+    of a :class:`~datetime.datetime` object.
+
+    The format parameter can either be ``'short'``, ``'medium'``,
+    ``'long'`` or ``'full'`` (in which cause the language's default for
+    that setting is used, or the default from the :attr:`Babel.date_formats`
+    mapping is used) or a format string as documented by Babel.
     """
     if rebase and isinstance(date, datetime):
         date = to_user_timezone(date)
@@ -201,14 +286,26 @@ def format_date(date=None, format=None, rebase=True):
 
 
 def format_time(time=None, format=None, rebase=True):
-    """Return the time formatted according to the pattern."""
+    """Return a time formatted according to the given pattern.  If no
+    :class:`~datetime.datetime` object is passed, the current time is
+    assumed.  By default rebasing happens which causes the object to
+    be converted to the users's timezone (as returned by
+    :func:`to_user_timezone`).  This function formats both date and
+    time.
+
+    The format parameter can either be ``'short'``, ``'medium'``,
+    ``'long'`` or ``'full'`` (in which cause the language's default for
+    that setting is used, or the default from the :attr:`Babel.date_formats`
+    mapping is used) or a format string as documented by Babel.
+    """
     format = _get_format('time', format)
     return _date_format(dates.format_time, time, format, rebase)
 
 
 def format_timedelta(datetime_or_timedelta, granularity='second'):
-    """Format the elapsed time from the given date to now of the given
-    timedelta.
+    """Format the elapsed time from the given date to now or the given
+    timedelta.  This currently requires an unreleased development
+    version of Babel.
     """
     if isinstance(datetime_or_timedelta, datetime):
         datetime_or_timedelta = datetime.utcnow() - datetime_or_timedelta
@@ -227,7 +324,10 @@ def _date_format(formatter, obj, format, rebase, **extra):
 
 def gettext(string, **variables):
     """Translates a string with the current locale and passes in the
-    given keyword arguments as mapping to a string formatting string.
+    given keyword arguments as mapping to a string formatting string::
+
+        gettext(u'Hello World!')
+        gettext(u'Hello %(name)s!', name='World')
     """
     t = get_translations()
     if t is None:
@@ -243,6 +343,10 @@ def ngettext(singular, plural, num, **variables):
     plural forms of the message.  It is available in the format string
     as ``%(num)d`` or ``%(num)s``.  The source language should be
     English or a similar language which only has one plural form.
+
+    ::
+
+        ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(apples))
     """
     variables.setdefault('num', num)
     t = get_translations()
@@ -254,6 +358,14 @@ def ngettext(singular, plural, num, **variables):
 def lazy_gettext(string, **variables):
     """Like :func:`gettext` but the string returned is lazy which means
     it will be translated when it is used as an actual string.
+
+    Example::
+
+        hello = lazy_gettext(u'Hello World')
+
+        @app.route('/')
+        def index():
+            return unicode(hello)
     """
     from speaklater import make_lazy_string
     return make_lazy_string(gettext, string, **variables)
