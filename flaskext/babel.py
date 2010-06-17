@@ -116,6 +116,23 @@ class Babel(object):
         self.timezone_selector_func = f
         return f
 
+
+    def list_translations(self):
+        """Returns a list of all the locales translations exist for.  The
+        list returned will be filled with actual locale objects and not just
+        strings.
+
+        .. versionadded:: 0.6
+        """
+        dirname = os.path.join(self.app.root_path, 'translations')
+        if not os.path.isdir(dirname):
+            return []
+        result = []
+        for folder in os.listdir(dirname):
+            if os.path.isdir(os.path.join(dirname, folder, 'LC_MESSAGES')):
+                result.append(Locale.parse(folder))
+        return result
+
     @property
     def default_locale(self):
         """The default locale from the configuration as instance of a

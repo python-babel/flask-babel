@@ -123,6 +123,13 @@ class GettextTestCase(unittest.TestCase):
         with app.test_request_context():
             assert unicode(yes) == 'Yes'
 
+    def test_list_translations(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app, default_locale='de_DE')
+        translations = b.list_translations()
+        assert len(translations) == 1
+        assert str(translations[0]) == 'de'
+
 
 if __name__ == '__main__':
     unittest.main()
