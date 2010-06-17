@@ -20,7 +20,7 @@ from setuptools import setup
 
 setup(
     name='Flask-Babel',
-    version='0.5.1',
+    version='0.6',
     url='http://github.com/mitsuhiko/flask-babel',
     license='BSD',
     author='Armin Ronacher',
