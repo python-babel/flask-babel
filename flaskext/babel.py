@@ -67,6 +67,9 @@ class Babel(object):
         """
         self.app = app
         app.babel_instance = self
+        if not hasattr(app, 'extensions'):
+            app.extensions = {}
+        app.extensions['babel'] = self
 
         app.config.setdefault('BABEL_DEFAULT_LOCALE', self._default_locale)
         app.config.setdefault('BABEL_DEFAULT_TIMEZONE', self._default_timezone)
@@ -188,7 +191,7 @@ def get_locale():
         return None
     locale = getattr(ctx, 'babel_locale', None)
     if locale is None:
-        babel = ctx.app.babel_instance
+        babel = ctx.app.extensions['babel']
         if babel.locale_selector_func is None:
             locale = babel.default_locale
         else:
@@ -209,7 +212,7 @@ def get_timezone():
     ctx = _request_ctx_stack.top
     tzinfo = getattr(ctx, 'babel_tzinfo', None)
     if tzinfo is None:
-        babel = ctx.app.babel_instance
+        babel = ctx.app.extensions['babel']
         if babel.timezone_selector_func is None:
             tzinfo = babel.default_timezone
         else:
@@ -248,7 +251,7 @@ def _get_format(key, format):
     """A small helper for the datetime formatting functions.  Looks up
     format defaults for different kinds.
     """
-    babel = _request_ctx_stack.top.app.babel_instance
+    babel = _request_ctx_stack.top.app.extensions['babel']
     if format is None:
         format = babel.date_formats[key]
     if format in ('short', 'medium', 'full', 'long'):
