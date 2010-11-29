@@ -184,12 +184,12 @@ Save it as ``babel.cfg`` or something similar next to your application.
 Then it's time to run the `pybabel` command that comes with Babel to
 extract your strings::
 
-    $ pybabel extract -F babel.cfg -o messages.pot
+    $ pybabel extract -F babel.cfg -o messages.pot .
 
 If you are using the :func:`lazy_gettext` function you should tell pybabel
 that it should also look for such function calls::
 
-    $ pybabel extract -F babel.cfg -k lazy_gettext -o messages.pot
+    $ pybabel extract -F babel.cfg -k lazy_gettext -o messages.pot .
 
 This will use the mapping from the ``babel.cfg`` file and store the
 generated template in ``messages.pot``.  Now we can create the first
