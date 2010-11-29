@@ -35,6 +35,28 @@ class DateFormattingTestCase(unittest.TestCase):
             assert babel.format_datetime(d, 'long') == \
                 '12. April 2010 15:46:00 MESZ'
 
+    def test_init_app(self):
+        b = babel.Babel()
+        app = flask.Flask(__name__)
+        b.init_app(app)
+        d = datetime(2010, 4, 12, 13, 46)
+
+        with app.test_request_context():
+            assert babel.format_datetime(d) == 'Apr 12, 2010 1:46:00 PM'
+            assert babel.format_date(d) == 'Apr 12, 2010'
+            assert babel.format_time(d) == '1:46:00 PM'
+
+        with app.test_request_context():
+            app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europe/Vienna'
+            assert babel.format_datetime(d) == 'Apr 12, 2010 3:46:00 PM'
+            assert babel.format_date(d) == 'Apr 12, 2010'
+            assert babel.format_time(d) == '3:46:00 PM'
+
+        with app.test_request_context():
+            app.config['BABEL_DEFAULT_LOCALE'] = 'de_DE'
+            assert babel.format_datetime(d, 'long') == \
+                '12. April 2010 15:46:00 MESZ'
+
     def test_custom_formats(self):
         app = flask.Flask(__name__)
         app.config.update(

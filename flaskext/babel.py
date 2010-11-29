@@ -28,8 +28,8 @@ from jinja2.environment import load_extensions
 class Babel(object):
     """Central controller class that can be used to configure how
     Flask-Babel behaves.  Each application that wants to use Flask-Babel
-    has to create an instance of this class after the configuration was
-    initialized.
+    has to create, or run :meth:`init_app` on, an instance of this class
+    after the configuration was initialized.
     """
 
     default_date_formats = ImmutableDict({
@@ -50,15 +50,28 @@ class Babel(object):
         'datetime.long':    None,
     })
 
-    def __init__(self, app, default_locale='en', default_timezone='UTC',
+    def __init__(self, app=None, default_locale='en', default_timezone='UTC',
                  date_formats=None, configure_jinja=True):
+        self._default_locale = default_locale
+        self._default_timezone = default_timezone
+        self._date_formats = date_formats
+        self._configure_jinja = configure_jinja
+        self.app = app
+
+        if app is not None:
+            self.init_app(app)
+
+    def init_app(self, app):
+        """Set up this instance for use with *app*, if no app was passed to
+        the constructor.
+        """
         self.app = app
         app.babel_instance = self
 
-        self.app.config.setdefault('BABEL_DEFAULT_LOCALE', default_locale)
-        self.app.config.setdefault('BABEL_DEFAULT_TIMEZONE', default_timezone)
-        if date_formats is None:
-            date_formats = self.default_date_formats.copy()
+        app.config.setdefault('BABEL_DEFAULT_LOCALE', self._default_locale)
+        app.config.setdefault('BABEL_DEFAULT_TIMEZONE', self._default_timezone)
+        if self._date_formats is None:
+            self._date_formats = self.default_date_formats.copy()
 
         #: a mapping of Babel datetime format strings that can be modified
         #: to change the defaults.  If you invoke :func:`format_datetime`
@@ -71,12 +84,12 @@ class Babel(object):
         #:      returned in step one) is looked up.  If the return value
         #:      is anything but `None` this is used as new format string.
         #:      otherwise the default for that language is used.
-        self.date_formats = date_formats
+        self.date_formats = self._date_formats
 
         self.locale_selector_func = None
         self.timezone_selector_func = None
 
-        if configure_jinja:
+        if self._configure_jinja:
             app.jinja_env.filters.update(
                 datetimeformat=format_datetime,
                 dateformat=format_date,
