@@ -142,7 +142,7 @@ There are two functions responsible for translating: :func:`gettext` and
 :func:`ngettext`.  The first to translate singular strings and the second
 to translate strings that might become plural.  Here some examples::
 
-    from flask import gettext, ngettext
+    from flaskext.babel import gettext, ngettext
 
     gettext(u'A simple string')
     gettext(u'Value: %(value)s', value=42)
@@ -153,7 +153,7 @@ application and define them outside of a request, you can use a lazy
 strings.  Lazy strings will not be evaluated until they are actually used.
 To use such a lazy string, use the :func:`lazy_gettext` function::
 
-    from flask import lazy_gettext
+    from flaskext.babel import lazy_gettext
 
     class MyForm(formlibrary.FormBase):
         success_message = lazy_gettext(u'The form was successfully saved.')
@@ -237,8 +237,52 @@ Then restart your terminal.
 API
 ---
 
-.. automodule:: flaskext.babel
+This part of the documentation documents each and every public class or
+function from Flask-Babel.
+
+Configuration
+`````````````
+
+.. autoclass:: Babel
    :members:
+
+Context Functions
+`````````````````
+
+.. autofunction:: get_translations
+
+.. autofunction:: get_locale
+
+.. autofunction:: get_timezone
+
+Datetime Functions
+``````````````````
+
+.. autofunction:: to_user_timezone
+
+.. autofunction:: to_utc
+
+.. autofunction:: format_datetime
+
+.. autofunction:: format_date
+
+.. autofunction:: format_time
+
+.. autofunction:: format_timedelta
+
+Gettext Functions
+`````````````````
+
+.. autofunction:: gettext
+
+.. autofunction:: ngettext
+
+.. autofunction:: lazy_gettext
+
+Low-Level API
+`````````````
+
+.. autofunction:: refresh
 
 
 .. _Flask: http://flask.pocoo.org/

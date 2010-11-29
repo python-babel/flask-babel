@@ -12,3 +12,4 @@ clean-pyc:
 
 upload-docs:
 	$(MAKE) -C docs html
+	python setup.py upload_sphinx
