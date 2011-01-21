@@ -10,7 +10,6 @@
 """
 from __future__ import absolute_import
 import os
-import sys
 
 # this is a workaround for a snow leopard bug that babel does not
 # work around :)
@@ -22,7 +21,6 @@ from flask import _request_ctx_stack
 from babel import dates, support, Locale
 from pytz import timezone, UTC
 from werkzeug import ImmutableDict
-from jinja2.environment import load_extensions
 
 
 class Babel(object):
@@ -294,6 +292,9 @@ def format_datetime(datetime=None, format=None, rebase=True):
     ``'long'`` or ``'full'`` (in which cause the language's default for
     that setting is used, or the default from the :attr:`Babel.date_formats`
     mapping is used) or a format string as documented by Babel.
+
+    This function is also available in the template context as filter
+    named `datetimeformat`.
     """
     format = _get_format('datetime', format)
     return _date_format(dates.format_datetime, datetime, format, rebase)
@@ -311,6 +312,9 @@ def format_date(date=None, format=None, rebase=True):
     ``'long'`` or ``'full'`` (in which cause the language's default for
     that setting is used, or the default from the :attr:`Babel.date_formats`
     mapping is used) or a format string as documented by Babel.
+
+    This function is also available in the template context as filter
+    named `dateformat`.
     """
     if rebase and isinstance(date, datetime):
         date = to_user_timezone(date)
@@ -330,6 +334,9 @@ def format_time(time=None, format=None, rebase=True):
     ``'long'`` or ``'full'`` (in which cause the language's default for
     that setting is used, or the default from the :attr:`Babel.date_formats`
     mapping is used) or a format string as documented by Babel.
+
+    This function is also available in the template context as filter
+    named `timeformat`.
     """
     format = _get_format('time', format)
     return _date_format(dates.format_time, time, format, rebase)
@@ -339,6 +346,9 @@ def format_timedelta(datetime_or_timedelta, granularity='second'):
     """Format the elapsed time from the given date to now or the given
     timedelta.  This currently requires an unreleased development
     version of Babel.
+
+    This function is also available in the template context as filter
+    named `timedeltaformat`.
     """
     if isinstance(datetime_or_timedelta, datetime):
         datetime_or_timedelta = datetime.utcnow() - datetime_or_timedelta
