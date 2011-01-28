@@ -119,7 +119,7 @@ u'05 12 1987'
 >>> format_datetime(datetime(1987, 3, 5, 17, 12), 'dd mm yyyy')
 u'05 12 1987'
 
-And again with a different langauge:
+And again with a different language:
 
 >>> app.config['BABEL_DEFAULT_LOCALE'] = 'de'
 >>> from flaskext.babel import refresh; refresh()

@@ -164,7 +164,7 @@ class Babel(object):
 
 def get_translations():
     """Returns the correct gettext translations that should be used for
-    ths request.  This will never fail and return a dummy translation
+    this request.  This will never fail and return a dummy translation
     object if used outside of the request or if a translation cannot be
     found.
     """
