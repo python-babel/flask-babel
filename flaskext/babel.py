@@ -19,8 +19,14 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
 from datetime import datetime
 from flask import _request_ctx_stack
 from babel import dates, support, Locale
-from pytz import timezone, UTC
 from werkzeug import ImmutableDict
+try:
+    from pytz.gae import pytz
+except ImportError:
+    from pytz import timezone, UTC
+else:
+    timezone = pytz.timezone
+    UTC = pytz.UTC
 
 
 class Babel(object):
