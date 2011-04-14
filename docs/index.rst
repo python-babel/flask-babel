@@ -58,7 +58,7 @@ the first time the timezone is needed it will call a
 :meth:`~Babel.timezoneselector` function.
 
 If any of these methods return `None` the extension will automatically
-fall back to what's in the config.  Furthermore for efficientcy that
+fall back to what's in the config.  Furthermore for efficiency that
 function is called only once and the return value then cached.  If you
 need to switch the language between a request, you can :func:`refresh` the
 cache.
