@@ -277,7 +277,13 @@ Gettext Functions
 
 .. autofunction:: ngettext
 
+.. autofunction:: pgettext
+
+.. autofunction:: npgettext
+
 .. autofunction:: lazy_gettext
+
+.. autofunction:: lazy_pgettext
 
 Low-Level API
 `````````````

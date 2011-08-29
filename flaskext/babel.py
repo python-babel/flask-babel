@@ -404,6 +404,29 @@ def ngettext(singular, plural, num, **variables):
     return t.ungettext(singular, plural, num) % variables
 
 
+def pgettext(context, string, **variables):
+    """Like :func:`gettext` but with a context.
+
+    .. versionadded:: 0.7
+    """
+    t = get_translations()
+    if t is None:
+        return string % variables
+    return t.upgettext(context, string) % variables
+
+
+def npgettext(context, singular, plural, num, **variables):
+    """Like :func:`ngettext` but with a context.
+
+    .. versionadded:: 0.7
+    """
+    variables.setdefault('num', num)
+    t = get_translations()
+    if t is None:
+        return (singular if num == 1 else plural) % variables
+    return t.unpgettext(context, singular, plural, num) % variables
+
+
 def lazy_gettext(string, **variables):
     """Like :func:`gettext` but the string returned is lazy which means
     it will be translated when it is used as an actual string.
@@ -418,3 +441,13 @@ def lazy_gettext(string, **variables):
     """
     from speaklater import make_lazy_string
     return make_lazy_string(gettext, string, **variables)
+
+
+def lazy_pgettext(context, string, **variables):
+    """Like :func:`pgettext` but the string returned is lazy which means
+    it will be translated when it is used as an actual string.
+
+    .. versionadded:: 0.7
+    """
+    from speaklater import make_lazy_string
+    return make_lazy_string(pgettext, context, string, **variables)
