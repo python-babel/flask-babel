@@ -378,7 +378,9 @@ def _date_format(formatter, obj, format, rebase, **extra):
 
 def gettext(string, **variables):
     """Translates a string with the current locale and passes in the
-    given keyword arguments as mapping to a string formatting string::
+    given keyword arguments as mapping to a string formatting string.
+
+    ::
 
         gettext(u'Hello World!')
         gettext(u'Hello %(name)s!', name='World')
