@@ -149,8 +149,13 @@ class Babel(object):
             return []
         result = []
         for folder in os.listdir(dirname):
-            if os.path.isdir(os.path.join(dirname, folder, 'LC_MESSAGES')):
+            locale_dir = os.path.join(dirname, folder, 'LC_MESSAGES')
+            if not os.path.isdir(locale_dir):
+                continue
+            if filter(lambda x: x.endswith('.mo'), os.listdir(locale_dir)):
                 result.append(Locale.parse(folder))
+        if not result:
+            result.append(Locale.parse(self._default_locale))
         return result
 
     @property
