@@ -18,7 +18,7 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
 
 from datetime import datetime
 from flask import _request_ctx_stack
-from babel import dates, support, Locale
+from babel import dates, numbers, support, Locale
 from werkzeug import ImmutableDict
 try:
     from pytz.gae import pytz
@@ -101,7 +101,13 @@ class Babel(object):
                 datetimeformat=format_datetime,
                 dateformat=format_date,
                 timeformat=format_time,
-                timedeltaformat=format_timedelta
+                timedeltaformat=format_timedelta,
+
+                numberformat=format_number,
+                decimalformat=format_decimal,
+                currencyformat=format_currency,
+                percentformat=format_percent,
+                scientificformat=format_scientific,
             )
             app.jinja_env.add_extension('jinja2.ext.i18n')
             app.jinja_env.install_gettext_callables(
@@ -374,6 +380,68 @@ def _date_format(formatter, obj, format, rebase, **extra):
     if formatter is not dates.format_date and rebase:
         extra['tzinfo'] = get_timezone()
     return formatter(obj, format, locale=locale, **extra)
+
+
+def format_number(number):
+    """Return the given number formatted for the locale in request
+    
+    :param number: the number to format
+    :return: the formatted number
+    :rtype: unicode
+    """
+    locale = get_locale()
+    return numbers.format_number(number, locale=locale)
+
+
+def format_decimal(number, format=None):
+    """Return the given decimal number formatted for the locale in request
+
+    :param number: the number to format
+    :param format: the format to use
+    :return: the formatted number
+    :rtype: unicode
+    """
+    locale = get_locale()
+    return numbers.format_decimal(number, format=format, locale=locale)
+
+
+def format_currency(number, currency, format=None):
+    """Return the given number formatted for the locale in request
+
+    :param number: the number to format
+    :param currency: the currency code
+    :param format: the format to use
+    :return: the formatted number
+    :rtype: unicode
+    """
+    locale = get_locale()
+    return numbers.format_currency(
+        number, currency, format=format, locale=locale
+        )
+
+
+def format_percent(number, format=None):
+    """Return formatted percent value for the locale in request
+
+    :param number: the number to format
+    :param format: the format to use
+    :return: the formatted percent number
+    :rtype: unicode
+    """
+    locale = get_locale()
+    return numbers.format_percent(number, format=format, locale=locale)
+
+
+def format_scientific(number, format=None):
+    """Return value formatted in scientific notation for the locale in request
+
+    :param number: the number to format
+    :param format: the format to use
+    :return: the formatted percent number
+    :rtype: unicode
+    """
+    locale = get_locale()
+    return numbers.format_scientific(number, format=format, locale=locale)
 
 
 def gettext(string, **variables):
