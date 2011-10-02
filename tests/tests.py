@@ -6,6 +6,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 import unittest
+from decimal import Decimal
 import flask
 from datetime import datetime
 from flaskext import babel
@@ -104,6 +105,21 @@ class DateFormattingTestCase(unittest.TestCase):
             app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europe/Vienna'
             babel.refresh()
             assert babel.format_datetime(d) == 'Apr 12, 2010 3:46:00 PM'
+
+
+class NumberFormattingTestCase(unittest.TestCase):
+
+    def test_basics(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app)
+        n = 1099
+
+        with app.test_request_context():
+            assert babel.format_number(n) == u'1,099'
+            assert babel.format_decimal(Decimal('1010.99')) == u'1,010.99'
+            assert babel.format_currency(n, 'USD') == '$1,099.00'
+            assert babel.format_percent(0.19) == '19%'
+            assert babel.format_scientific(10000) == u'1E4'
 
 
 class GettextTestCase(unittest.TestCase):
