@@ -417,7 +417,7 @@ def format_currency(number, currency, format=None):
     locale = get_locale()
     return numbers.format_currency(
         number, currency, format=format, locale=locale
-        )
+    )
 
 
 def format_percent(number, format=None):
