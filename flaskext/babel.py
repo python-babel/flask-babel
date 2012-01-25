@@ -55,11 +55,13 @@ class Babel(object):
     })
 
     def __init__(self, app=None, default_locale='en', default_timezone='UTC',
-                 date_formats=None, configure_jinja=True):
+                 date_formats=None, configure_jinja=True, 
+                 domain=support.Translations.DEFAULT_DOMAIN):
         self._default_locale = default_locale
         self._default_timezone = default_timezone
         self._date_formats = date_formats
         self._configure_jinja = configure_jinja
+        self._domain = domain
         self.app = app
 
         if app is not None:
@@ -77,6 +79,7 @@ class Babel(object):
 
         app.config.setdefault('BABEL_DEFAULT_LOCALE', self._default_locale)
         app.config.setdefault('BABEL_DEFAULT_TIMEZONE', self._default_timezone)
+        app.config.setdefault('BABEL_DOMAIN', self._domain)
         if self._date_formats is None:
             self._date_formats = self.default_date_formats.copy()
 
@@ -178,6 +181,12 @@ class Babel(object):
         """
         return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
 
+    @property
+    def domain(self):
+        """The gettext domain from the configuration
+        """
+        return self.app.config['BABEL_DOMAIN']
+
 
 def get_translations():
     """Returns the correct gettext translations that should be used for
@@ -190,8 +199,10 @@ def get_translations():
         return None
     translations = getattr(ctx, 'babel_translations', None)
     if translations is None:
+        babel = ctx.app.extensions['babel']
         dirname = os.path.join(ctx.app.root_path, 'translations')
-        translations = support.Translations.load(dirname, [get_locale()])
+        translations = support.Translations.load(dirname, [get_locale()],
+                                                 babel.domain)
         ctx.babel_translations = translations
     return translations
 
