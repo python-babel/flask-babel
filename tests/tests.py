@@ -106,6 +106,20 @@ class DateFormattingTestCase(unittest.TestCase):
             babel.refresh()
             assert babel.format_datetime(d) == 'Apr 12, 2010 3:46:00 PM'
 
+    def test_force_locale(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app)
+
+        @b.localeselector
+        def select_locale():
+            return 'de_DE'
+
+        with app.test_request_context():
+            assert str(babel.get_locale()) == 'de_DE'
+            with babel.force_locale('en_US'):
+                assert str(babel.get_locale()) == 'en_US'
+            assert str(babel.get_locale()) == 'de_DE'
+
 
 class NumberFormattingTestCase(unittest.TestCase):
 
