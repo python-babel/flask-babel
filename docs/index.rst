@@ -270,6 +270,19 @@ Datetime Functions
 
 .. autofunction:: format_timedelta
 
+Number Formatting Functions
+```````````````````````````
+
+.. autofunction:: format_number
+
+.. autofunction:: format_decimal
+
+.. autofunction:: format_currency
+
+.. autofunction:: format_percent
+
+.. autofunction:: format_scientific
+
 Gettext Functions
 `````````````````
 

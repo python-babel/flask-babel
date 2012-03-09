@@ -383,36 +383,48 @@ def _date_format(formatter, obj, format, rebase, **extra):
 
 
 def format_number(number):
-    """Return the given number formatted for the locale in request
-    
-    :param number: the number to format
-    :return: the formatted number
-    :rtype: unicode
+    """Return a formatted number.
+
+    Note that this function does the same as :func:`format_decimal`,
+    but without the possibility to specify custom formats.
+
+    This function is also available in the template context as filter
+    named `numberformat`.
     """
     locale = get_locale()
     return numbers.format_number(number, locale=locale)
 
 
 def format_decimal(number, format=None):
-    """Return the given decimal number formatted for the locale in request
+    """Return a formatted decimal number.
 
-    :param number: the number to format
-    :param format: the format to use
-    :return: the formatted number
-    :rtype: unicode
+    If you specify just the number, it uses the default format pattern
+    for the current locale. The format parameter can be used to force a
+    custom pattern. See the `Babel documentation`_ for details on the
+    pattern syntax.
+
+    This function is also available in the template context as filter
+    named `decimalformat`.
+
+    .. _`Babel documentation`: http://babel.edgewall.org/wiki/Documentation/numbers.html#pattern-syntax
     """
     locale = get_locale()
     return numbers.format_decimal(number, format=format, locale=locale)
 
 
 def format_currency(number, currency, format=None):
-    """Return the given number formatted for the locale in request
+    """Return a formatted currency value. Use the three-letter
+    ISO 4217 code to specify the currency (e.g. EUR, USD).
 
-    :param number: the number to format
-    :param currency: the currency code
-    :param format: the format to use
-    :return: the formatted number
-    :rtype: unicode
+    If you specify just the number, it uses the default format pattern
+    for the current locale. The format parameter can be used to force a
+    custom pattern. See the `Babel documentation`_ for details on the
+    pattern syntax.
+
+    This function is also available in the template context as filter
+    named `currencyformat`.
+
+    .. _`Babel documentation`: http://babel.edgewall.org/wiki/Documentation/numbers.html#pattern-syntax
     """
     locale = get_locale()
     return numbers.format_currency(
@@ -421,24 +433,34 @@ def format_currency(number, currency, format=None):
 
 
 def format_percent(number, format=None):
-    """Return formatted percent value for the locale in request
+    """Return a formatted percent value.
 
-    :param number: the number to format
-    :param format: the format to use
-    :return: the formatted percent number
-    :rtype: unicode
+    If you specify just the number, it uses the default format pattern
+    for the current locale. The format parameter can be used to force a
+    custom pattern. See the `Babel documentation`_ for details on the
+    pattern syntax.
+
+    This function is also available in the template context as filter
+    named `percentformat`.
+
+    .. _`Babel documentation`: http://babel.edgewall.org/wiki/Documentation/numbers.html#pattern-syntax
     """
     locale = get_locale()
     return numbers.format_percent(number, format=format, locale=locale)
 
 
 def format_scientific(number, format=None):
-    """Return value formatted in scientific notation for the locale in request
+    """Return a decimal number formatted in scientific notation.
 
-    :param number: the number to format
-    :param format: the format to use
-    :return: the formatted percent number
-    :rtype: unicode
+    If you specify just the number, it uses the default format pattern
+    for the current locale. The format parameter can be used to force a
+    custom pattern. See the `Babel documentation`_ for details on the
+    pattern syntax.
+
+    This function is also available in the template context as filter
+    named `scientificformat`.
+
+    .. _`Babel documentation`: http://babel.edgewall.org/wiki/Documentation/numbers.html#pattern-syntax
     """
     locale = get_locale()
     return numbers.format_scientific(number, format=format, locale=locale)
