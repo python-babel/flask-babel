@@ -135,6 +135,8 @@ class Babel(object):
                 __ugettext, __ungettext, newstyle=True
             )
 
+            del __ugettext, __ungettext
+
     def localeselector(self, f):
         """Registers a callback function for locale selection.  The default
         behaves as if a function was registered that returns `None` all the
