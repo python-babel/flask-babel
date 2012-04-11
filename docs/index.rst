@@ -240,7 +240,7 @@ into "messages" domain.
 Flask-Babel allows extension developers to specify which translation domain to
 use::
 
-    from flask.ext.babel import Domain
+    from flask_ext.babel import Domain
 
     mydomain = Domain(domain='myext')
 
@@ -254,9 +254,9 @@ they have to be located in ``translations`` directory under users Flask applicat
 If extension is distributed with the localizations, it is possible to specify
 their location::
 
-    from flask.ext.babel import Domain
+    from flask_ext.babel import Domain
 
-    from flask.ext.myext import translations
+    from flask_ext.myext import translations
     mydomain = Domain(translations.__path__[0])
 
 ``mydomain`` will look for translations in extension directory with default (messages)
