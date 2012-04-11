@@ -18,6 +18,7 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
 
 from datetime import datetime
 from flask import _request_ctx_stack
+from gettext import NullTranslations
 from babel import dates, numbers, support, Locale
 from werkzeug import ImmutableDict
 try:
@@ -458,7 +459,7 @@ class Domain(object):
         """
         ctx = _request_ctx_stack.top
         if ctx is None:
-            return None
+            return NullTranslations()
 
         translations = getattr(ctx, 'babel_translations', None)
 
