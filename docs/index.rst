@@ -297,8 +297,8 @@ Context Functions
 
 .. autofunction:: get_timezone
 
-Translation domain
-``````````````````
+Translation domains
+```````````````````
 
 .. autoclass:: Domain
     :members:

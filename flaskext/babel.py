@@ -448,7 +448,7 @@ def format_scientific(number, format=None):
 
 class Domain(object):
     """Localization domain. By default will use look for tranlations in Flask application directory
-    and "messages" domain - all message catalogs should be called ``messages.mo`.
+    and "messages" domain - all message catalogs should be called ``messages.mo``.
     """
     def __init__(self, dirname=None, domain='messages'):
         self.dirname = dirname
