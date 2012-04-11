@@ -232,10 +232,10 @@ directory structure should look like this:
 Translation Domains
 -------------------
 
-By default, Flask-Babel will read translations from the "messages" domain,
-which will use translations from the ``messages.mo`` file. It is not very
-convenient for third-party extensions, which might want to localize themselves
-without requiring user to merge their translations into "messages" domain.
+By default, Flask-Babel will use "messages" domain, which will make it use translations
+from the ``messages.mo`` file. It is not very convenient for third-party Flask extensions,
+which might want to localize themselves without requiring user to merge their translations
+into "messages" domain.
 
 Flask-Babel allows extension developers to specify which translation domain to
 use::
