@@ -111,8 +111,8 @@ class Babel(object):
             )
             app.jinja_env.add_extension('jinja2.ext.i18n')
             app.jinja_env.install_gettext_callables(
-                lambda x: get_translations().ugettext(x),
-                lambda s, p, n: get_translations().ungettext(s, p, n),
+                lambda x: domain.get_translations().ugettext(x),
+                lambda s, p, n: domain.get_translations().ungettext(s, p, n),
                 newstyle=True
             )
 
@@ -141,7 +141,6 @@ class Babel(object):
             'a timezoneselector function is already registered'
         self.timezone_selector_func = f
         return f
-
 
     def list_translations(self):
         """Returns a list of all the locales translations exist for.  The
@@ -177,23 +176,6 @@ class Babel(object):
         `pytz.timezone` object.
         """
         return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
-
-
-def get_translations():
-    """Returns the correct gettext translations that should be used for
-    this request.  This will never fail and return a dummy translation
-    object if used outside of the request or if a translation cannot be
-    found.
-    """
-    ctx = _request_ctx_stack.top
-    if ctx is None:
-        return None
-    translations = getattr(ctx, 'babel_translations', None)
-    if translations is None:
-        dirname = os.path.join(ctx.app.root_path, 'translations')
-        translations = support.Translations.load(dirname, [get_locale()])
-        ctx.babel_translations = translations
-    return translations
 
 
 def get_locale():
@@ -384,7 +366,7 @@ def _date_format(formatter, obj, format, rebase, **extra):
 
 def format_number(number):
     """Return the given number formatted for the locale in request
-    
+
     :param number: the number to format
     :return: the formatted number
     :rtype: unicode
@@ -444,85 +426,132 @@ def format_scientific(number, format=None):
     return numbers.format_scientific(number, format=format, locale=locale)
 
 
-def gettext(string, **variables):
-    """Translates a string with the current locale and passes in the
-    given keyword arguments as mapping to a string formatting string.
-
-    ::
-
-        gettext(u'Hello World!')
-        gettext(u'Hello %(name)s!', name='World')
+class Domain(object):
+    """Localization domain. By default will use look for tranlations in Flask application directory
+    and "messages" domain - all message catalogs should be called ``messages.mo`.
     """
-    t = get_translations()
-    if t is None:
-        return string % variables
-    return t.ugettext(string) % variables
-_ = gettext
+    def __init__(self, dirname=None, domain='messages'):
+        self.dirname = dirname
+        self.domain = domain
 
+        self.cache = dict()
 
-def ngettext(singular, plural, num, **variables):
-    """Translates a string with the current locale and passes in the
-    given keyword arguments as mapping to a string formatting string.
-    The `num` parameter is used to dispatch between singular and various
-    plural forms of the message.  It is available in the format string
-    as ``%(num)d`` or ``%(num)s``.  The source language should be
-    English or a similar language which only has one plural form.
+    def get_translations_path(self, ctx):
+        """Returns translations directory path. Override if you want
+        to implement custom behavior.
+        """
+        return self.dirname or os.path.join(ctx.app.root_path, 'translations')
 
-    ::
+    def get_translations(self):
+        """Returns the correct gettext translations that should be used for
+        this request.  This will never fail and return a dummy translation
+        object if used outside of the request or if a translation cannot be
+        found.
+        """
+        ctx = _request_ctx_stack.top
+        if ctx is None:
+            return None
 
-        ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(apples))
-    """
-    variables.setdefault('num', num)
-    t = get_translations()
-    if t is None:
-        return (singular if num == 1 else plural) % variables
-    return t.ungettext(singular, plural, num) % variables
+        translations = getattr(ctx, 'babel_translations', None)
 
+        if translations is None:
+            locale = get_locale()
 
-def pgettext(context, string, **variables):
-    """Like :func:`gettext` but with a context.
+            translations = self.cache.get(locale)
+            if translations is None:
+                dirname = self.get_translations_path(ctx)
+                translations = support.Translations.load(dirname,
+                                                         locale,
+                                                         domain=self.domain)
+                ctx.babel_translations = translations
+                self.cache[locale] = translations
 
-    .. versionadded:: 0.7
-    """
-    t = get_translations()
-    if t is None:
-        return string % variables
-    return t.upgettext(context, string) % variables
+        return translations
 
+    def gettext(self, string, **variables):
+        """Translates a string with the current locale and passes in the
+        given keyword arguments as mapping to a string formatting string.
 
-def npgettext(context, singular, plural, num, **variables):
-    """Like :func:`ngettext` but with a context.
+        ::
 
-    .. versionadded:: 0.7
-    """
-    variables.setdefault('num', num)
-    t = get_translations()
-    if t is None:
-        return (singular if num == 1 else plural) % variables
-    return t.unpgettext(context, singular, plural, num) % variables
+            gettext(u'Hello World!')
+            gettext(u'Hello %(name)s!', name='World')
+        """
+        t = self.get_translations()
+        if t is None:
+            return string % variables
+        return t.ugettext(string) % variables
 
+    def ngettext(self, singular, plural, num, **variables):
+        """Translates a string with the current locale and passes in the
+        given keyword arguments as mapping to a string formatting string.
+        The `num` parameter is used to dispatch between singular and various
+        plural forms of the message.  It is available in the format string
+        as ``%(num)d`` or ``%(num)s``.  The source language should be
+        English or a similar language which only has one plural form.
 
-def lazy_gettext(string, **variables):
-    """Like :func:`gettext` but the string returned is lazy which means
-    it will be translated when it is used as an actual string.
+        ::
 
-    Example::
+            ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(apples))
+        """
+        variables.setdefault('num', num)
+        t = self.get_translations()
+        if t is None:
+            return (singular if num == 1 else plural) % variables
+        return t.ungettext(singular, plural, num) % variables
 
-        hello = lazy_gettext(u'Hello World')
+    def pgettext(self, context, string, **variables):
+        """Like :func:`gettext` but with a context.
 
-        @app.route('/')
-        def index():
-            return unicode(hello)
-    """
-    from speaklater import make_lazy_string
-    return make_lazy_string(gettext, string, **variables)
+        .. versionadded:: 0.7
+        """
+        t = self.get_translations()
+        if t is None:
+            return string % variables
+        return t.upgettext(context, string) % variables
 
+    def npgettext(self, context, singular, plural, num, **variables):
+        """Like :func:`ngettext` but with a context.
 
-def lazy_pgettext(context, string, **variables):
-    """Like :func:`pgettext` but the string returned is lazy which means
-    it will be translated when it is used as an actual string.
+        .. versionadded:: 0.7
+        """
+        variables.setdefault('num', num)
+        t = self.get_translations()
+        if t is None:
+            return (singular if num == 1 else plural) % variables
+        return t.unpgettext(context, singular, plural, num) % variables
 
-    .. versionadded:: 0.7
-    """
-    from speaklater import make_lazy_string
-    return make_lazy_string(pgettext, context, string, **variables)
+    def lazy_gettext(self, string, **variables):
+        """Like :func:`gettext` but the string returned is lazy which means
+        it will be translated when it is used as an actual string.
+
+        Example::
+
+            hello = lazy_gettext(u'Hello World')
+
+            @app.route('/')
+            def index():
+                return unicode(hello)
+        """
+        from speaklater import make_lazy_string
+        return make_lazy_string(self.gettext, string, **variables)
+
+    def lazy_pgettext(self, context, string, **variables):
+        """Like :func:`pgettext` but the string returned is lazy which means
+        it will be translated when it is used as an actual string.
+
+        .. versionadded:: 0.7
+        """
+        from speaklater import make_lazy_string
+        return make_lazy_string(self.pgettext, context, string, **variables)
+
+# Create shortcuts for the default Flask domain
+domain = Domain()
+
+_ = domain.gettext
+gettext = domain.gettext
+ngettext = domain.ngettext
+pgettext = domain.pgettext
+npgettext = domain.npgettext
+lazy_gettext = domain.lazy_gettext
+lazy_pgettext = domain.lazy_pgettext
