@@ -465,14 +465,14 @@ class Domain(object):
         if translations is None:
             locale = get_locale()
 
-            translations = self.cache.get(locale)
+            translations = self.cache.get(str(locale))
             if translations is None:
                 dirname = self.get_translations_path(ctx)
                 translations = support.Translations.load(dirname,
                                                          locale,
                                                          domain=self.domain)
                 ctx.babel_translations = translations
-                self.cache[locale] = translations
+                self.cache[str(locale)] = translations
 
         return translations
 
