@@ -188,7 +188,11 @@ def get_locale():
         return None
     locale = getattr(ctx, 'babel_locale', None)
     if locale is None:
-        babel = ctx.app.extensions['babel']
+        babel = ctx.app.extensions.get('babel')
+
+        if babel is None:
+            return None
+
         if babel.locale_selector_func is None:
             locale = babel.default_locale
         else:
@@ -209,7 +213,11 @@ def get_timezone():
     ctx = _request_ctx_stack.top
     tzinfo = getattr(ctx, 'babel_tzinfo', None)
     if tzinfo is None:
-        babel = ctx.app.extensions['babel']
+        babel = ctx.app.extensions.get('babel')
+
+        if babel is None:
+            return None
+
         if babel.timezone_selector_func is None:
             tzinfo = babel.default_timezone
         else:
@@ -544,6 +552,7 @@ class Domain(object):
         """
         from speaklater import make_lazy_string
         return make_lazy_string(self.pgettext, context, string, **variables)
+
 
 # Create shortcuts for the default Flask domain
 domain = Domain()
