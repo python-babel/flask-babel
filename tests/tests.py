@@ -106,6 +106,12 @@ class DateFormattingTestCase(unittest.TestCase):
             babel.refresh()
             assert babel.format_datetime(d) == 'Apr 12, 2010 3:46:00 PM'
 
+    def test_non_initialized(self):
+        app = flask.Flask(__name__)
+        d = datetime(2010, 4, 12, 13, 46)
+        with app.test_request_context():
+            assert babel.format_datetime(d) == 'Apr 12, 2010 1:46:00 PM'
+
 
 class NumberFormattingTestCase(unittest.TestCase):
 
@@ -176,6 +182,12 @@ class GettextTestCase(unittest.TestCase):
         with app.test_request_context():
             assert domain.gettext('first') == 'erste'
             assert babel.gettext('first') == 'first'
+
+    def test_non_initialized(self):
+        app = flask.Flask(__name__)
+        with app.test_request_context():
+            assert babel.gettext('first') == 'first'
+
 
 if __name__ == '__main__':
     unittest.main()

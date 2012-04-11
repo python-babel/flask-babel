@@ -30,6 +30,9 @@ else:
     UTC = pytz.UTC
 
 
+DEFAULT_LOCALE = 'en'
+
+
 class Babel(object):
     """Central controller class that can be used to configure how
     Flask-Babel behaves.  Each application that wants to use Flask-Babel
@@ -55,7 +58,7 @@ class Babel(object):
         'datetime.long':    None,
     })
 
-    def __init__(self, app=None, default_locale='en', default_timezone='UTC',
+    def __init__(self, app=None, default_locale=DEFAULT_LOCALE, default_timezone='UTC',
                  date_formats=None, configure_jinja=True):
         self._default_locale = default_locale
         self._default_timezone = default_timezone
@@ -182,7 +185,8 @@ class Babel(object):
 def get_locale():
     """Returns the locale that should be used for this request as
     `babel.Locale` object.  This returns `None` if used outside of
-    a request or flask-babel was not attached to the Flask application.
+    a request. If flask-babel was not attached to the Flask application,
+    will return 'en' locale.
     """
     ctx = _request_ctx_stack.top
     if ctx is None:
@@ -192,7 +196,7 @@ def get_locale():
         babel = ctx.app.extensions.get('babel')
 
         if babel is None:
-            return None
+            return Locale.parse(DEFAULT_LOCALE)
 
         if babel.locale_selector_func is None:
             locale = babel.default_locale
@@ -258,11 +262,17 @@ def _get_format(key, format):
     """A small helper for the datetime formatting functions.  Looks up
     format defaults for different kinds.
     """
-    babel = _request_ctx_stack.top.app.extensions['babel']
+    babel = _request_ctx_stack.top.app.extensions.get('babel')
+
+    if babel is not None:
+        formats = babel.date_formats
+    else:
+        formats = Babel.default_date_formats
+
     if format is None:
-        format = babel.date_formats[key]
+        format = formats[key]
     if format in ('short', 'medium', 'full', 'long'):
-        rv = babel.date_formats['%s.%s' % (key, format)]
+        rv = formats['%s.%s' % (key, format)]
         if rv is not None:
             format = rv
     return format
