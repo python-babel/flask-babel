@@ -168,6 +168,14 @@ class GettextTestCase(unittest.TestCase):
         assert len(translations) == 1
         assert str(translations[0]) == 'de'
 
+    def test_domain(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app, default_locale='de_DE')
+        domain = babel.Domain(domain='test')
+
+        with app.test_request_context():
+            assert domain.gettext('first') == 'erste'
+            assert babel.gettext('first') == 'first'
 
 if __name__ == '__main__':
     unittest.main()

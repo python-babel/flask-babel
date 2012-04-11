@@ -461,19 +461,17 @@ class Domain(object):
         if ctx is None:
             return NullTranslations()
 
-        translations = getattr(ctx, 'babel_translations', None)
+        locale = get_locale()
 
+        translations = self.cache.get(str(locale))
         if translations is None:
-            locale = get_locale()
+            dirname = self.get_translations_path(ctx)
+            translations = support.Translations.load(dirname,
+                                                     locale,
+                                                     domain=self.domain)
 
-            translations = self.cache.get(str(locale))
-            if translations is None:
-                dirname = self.get_translations_path(ctx)
-                translations = support.Translations.load(dirname,
-                                                         locale,
-                                                         domain=self.domain)
-                ctx.babel_translations = translations
-                self.cache[str(locale)] = translations
+            ctx.babel_translations = translations
+            self.cache[str(locale)] = translations
 
         return translations
 
@@ -487,8 +485,6 @@ class Domain(object):
             gettext(u'Hello %(name)s!', name='World')
         """
         t = self.get_translations()
-        if t is None:
-            return string % variables
         return t.ugettext(string) % variables
 
     def ngettext(self, singular, plural, num, **variables):
@@ -505,8 +501,6 @@ class Domain(object):
         """
         variables.setdefault('num', num)
         t = self.get_translations()
-        if t is None:
-            return (singular if num == 1 else plural) % variables
         return t.ungettext(singular, plural, num) % variables
 
     def pgettext(self, context, string, **variables):
@@ -515,8 +509,6 @@ class Domain(object):
         .. versionadded:: 0.7
         """
         t = self.get_translations()
-        if t is None:
-            return string % variables
         return t.upgettext(context, string) % variables
 
     def npgettext(self, context, singular, plural, num, **variables):
@@ -526,8 +518,6 @@ class Domain(object):
         """
         variables.setdefault('num', num)
         t = self.get_translations()
-        if t is None:
-            return (singular if num == 1 else plural) % variables
         return t.unpgettext(context, singular, plural, num) % variables
 
     def lazy_gettext(self, string, **variables):
