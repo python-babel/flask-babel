@@ -30,7 +30,7 @@ else:
     UTC = pytz.UTC
 
 
-DEFAULT_LOCALE = 'en'
+_DEFAULT_LOCALE = Locale.parse('en')
 
 
 class Babel(object):
@@ -58,13 +58,15 @@ class Babel(object):
         'datetime.long':    None,
     })
 
-    def __init__(self, app=None, default_locale=DEFAULT_LOCALE, default_timezone='UTC',
+    def __init__(self, app=None, default_locale='en', default_timezone='UTC',
                  date_formats=None, configure_jinja=True):
         self._default_locale = default_locale
         self._default_timezone = default_timezone
         self._date_formats = date_formats
         self._configure_jinja = configure_jinja
         self.app = app
+
+        self._locale_cache = dict()
 
         if app is not None:
             self.init_app(app)
@@ -172,7 +174,7 @@ class Babel(object):
         """The default locale from the configuration as instance of a
         `babel.Locale` object.
         """
-        return Locale.parse(self.app.config['BABEL_DEFAULT_LOCALE'])
+        return self.load_locale(self.app.config['BABEL_DEFAULT_LOCALE'])
 
     @property
     def default_timezone(self):
@@ -180,6 +182,15 @@ class Babel(object):
         `pytz.timezone` object.
         """
         return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
+
+    def load_locale(self, locale):
+        """Load locale by name and cache it. Returns instance of a `babel.Locale`
+        object.
+        """
+        rv = self._locale_cache.get(locale)
+        if rv is None:
+            self._locale_cache[locale] = rv = Locale.parse(locale)
+        return rv
 
 
 def get_locale():
@@ -191,22 +202,25 @@ def get_locale():
     ctx = _request_ctx_stack.top
     if ctx is None:
         return None
+
     locale = getattr(ctx, 'babel_locale', None)
     if locale is None:
         babel = ctx.app.extensions.get('babel')
 
         if babel is None:
-            return Locale.parse(DEFAULT_LOCALE)
-
-        if babel.locale_selector_func is None:
-            locale = babel.default_locale
+            locale = _DEFAULT_LOCALE
         else:
-            rv = babel.locale_selector_func()
-            if rv is None:
-                locale = babel.default_locale
+            if babel.locale_selector_func is not None:
+                rv = babel.locale_selector_func()
+                if rv is None:
+                    locale = babel.default_locale
+                else:
+                    locale = babel.load_locale(rv)
             else:
-                locale = Locale.parse(rv)
+                locale = babel.default_locale
+
         ctx.babel_locale = locale
+
     return locale
 
 
@@ -218,24 +232,27 @@ def get_timezone():
     """
     ctx = _request_ctx_stack.top
     tzinfo = getattr(ctx, 'babel_tzinfo', None)
+
     if tzinfo is None:
         babel = ctx.app.extensions.get('babel')
 
         if babel is None:
-            return UTC
-
-        if babel.timezone_selector_func is None:
-            tzinfo = babel.default_timezone
+            tzinfo = UTC
         else:
-            rv = babel.timezone_selector_func()
-            if rv is None:
+            if babel.timezone_selector_func is None:
                 tzinfo = babel.default_timezone
             else:
-                if isinstance(rv, basestring):
-                    tzinfo = timezone(rv)
+                rv = babel.timezone_selector_func()
+                if rv is None:
+                    tzinfo = babel.default_timezone
                 else:
-                    tzinfo = rv
+                    if isinstance(rv, basestring):
+                        tzinfo = timezone(rv)
+                    else:
+                        tzinfo = rv
+
         ctx.babel_tzinfo = tzinfo
+
     return tzinfo
 
 
