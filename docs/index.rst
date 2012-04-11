@@ -218,6 +218,50 @@ out if a translation matched a changed key).  If you have fuzzy entries,
 make sure to check them by hand and remove the fuzzy flag before
 compiling.
 
+Flask-Babel looks for message catalogs in ``translations`` directory
+which should be located under Flask application directory. Default
+domain is "messages".
+
+For example, if you want to have translations for German, Spanish and French,
+directory structure should look like this:
+
+    translations/de/LC_MESSAGES/messages.mo
+    translations/sp/LC_MESSAGES/messages.mo
+    translations/fr/LC_MESSAGES/messages.mo
+
+Translation Domains
+-------------------
+
+By default, Flask-Babel will read translations from the "messages" domain,
+which will use translations from the ``messages.mo`` file. It is not very
+convenient for third-party extensions, which might want to localize themselves
+without requiring user to merge their translations into "messages" domain.
+
+Flask-Babel allows extension developers to specify which translation domain to
+use::
+
+    from flask.ext.babel import Domain
+
+    mydomain = Domain(domain='myext')
+
+    mydomain.lazy_gettext('Hello World!')
+
+:class:`Domain` contains all gettext-related methods (:meth:`~Domain.gettext`,
+:meth:`~Domain.ngettext`, etc).
+
+In previous example, localizations will be read from the ``myext.mo`` files, but
+they have to be located in ``translations`` directory under users Flask application.
+If extension is distributed with the localizations, it is possible to specify
+their location::
+
+    from flask.ext.babel import Domain
+
+    from flask.ext.myext import translations
+    mydomain = Domain(translations.__path__[0])
+
+``mydomain`` will look for translations in extension directory with default (messages)
+domain.
+
 Troubleshooting
 ---------------
 
@@ -249,11 +293,15 @@ Configuration
 Context Functions
 `````````````````
 
-.. autofunction:: get_translations
-
 .. autofunction:: get_locale
 
 .. autofunction:: get_timezone
+
+Translation domain
+``````````````````
+
+.. autoclass:: Domain
+    :members:
 
 Datetime Functions
 ``````````````````
