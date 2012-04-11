@@ -480,8 +480,6 @@ class Domain(object):
             translations = support.Translations.load(dirname,
                                                      locale,
                                                      domain=self.domain)
-
-            ctx.babel_translations = translations
             self.cache[str(locale)] = translations
 
         return translations
