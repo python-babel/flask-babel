@@ -182,7 +182,7 @@ class Babel(object):
 def get_locale():
     """Returns the locale that should be used for this request as
     `babel.Locale` object.  This returns `None` if used outside of
-    a request.
+    a request or flask-babel was not attached to the Flask application.
     """
     ctx = _request_ctx_stack.top
     if ctx is None:
@@ -209,7 +209,8 @@ def get_locale():
 def get_timezone():
     """Returns the timezone that should be used for this request as
     `pytz.timezone` object.  This returns `None` if used outside of
-    a request.
+    a request. If flask-babel was not attached to application, will
+    return UTC timezone object.
     """
     ctx = _request_ctx_stack.top
     tzinfo = getattr(ctx, 'babel_tzinfo', None)
@@ -217,7 +218,7 @@ def get_timezone():
         babel = ctx.app.extensions.get('babel')
 
         if babel is None:
-            return None
+            return UTC
 
         if babel.timezone_selector_func is None:
             tzinfo = babel.default_timezone
