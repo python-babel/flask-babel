@@ -188,6 +188,21 @@ class GettextTestCase(unittest.TestCase):
         with app.test_request_context():
             assert babel.gettext('first') == 'first'
 
+    def test_multiple_apps(self):
+        app1 = flask.Flask(__name__)
+        b1 = babel.Babel(app1, default_locale='de_DE')
+
+        app2 = flask.Flask(__name__)
+        b2 = babel.Babel(app2, default_locale='de_DE')
+
+        with app1.test_request_context():
+            assert babel.gettext('Yes') == 'Ja'
+
+            assert babel.domain.cache == dict()
+            assert 'de_DE' in b1._default_translations
+
+        with app2.test_request_context():
+            assert b2._default_translations == dict()
 
 if __name__ == '__main__':
     unittest.main()

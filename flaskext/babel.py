@@ -67,6 +67,7 @@ class Babel(object):
         self.app = app
 
         self._locale_cache = dict()
+        self._default_translations = dict()
 
         if app is not None:
             self.init_app(app)
@@ -473,6 +474,10 @@ class Domain(object):
 
         self.cache = dict()
 
+    def get_translations_cache(self, ctx):
+        """Returns dictionary-like object for translation caching"""
+        return self.cache
+
     def get_translations_path(self, ctx):
         """Returns translations directory path. Override if you want
         to implement custom behavior.
@@ -491,13 +496,15 @@ class Domain(object):
 
         locale = get_locale()
 
-        translations = self.cache.get(str(locale))
+        cache = self.get_translations_cache(ctx)
+
+        translations = cache.get(str(locale))
         if translations is None:
             dirname = self.get_translations_path(ctx)
             translations = support.Translations.load(dirname,
                                                      locale,
                                                      domain=self.domain)
-            self.cache[str(locale)] = translations
+            cache[str(locale)] = translations
 
         return translations
 
@@ -571,8 +578,18 @@ class Domain(object):
         return make_lazy_string(self.pgettext, context, string, **variables)
 
 
+class DefaultDomain(Domain):
+    def get_translations_cache(self, ctx):
+        babel = ctx.app.extensions.get('babel')
+
+        if babel is not None:
+            return babel._default_translations
+        else:
+            # If babel was not initialized for the application, use default cache.
+            return self.cache
+
 # Create shortcuts for the default Flask domain
-domain = Domain()
+domain = DefaultDomain()
 
 _ = domain.gettext
 gettext = domain.gettext
