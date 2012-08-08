@@ -54,9 +54,12 @@ class Babel(object):
         'datetime.long':    None,
     })
 
-    def __init__(self, app=None, default_locale='en', default_timezone='UTC',
-                 date_formats=None, configure_jinja=True):
+    def __init__(self, app=None, default_locale='en',
+                 locale_folder='translations',
+                 default_timezone='UTC', date_formats=None,
+                 configure_jinja=True):
         self._default_locale = default_locale
+        self._locale_folder = locale_folder
         self._default_timezone = default_timezone
         self._date_formats = date_formats
         self._configure_jinja = configure_jinja
@@ -76,6 +79,8 @@ class Babel(object):
         app.extensions['babel'] = self
 
         app.config.setdefault('BABEL_DEFAULT_LOCALE', self._default_locale)
+        app.config.setdefault('BABEL_LOCALE_FOLDER',
+                              self._locale_folder)
         app.config.setdefault('BABEL_DEFAULT_TIMEZONE', self._default_timezone)
         if self._date_formats is None:
             self._date_formats = self.default_date_formats.copy()
@@ -142,7 +147,6 @@ class Babel(object):
         self.timezone_selector_func = f
         return f
 
-
     def list_translations(self):
         """Returns a list of all the locales translations exist for.  The
         list returned will be filled with actual locale objects and not just
@@ -150,7 +154,10 @@ class Babel(object):
 
         .. versionadded:: 0.6
         """
-        dirname = os.path.join(self.app.root_path, 'translations')
+        dirname = os.path.join(
+            self.app.root_path,
+            self.app.config['BABEL_LOCALE_FOLDER']
+        )
         if not os.path.isdir(dirname):
             return []
         result = []
@@ -190,7 +197,10 @@ def get_translations():
         return None
     translations = getattr(ctx, 'babel_translations', None)
     if translations is None:
-        dirname = os.path.join(ctx.app.root_path, 'translations')
+        dirname = os.path.join(
+            ctx.app.root_path,
+            ctx.app.config['BABEL_LOCALE_FOLDER']
+        )
         translations = support.Translations.load(dirname, [get_locale()])
         ctx.babel_translations = translations
     return translations
@@ -384,7 +394,7 @@ def _date_format(formatter, obj, format, rebase, **extra):
 
 def format_number(number):
     """Return the given number formatted for the locale in request
-    
+
     :param number: the number to format
     :return: the formatted number
     :rtype: unicode

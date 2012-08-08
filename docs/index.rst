@@ -45,6 +45,8 @@ some internal defaults:
 `BABEL_DEFAULT_LOCALE`      The default locale to use if no locale
                             selector is registered.  This defaults
                             to ``'en'``.
+`BABEL_LOCALE_FOLDER`       Where the locale files located. The default
+                            path is ``'translations'``.
 `BABEL_DEFAULT_TIMEZONE`    The timezone to use for user facing dates.
                             This defaults to ``'UTC'`` which also is the
                             timezone your application must use internally.
