@@ -55,11 +55,11 @@ class Babel(object):
     })
 
     def __init__(self, app=None, default_locale='en',
-                 default_locale_path='translations',
+                 locale_folder='translations',
                  default_timezone='UTC', date_formats=None,
                  configure_jinja=True):
         self._default_locale = default_locale
-        self._default_locale_path = default_locale_path
+        self._locale_folder = locale_folder
         self._default_timezone = default_timezone
         self._date_formats = date_formats
         self._configure_jinja = configure_jinja
@@ -79,8 +79,8 @@ class Babel(object):
         app.extensions['babel'] = self
 
         app.config.setdefault('BABEL_DEFAULT_LOCALE', self._default_locale)
-        app.config.setdefault('BABEL_DEFAULT_LOCALE_PATH',
-                              self._default_locale_path)
+        app.config.setdefault('BABEL_LOCALE_FOLDER',
+                              self._locale_folder)
         app.config.setdefault('BABEL_DEFAULT_TIMEZONE', self._default_timezone)
         if self._date_formats is None:
             self._date_formats = self.default_date_formats.copy()
@@ -156,7 +156,7 @@ class Babel(object):
         """
         dirname = os.path.join(
             self.app.root_path,
-            self.app.config['BABEL_DEFAULT_LOCALE_PATH']
+            self.app.config['BABEL_LOCALE_FOLDER']
         )
         if not os.path.isdir(dirname):
             return []
@@ -199,7 +199,7 @@ def get_translations():
     if translations is None:
         dirname = os.path.join(
             ctx.app.root_path,
-            ctx.app.config['BABEL_DEFAULT_LOCALE_PATH']
+            ctx.app.config['BABEL_LOCALE_FOLDER']
         )
         translations = support.Translations.load(dirname, [get_locale()])
         ctx.babel_translations = translations

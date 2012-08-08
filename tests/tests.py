@@ -171,7 +171,7 @@ class GettextTestCase(unittest.TestCase):
     def test_basics_for_different_locale_path(self):
         app = flask.Flask(__name__)
         b = babel.Babel(app, default_locale='de_DE',
-                        default_locale_path='locale')
+                        locale_folder='locale')
 
         with app.test_request_context():
             assert gettext(u'Hello %(name)s!', name='Peter') == 'Hallo Peter!'
@@ -183,7 +183,7 @@ class GettextTestCase(unittest.TestCase):
         b = babel.Babel(app, default_locale='de_DE')
 
         with app.test_request_context():
-            app.config['BABEL_DEFAULT_LOCALE_PATH'] = 'locale'
+            app.config['BABEL_LOCALE_FOLDER'] = 'locale'
             assert gettext(u'Hello %(name)s!', name='Peter') == 'Hallo Peter!'
             assert ngettext(u'%(num)s Apple', u'%(num)s Apples', 3) == u'3 Äpfel'
             assert ngettext(u'%(num)s Apple', u'%(num)s Apples', 1) == u'1 Apfel'
