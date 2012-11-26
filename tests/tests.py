@@ -183,6 +183,24 @@ class GettextTestCase(unittest.TestCase):
             assert domain.gettext('first') == 'erste'
             assert babel.gettext('first') == 'first'
 
+    def test_as_default(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app, default_locale='de_DE')
+        domain = babel.Domain(domain='test')
+
+        with app.test_request_context():
+            assert babel.gettext('first') == 'first'
+            domain.as_default()
+            assert babel.gettext('first') == 'erste'
+            
+    def test_default_domain(self):
+        app = flask.Flask(__name__)
+        domain = babel.Domain(domain='test')
+        b = babel.Babel(app, default_locale='de_DE', default_domain=domain)
+
+        with app.test_request_context():
+            assert babel.gettext('first') == 'erste'
+
     def test_non_initialized(self):
         app = flask.Flask(__name__)
         with app.test_request_context():
@@ -198,11 +216,10 @@ class GettextTestCase(unittest.TestCase):
         with app1.test_request_context():
             assert babel.gettext('Yes') == 'Ja'
 
-            assert babel.domain.cache == dict()
-            assert 'de_DE' in b1._default_translations
+            assert 'de_DE' in b1._default_domain.cache
 
         with app2.test_request_context():
-            assert b2._default_translations == dict()
+            assert 'de_DE' not in b2._default_domain.cache
 
 if __name__ == '__main__':
     unittest.main()

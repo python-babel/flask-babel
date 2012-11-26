@@ -262,6 +262,42 @@ their location::
 ``mydomain`` will look for translations in extension directory with default (messages)
 domain.
 
+It is also possible to change the translation domain used by default,
+either for each app or per request.
+
+To set the :class:`Domain` that will be used in an app, pass it to
+:class:`Babel` on initialization::
+
+    from flask import Flask
+    from flaskext.babel import Babel, Domain
+
+    app = Flask(__name__)
+    domain = Domain(domain='myext')
+    babel = Babel(app, default_domain=domain)
+
+Translations will then come from the ``myext.mo`` files by default.
+
+To change the default domain in a request context, call the
+:meth:`~Domain.as_default` method from within the request context::
+ 
+    from flask import Flask
+    from flaskext.babel import Babel, Domain, gettext
+
+    app = Flask(__name__)
+    domain = Domain(domain='myext')
+    babel = Babel(app)
+
+    @app.route('/path')
+    def demopage():
+        domain.as_default()
+
+        return gettext('Hello World!')
+
+``Hello World!`` will get translated using the ``myext.mo`` files, but
+other requests will use the default ``messages.mo``. Note that a
+:class:`Babel` must be initialized for the app for translations to
+work at all.
+
 Troubleshooting
 ---------------
 

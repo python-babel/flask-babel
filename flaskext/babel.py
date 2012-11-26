@@ -59,7 +59,7 @@ class Babel(object):
     })
 
     def __init__(self, app=None, default_locale='en', default_timezone='UTC',
-                 date_formats=None, configure_jinja=True):
+                 date_formats=None, configure_jinja=True, default_domain=None):
         self._default_locale = default_locale
         self._default_timezone = default_timezone
         self._date_formats = date_formats
@@ -67,7 +67,11 @@ class Babel(object):
         self.app = app
 
         self._locale_cache = dict()
-        self._default_translations = dict()
+
+        if default_domain is None:
+            self._default_domain = Domain()
+        else:
+            self._default_domain = default_domain
 
         if app is not None:
             self.init_app(app)
@@ -118,8 +122,8 @@ class Babel(object):
             )
             app.jinja_env.add_extension('jinja2.ext.i18n')
             app.jinja_env.install_gettext_callables(
-                lambda x: domain.get_translations().ugettext(x),
-                lambda s, p, n: domain.get_translations().ungettext(s, p, n),
+                lambda x: get_domain().get_translations().ugettext(x),
+                lambda s, p, n: get_domain().get_translations().ungettext(s, p, n),
                 newstyle=True
             )
 
@@ -271,7 +275,7 @@ def refresh():
     return English text and a now German page.
     """
     ctx = _request_ctx_stack.top
-    for key in 'babel_locale', 'babel_tzinfo', 'babel_translations':
+    for key in 'babel_locale', 'babel_tzinfo':
         if hasattr(ctx, key):
             delattr(ctx, key)
 
@@ -474,6 +478,14 @@ class Domain(object):
 
         self.cache = dict()
 
+    def as_default(self):
+        """Set this domain as default for the current request"""
+        ctx = _request_ctx_stack.top
+        if ctx is None:
+            raise RuntimeError("No request context")
+
+        ctx.babel_domain = self
+
     def get_translations_cache(self, ctx):
         """Returns dictionary-like object for translation caching"""
         return self.cache
@@ -577,24 +589,45 @@ class Domain(object):
         from speaklater import make_lazy_string
         return make_lazy_string(self.pgettext, context, string, **variables)
 
+# This is the domain that will be used if there is no request context (and thus no app)
+# or if the app isn't initialized for babel. Note that if there is no request context,
+# then the standard Domain will use NullTranslations
+domain = Domain()
+        
+def get_domain():
+    """Return the correct translation domain that is used for this request.
+    This will return the default domain (e.g. "messages" in <approot>/translations")
+    if none is set for this request.
+    """
+    ctx = _request_ctx_stack.top
+    if ctx is None:
+        return domain
 
-class DefaultDomain(Domain):
-    def get_translations_cache(self, ctx):
-        babel = ctx.app.extensions.get('babel')
-
-        if babel is not None:
-            return babel._default_translations
-        else:
-            # If babel was not initialized for the application, use default cache.
-            return self.cache
-
+    try:
+        return ctx.babel_domain
+    except AttributeError:
+        pass
+    
+    babel = ctx.app.extensions.get('babel')
+    if babel is not None:
+        d = babel._default_domain
+    else:
+        d = domain
+        
+    ctx.babel_domain = d
+    return d
+    
 # Create shortcuts for the default Flask domain
-domain = DefaultDomain()
-
-_ = domain.gettext
-gettext = domain.gettext
-ngettext = domain.ngettext
-pgettext = domain.pgettext
-npgettext = domain.npgettext
-lazy_gettext = domain.lazy_gettext
-lazy_pgettext = domain.lazy_pgettext
+def gettext(*args, **kwargs):
+    return get_domain().gettext(*args, **kwargs)
+_ = gettext
+def ngettext(*args, **kwargs):
+    return get_domain().ngettext(*args, **kwargs)
+def pgettext(*args, **kwargs):
+    return get_domain().pgettext(*args, **kwargs)
+def npgettext(*args, **kwargs):
+    return get_domain().npgettext(*args, **kwargs)
+def lazy_gettext(*args, **kwargs):
+    return get_domain().lazy_gettext(*args, **kwargs)
+def lazy_pgettext(*args, **kwargs):
+    return get_domain().lazy_pgettext(*args, **kwargs)
