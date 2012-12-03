@@ -106,6 +106,12 @@ class DateFormattingTestCase(unittest.TestCase):
             babel.refresh()
             assert babel.format_datetime(d) == 'Apr 12, 2010 3:46:00 PM'
 
+    def test_non_initialized(self):
+        app = flask.Flask(__name__)
+        d = datetime(2010, 4, 12, 13, 46)
+        with app.test_request_context():
+            assert babel.format_datetime(d) == 'Apr 12, 2010 1:46:00 PM'
+
 
 class NumberFormattingTestCase(unittest.TestCase):
 
@@ -168,6 +174,52 @@ class GettextTestCase(unittest.TestCase):
         assert len(translations) == 1
         assert str(translations[0]) == 'de'
 
+    def test_domain(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app, default_locale='de_DE')
+        domain = babel.Domain(domain='test')
+
+        with app.test_request_context():
+            assert domain.gettext('first') == 'erste'
+            assert babel.gettext('first') == 'first'
+
+    def test_as_default(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app, default_locale='de_DE')
+        domain = babel.Domain(domain='test')
+
+        with app.test_request_context():
+            assert babel.gettext('first') == 'first'
+            domain.as_default()
+            assert babel.gettext('first') == 'erste'
+            
+    def test_default_domain(self):
+        app = flask.Flask(__name__)
+        domain = babel.Domain(domain='test')
+        b = babel.Babel(app, default_locale='de_DE', default_domain=domain)
+
+        with app.test_request_context():
+            assert babel.gettext('first') == 'erste'
+
+    def test_non_initialized(self):
+        app = flask.Flask(__name__)
+        with app.test_request_context():
+            assert babel.gettext('first') == 'first'
+
+    def test_multiple_apps(self):
+        app1 = flask.Flask(__name__)
+        b1 = babel.Babel(app1, default_locale='de_DE')
+
+        app2 = flask.Flask(__name__)
+        b2 = babel.Babel(app2, default_locale='de_DE')
+
+        with app1.test_request_context():
+            assert babel.gettext('Yes') == 'Ja'
+
+            assert 'de_DE' in b1._default_domain.cache
+
+        with app2.test_request_context():
+            assert 'de_DE' not in b2._default_domain.cache
 
 if __name__ == '__main__':
     unittest.main()
