@@ -5,12 +5,20 @@ Flask-BabelEx
 Adds i18n/l10n support to Flask applications with the help of the
 `Babel`_ library.
 
+This is fork of official Flask-Babel extension with following features:
+
+1. It is possible to use multiple language catalogs in one Flask application;
+2. Localization domains: your extension can package localization file(s) and use them
+   if necessary;
+3. Does not reload localizations for each request.
+
 Links
 `````
 
 * `documentation <http://packages.python.org/Flask-BabelEx>`_
 * `development version
   <http://github.com/mrjoes/flask-babelex/zipball/master#egg=Flask-BabelEx-dev>`_
+* `original Flask-Babel extension <https://pypi.python.org/pypi/Flask-Babel>`_.
 
 .. _Babel: http://babel.edgewall.org/
 
