@@ -1,6 +1,6 @@
 """
-Flask-Babel
------------
+Flask-BabelEx
+-------------
 
 Adds i18n/l10n support to Flask applications with the help of the
 `Babel`_ library.
@@ -8,9 +8,9 @@ Adds i18n/l10n support to Flask applications with the help of the
 Links
 `````
 
-* `documentation <http://packages.python.org/Flask-Babel>`_
+* `documentation <http://packages.python.org/Flask-BabelEx>`_
 * `development version
-  <http://github.com/mitsuhiko/flask-babel/zipball/master#egg=Flask-Babel-dev>`_
+  <http://github.com/mrjoes/flask-babelex/zipball/master#egg=Flask-BabelEx-dev>`_
 
 .. _Babel: http://babel.edgewall.org/
 
@@ -19,16 +19,15 @@ from setuptools import setup
 
 
 setup(
-    name='Flask-Babel',
-    version='0.8',
-    url='http://github.com/mitsuhiko/flask-babel',
+    name='Flask-BabelEx',
+    version='0.1',
+    url='http://github.com/mrjoes/flask-babelex',
     license='BSD',
-    author='Armin Ronacher',
-    author_email='armin.ronacher@active-4.com',
+    author='Serge S. Koval',
+    author_email='serge.koval+github@gmail.com',
     description='Adds i18n/l10n support to Flask applications',
     long_description=__doc__,
-    packages=['flaskext'],
-    namespace_packages=['flaskext'],
+    packages=['flask_babelex'],
     zip_safe=False,
     platforms='any',
     install_requires=[

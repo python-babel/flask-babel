@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-    flaskext.babel
-    ~~~~~~~~~~~~~~
+    flask.ext.babelex
+    ~~~~~~~~~~~~~~~~~
 
     Implements i18n/l10n support for Flask applications based on Babel.
 
-    :copyright: (c) 2010 by Armin Ronacher.
+    :copyright: (c) 2013 by Serge S. Koval, Armin Ronacher and contributors.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import absolute_import
@@ -593,7 +593,7 @@ class Domain(object):
 # or if the app isn't initialized for babel. Note that if there is no request context,
 # then the standard Domain will use NullTranslations
 domain = Domain()
-        
+
 def get_domain():
     """Return the correct translation domain that is used for this request.
     This will return the default domain (e.g. "messages" in <approot>/translations")
@@ -607,16 +607,16 @@ def get_domain():
         return ctx.babel_domain
     except AttributeError:
         pass
-    
+
     babel = ctx.app.extensions.get('babel')
     if babel is not None:
         d = babel._default_domain
     else:
         d = domain
-        
+
     ctx.babel_domain = d
     return d
-    
+
 # Create shortcuts for the default Flask domain
 def gettext(*args, **kwargs):
     return get_domain().gettext(*args, **kwargs)

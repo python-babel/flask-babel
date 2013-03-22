@@ -9,8 +9,8 @@ import unittest
 from decimal import Decimal
 import flask
 from datetime import datetime
-from flaskext import babel
-from flaskext.babel import gettext, ngettext, lazy_gettext
+from flask.ext import babelex as babel
+from flask.ext.babelex import gettext, ngettext, lazy_gettext
 
 
 class DateFormattingTestCase(unittest.TestCase):
@@ -192,7 +192,7 @@ class GettextTestCase(unittest.TestCase):
             assert babel.gettext('first') == 'first'
             domain.as_default()
             assert babel.gettext('first') == 'erste'
-            
+
     def test_default_domain(self):
         app = flask.Flask(__name__)
         domain = babel.Domain(domain='test')
