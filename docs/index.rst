@@ -162,7 +162,7 @@ So how does Flask-Babel find the translations?  Well first you have to
 create some.  Here is how you do it:
 
 In Jinja2 templates
-~~~~~~~~~~~~~~~~~~~
+```````````````````
 Flask-Babel uses the `i18n`_ extension of Jinja2.
 
 
