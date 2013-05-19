@@ -77,6 +77,8 @@ class Babel(object):
 
         app.config.setdefault('BABEL_DEFAULT_LOCALE', self._default_locale)
         app.config.setdefault('BABEL_DEFAULT_TIMEZONE', self._default_timezone)
+        app.config.setdefault('BABEL_DIRNAME', 'translations')
+        app.config.setdefault('BABEL_DOMAIN', 'messages')
         if self._date_formats is None:
             self._date_formats = self.default_date_formats.copy()
 
@@ -149,7 +151,7 @@ class Babel(object):
 
         .. versionadded:: 0.6
         """
-        dirname = os.path.join(self.app.root_path, 'translations')
+        dirname = self.locale_dirname
         if not os.path.isdir(dirname):
             return []
         result = []
@@ -177,6 +179,18 @@ class Babel(object):
         """
         return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
 
+    @property
+    def locale_dirname(self):
+        dirname = os.path.join(
+            self.app.root_path,
+            self.app.config['BABEL_DIRNAME']
+        )
+        return dirname
+
+    @property
+    def locale_domain(self):
+        return self.app.config['BABEL_DOMAIN']
+
 
 def get_translations():
     """Returns the correct gettext translations that should be used for
@@ -189,8 +203,11 @@ def get_translations():
         return None
     translations = getattr(ctx, 'babel_translations', None)
     if translations is None:
-        dirname = os.path.join(ctx.app.root_path, 'translations')
-        translations = support.Translations.load(dirname, [get_locale()])
+        babel = ctx.app.extensions['babel']
+        translations = support.Translations.load(
+            babel.locale_dirname, [get_locale()],
+            domain=babel.locale_domain
+        )
         ctx.babel_translations = translations
     return translations
 
