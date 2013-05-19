@@ -48,6 +48,10 @@ some internal defaults:
 `BABEL_DEFAULT_TIMEZONE`    The timezone to use for user facing dates.
                             This defaults to ``'UTC'`` which also is the
                             timezone your application must use internally.
+`BABEL_DIRNAME`             The dirname where the locale messages stored.
+                            This defaults to ``'translations'``.
+`BABEL_DOMAIN`              The domain name for the locale messages.
+                            This defaults to ``'messages'``.
 =========================== =============================================
 
 For more complex applications you might want to have multiple applications

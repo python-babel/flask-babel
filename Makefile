@@ -1,4 +1,4 @@
-.PHONY: clean-pyc test upload-docs
+.PHONY: clean-pyc test upload-docs docs coverage
 
 all: clean-pyc test
 
@@ -14,6 +14,8 @@ clean-pyc:
 	@find . -name '*.pyo' -exec rm -f {} +
 	@find . -name '*~' -exec rm -f {} +
 
-upload-docs:
+docs:
 	@$(MAKE) -C docs html
+
+upload-docs: docs
 	@python setup.py upload_sphinx
