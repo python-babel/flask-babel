@@ -142,7 +142,6 @@ class Babel(object):
         self.timezone_selector_func = f
         return f
 
-
     def list_translations(self):
         """Returns a list of all the locales translations exist for.  The
         list returned will be filled with actual locale objects and not just
@@ -276,25 +275,25 @@ def _get_format(key, format):
     return format
 
 
-def to_user_timezone(datetime):
+def to_user_timezone(value):
     """Convert a datetime object to the user's timezone.  This automatically
     happens on all date formatting unless rebasing is disabled.  If you need
     to convert a :class:`datetime.datetime` object at any time to the user's
     timezone (as returned by :func:`get_timezone` this function can be used).
     """
-    if datetime.tzinfo is None:
-        datetime = datetime.replace(tzinfo=UTC)
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=UTC)
     tzinfo = get_timezone()
-    return tzinfo.normalize(datetime.astimezone(tzinfo))
+    return tzinfo.normalize(value.astimezone(tzinfo))
 
 
-def to_utc(datetime):
+def to_utc(value):
     """Convert a datetime object to UTC and drop tzinfo.  This is the
     opposite operation to :func:`to_user_timezone`.
     """
-    if datetime.tzinfo is None:
-        datetime = get_timezone().localize(datetime)
-    return datetime.astimezone(UTC).replace(tzinfo=None)
+    if value.tzinfo is None:
+        value = get_timezone().localize(value)
+    return value.astimezone(UTC).replace(tzinfo=None)
 
 
 def format_datetime(datetime=None, format=None, rebase=True):
@@ -384,7 +383,7 @@ def _date_format(formatter, obj, format, rebase, **extra):
 
 def format_number(number):
     """Return the given number formatted for the locale in request
-    
+
     :param number: the number to format
     :return: the formatted number
     :rtype: unicode
