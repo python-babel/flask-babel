@@ -1,7 +1,6 @@
 language: python
 install:
     - python setup.py develop
-    - pip install coveralls
 
 python:
     - "2.6"
@@ -11,6 +10,7 @@ script:
     - nosetests -s
 
 after_success:
+    - pip install coveralls
     - coverage run --source=flask_babel setup.py -q nosetests
     - coveralls
 
