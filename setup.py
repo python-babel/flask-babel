@@ -24,7 +24,7 @@ setup(
     author_email='armin.ronacher@active-4.com',
     description='Adds i18n/l10n support to Flask applications',
     long_description=__doc__,
-    py_modules=['flask_shorturl'],
+    py_modules=['flask_babel'],
     zip_safe=False,
     platforms='any',
     install_requires=[
