@@ -1,15 +1,21 @@
-.PHONY: clean-pyc test upload-docs
+.PHONY: clean-pyc test upload-docs docs coverage
 
 all: clean-pyc test
 
 test:
-	cd tests; python tests.py
+	@nosetests -s
+
+coverage:
+	@rm -f .coverage
+	@nosetests --with-coverage --cover-package=flask_babel --cover-html
 
 clean-pyc:
-	find . -name '*.pyc' -exec rm -f {} +
-	find . -name '*.pyo' -exec rm -f {} +
-	find . -name '*~' -exec rm -f {} +
+	@find . -name '*.pyc' -exec rm -f {} +
+	@find . -name '*.pyo' -exec rm -f {} +
+	@find . -name '*~' -exec rm -f {} +
 
-upload-docs:
-	$(MAKE) -C docs html
-	python setup.py upload_sphinx
+docs:
+	@$(MAKE) -C docs html
+
+upload-docs: docs
+	@python setup.py upload_sphinx

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    flaskext.babel
+    flask_babel
     ~~~~~~~~~~~~~~
 
     Implements i18n/l10n support for Flask applications based on Babel.
@@ -77,6 +77,8 @@ class Babel(object):
 
         app.config.setdefault('BABEL_DEFAULT_LOCALE', self._default_locale)
         app.config.setdefault('BABEL_DEFAULT_TIMEZONE', self._default_timezone)
+        app.config.setdefault('BABEL_DIRNAME', 'translations')
+        app.config.setdefault('BABEL_DOMAIN', 'messages')
         if self._date_formats is None:
             self._date_formats = self.default_date_formats.copy()
 
@@ -142,7 +144,6 @@ class Babel(object):
         self.timezone_selector_func = f
         return f
 
-
     def list_translations(self):
         """Returns a list of all the locales translations exist for.  The
         list returned will be filled with actual locale objects and not just
@@ -150,7 +151,7 @@ class Babel(object):
 
         .. versionadded:: 0.6
         """
-        dirname = os.path.join(self.app.root_path, 'translations')
+        dirname = self.locale_dirname
         if not os.path.isdir(dirname):
             return []
         result = []
@@ -178,6 +179,18 @@ class Babel(object):
         """
         return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
 
+    @property
+    def locale_dirname(self):
+        dirname = os.path.join(
+            self.app.root_path,
+            self.app.config['BABEL_DIRNAME']
+        )
+        return dirname
+
+    @property
+    def locale_domain(self):
+        return self.app.config['BABEL_DOMAIN']
+
 
 def get_translations():
     """Returns the correct gettext translations that should be used for
@@ -190,8 +203,11 @@ def get_translations():
         return None
     translations = getattr(ctx, 'babel_translations', None)
     if translations is None:
-        dirname = os.path.join(ctx.app.root_path, 'translations')
-        translations = support.Translations.load(dirname, [get_locale()])
+        babel = ctx.app.extensions['babel']
+        translations = support.Translations.load(
+            babel.locale_dirname, [get_locale()],
+            domain=babel.locale_domain
+        )
         ctx.babel_translations = translations
     return translations
 
@@ -276,25 +292,25 @@ def _get_format(key, format):
     return format
 
 
-def to_user_timezone(datetime):
+def to_user_timezone(value):
     """Convert a datetime object to the user's timezone.  This automatically
     happens on all date formatting unless rebasing is disabled.  If you need
     to convert a :class:`datetime.datetime` object at any time to the user's
     timezone (as returned by :func:`get_timezone` this function can be used).
     """
-    if datetime.tzinfo is None:
-        datetime = datetime.replace(tzinfo=UTC)
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=UTC)
     tzinfo = get_timezone()
-    return tzinfo.normalize(datetime.astimezone(tzinfo))
+    return tzinfo.normalize(value.astimezone(tzinfo))
 
 
-def to_utc(datetime):
+def to_utc(value):
     """Convert a datetime object to UTC and drop tzinfo.  This is the
     opposite operation to :func:`to_user_timezone`.
     """
-    if datetime.tzinfo is None:
-        datetime = get_timezone().localize(datetime)
-    return datetime.astimezone(UTC).replace(tzinfo=None)
+    if value.tzinfo is None:
+        value = get_timezone().localize(value)
+    return value.astimezone(UTC).replace(tzinfo=None)
 
 
 def format_datetime(datetime=None, format=None, rebase=True):
@@ -384,7 +400,7 @@ def _date_format(formatter, obj, format, rebase, **extra):
 
 def format_number(number):
     """Return the given number formatted for the locale in request
-    
+
     :param number: the number to format
     :return: the formatted number
     :rtype: unicode

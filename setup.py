@@ -9,9 +9,6 @@ Links
 `````
 
 * `documentation <http://packages.python.org/Flask-Babel>`_
-* `development version
-  <http://github.com/mitsuhiko/flask-babel/zipball/master#egg=Flask-Babel-dev>`_
-
 .. _Babel: http://babel.edgewall.org/
 
 """
@@ -27,8 +24,7 @@ setup(
     author_email='armin.ronacher@active-4.com',
     description='Adds i18n/l10n support to Flask applications',
     long_description=__doc__,
-    packages=['flaskext'],
-    namespace_packages=['flaskext'],
+    py_modules=['flask_babel'],
     zip_safe=False,
     platforms='any',
     install_requires=[

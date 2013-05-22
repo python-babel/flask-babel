@@ -1,7 +1,7 @@
 Flask-Babel
 ===========
 
-.. module:: flaskext.babel
+.. module:: flask_babel
 
 Flask-Babel is an extension to `Flask`_ that adds i18n and l10n support to
 any Flask application with the help of `babel`_, `pytz`_ and
@@ -31,7 +31,7 @@ To get started all you need to do is to instanciate a :class:`Babel`
 object after configuring the application::
 
     from flask import Flask
-    from flaskext.babel import Babel
+    from flask_babel import Babel
 
     app = Flask(__name__)
     app.config.from_pyfile('mysettings.cfg')
@@ -48,6 +48,10 @@ some internal defaults:
 `BABEL_DEFAULT_TIMEZONE`    The timezone to use for user facing dates.
                             This defaults to ``'UTC'`` which also is the
                             timezone your application must use internally.
+`BABEL_DIRNAME`             The dirname where the locale messages stored.
+                            This defaults to ``'translations'``.
+`BABEL_DOMAIN`              The domain name for the locale messages.
+                            This defaults to ``'messages'``.
 =========================== =============================================
 
 For more complex applications you might want to have multiple applications
@@ -106,7 +110,7 @@ To play with the date formatting from the console, you can use the
 
 Here some examples:
 
->>> from flaskext.babel import format_datetime
+>>> from flask_babel import format_datetime
 >>> from datetime import datetime
 >>> format_datetime(datetime(1987, 3, 5, 17, 12))
 u'Mar 5, 1987 5:12:00 PM'
@@ -122,7 +126,7 @@ u'05 12 1987'
 And again with a different language:
 
 >>> app.config['BABEL_DEFAULT_LOCALE'] = 'de'
->>> from flaskext.babel import refresh; refresh()
+>>> from flask_babel import refresh; refresh()
 >>> format_datetime(datetime(1987, 3, 5, 17, 12), 'EEEE, d. MMMM yyyy H:mm')
 u'Donnerstag, 5. M\xe4rz 1987 17:12'
 
@@ -142,7 +146,7 @@ There are two functions responsible for translating: :func:`gettext` and
 :func:`ngettext`.  The first to translate singular strings and the second
 to translate strings that might become plural.  Here some examples::
 
-    from flaskext.babel import gettext, ngettext
+    from flask_babel import gettext, ngettext
 
     gettext(u'A simple string')
     gettext(u'Value: %(value)s', value=42)
@@ -153,7 +157,7 @@ application and define them outside of a request, you can use a lazy
 strings.  Lazy strings will not be evaluated until they are actually used.
 To use such a lazy string, use the :func:`lazy_gettext` function::
 
-    from flaskext.babel import lazy_gettext
+    from flask_babel import lazy_gettext
 
     class MyForm(formlibrary.FormBase):
         success_message = lazy_gettext(u'The form was successfully saved.')
