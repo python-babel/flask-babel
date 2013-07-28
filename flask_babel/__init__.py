@@ -28,7 +28,7 @@ else:
     timezone = pytz.timezone
     UTC = pytz.UTC
 
-from flask.ext.babel._compat import string_types
+from flask_babel._compat import string_types
 
 
 class Babel(object):
