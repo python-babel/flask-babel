@@ -27,7 +27,7 @@ setup(
     author_email='armin.ronacher@active-4.com',
     description='Adds i18n/l10n support to Flask applications',
     long_description=__doc__,
-    py_modules=['flask_babel'],
+    packages=['flask_babel'],
     zip_safe=False,
     platforms='any',
     install_requires=[
@@ -44,6 +44,7 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ]
