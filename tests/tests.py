@@ -11,6 +11,7 @@ import flask
 from datetime import datetime
 import flask_babel as babel
 from flask_babel import gettext, ngettext, lazy_gettext
+from flask_babel._compat import text_type
 
 
 class DateFormattingTestCase(unittest.TestCase):
@@ -156,10 +157,10 @@ class GettextTestCase(unittest.TestCase):
         b = babel.Babel(app, default_locale='de_DE')
         yes = lazy_gettext(u'Yes')
         with app.test_request_context():
-            assert unicode(yes) == 'Ja'
+            assert text_type(yes) == 'Ja'
         app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
         with app.test_request_context():
-            assert unicode(yes) == 'Yes'
+            assert text_type(yes) == 'Yes'
 
     def test_list_translations(self):
         app = flask.Flask(__name__)
