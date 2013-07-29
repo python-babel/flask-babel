@@ -32,8 +32,7 @@ setup(
     platforms='any',
     install_requires=[
         'Flask',
-        'Babel',
-        'pytz',
+        'Babel>=1.0',
         'speaklater>=1.2',
         'Jinja2>=2.5'
     ],
