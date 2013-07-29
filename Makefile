@@ -17,6 +17,6 @@ clean: clean-pyc
 
 upload-docs:
 	$(MAKE) -C docs html
-	python setup.py upload_sphinx
+	python setup.py upload_docs
 
 .PHONY: upload-docs clean-pyc clean tox-test test all
