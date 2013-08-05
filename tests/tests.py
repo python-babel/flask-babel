@@ -170,5 +170,25 @@ class GettextTestCase(unittest.TestCase):
         assert str(translations[0]) == 'de'
 
 
+class AppFactoryTestCase(unittest.TestCase):
+
+    def test_basics(self):
+        b = babel.Babel()
+        app = flask.Flask(__name__)
+        b.init_app(app)
+
+    def test_getter_decorators(self):
+        b = babel.Babel()
+        app = flask.Flask(__name__)
+
+        @b.localeselector
+        def get_locale():
+            return 'de_DE'
+
+        @b.timezoneselector
+        def get_timezone():
+            return 'Europe/Vienna'
+
+
 if __name__ == '__main__':
     unittest.main()
