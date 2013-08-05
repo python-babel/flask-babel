@@ -62,6 +62,8 @@ class Babel(object):
         self._default_timezone = default_timezone
         self._date_formats = date_formats
         self._configure_jinja = configure_jinja
+        self.locale_selector_func = None
+        self.timezone_selector_func = None
         self.app = app
 
         if app is not None:
@@ -94,9 +96,6 @@ class Babel(object):
         #:      is anything but `None` this is used as new format string.
         #:      otherwise the default for that language is used.
         self.date_formats = self._date_formats
-
-        self.locale_selector_func = None
-        self.timezone_selector_func = None
 
         if self._configure_jinja:
             app.jinja_env.filters.update(
