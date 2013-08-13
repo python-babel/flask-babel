@@ -19,6 +19,7 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
 from datetime import datetime
 from flask import _request_ctx_stack
 from babel import dates, numbers, support, Locale
+from gettext import NullTranslations
 from werkzeug import ImmutableDict
 try:
     from pytz.gae import pytz
@@ -57,9 +58,11 @@ class Babel(object):
     })
 
     def __init__(self, app=None, default_locale='en', default_timezone='UTC',
-                 date_formats=None, configure_jinja=True):
+                 date_formats=None, configure_jinja=True,
+                 default_domain=support.Translations.DEFAULT_DOMAIN):
         self._default_locale = default_locale
         self._default_timezone = default_timezone
+        self._default_domain = default_domain
         self._date_formats = date_formats
         self._configure_jinja = configure_jinja
         self.app = app
@@ -79,6 +82,7 @@ class Babel(object):
 
         app.config.setdefault('BABEL_DEFAULT_LOCALE', self._default_locale)
         app.config.setdefault('BABEL_DEFAULT_TIMEZONE', self._default_timezone)
+        app.config.setdefault('BABEL_DEFAULT_DOMAIN', self._default_domain)
         if self._date_formats is None:
             self._date_formats = self.default_date_formats.copy()
 
@@ -97,6 +101,7 @@ class Babel(object):
 
         self.locale_selector_func = None
         self.timezone_selector_func = None
+        self.domain_selector_func = None
 
         if self._configure_jinja:
             app.jinja_env.filters.update(
@@ -144,6 +149,19 @@ class Babel(object):
         self.timezone_selector_func = f
         return f
 
+    def domainselector(self, f):
+        """Registers a callback function for domain selection.  The default
+        behaves as if a function was registered that returns `None` all the
+        time.  If `None` is returned, the domain falls back to the one from
+        the configuration.
+
+        This has to return the domain as a list of strings (eg: ``['messages']``)
+        """
+        assert self.domain_selector_func is None, \
+            'a localeselector function is already registered'
+        self.domain_selector_func = f
+        return f
+
 
     def list_translations(self):
         """Returns a list of all the locales translations exist for.  The
@@ -180,6 +198,13 @@ class Babel(object):
         """
         return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
 
+    @property
+    def default_domain(self):
+        """The default domain from the configuration as instance of a
+        `string` object.
+        """
+        return self.app.config['BABEL_DEFAULT_DOMAIN']
+
 
 def get_translations():
     """Returns the correct gettext translations that should be used for
@@ -193,7 +218,10 @@ def get_translations():
     translations = getattr(ctx, 'babel_translations', None)
     if translations is None:
         dirname = os.path.join(ctx.app.root_path, 'translations')
-        translations = support.Translations.load(dirname, [get_locale()])
+        locale = get_locale()
+        for domain in get_domains():
+            dt = support.Translations.load(dirname, [locale], domain)
+            translations = dt if translations is None or not hasattr(translations, 'merge') else translations.merge(dt)
         ctx.babel_translations = translations
     return translations
 
@@ -243,6 +271,29 @@ def get_timezone():
                     tzinfo = rv
         ctx.babel_tzinfo = tzinfo
     return tzinfo
+
+
+def get_domains():
+    """Returns the domains that should be used for this request as
+    `list` object.  This returns `None` if used outside of
+    a request.
+    """
+    ctx = _request_ctx_stack.top
+    if ctx is None:
+        return None
+    domains = getattr(ctx, 'babel_domains', None)
+    if domains is None:
+        babel = ctx.app.extensions['babel']
+        if babel.domain_selector_func is None:
+            domains = [babel.default_domain]
+        else:
+            rv = babel.domain_selector_func()
+            if rv is None:
+                domains = [babel.default_domain]
+            else:
+                domains = rv
+        ctx.babel_domains = domains
+    return domains
 
 
 def refresh():
