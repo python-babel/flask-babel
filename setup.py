@@ -28,7 +28,7 @@ from setuptools import setup
 
 setup(
     name='Flask-BabelEx',
-    version='0.8.1',
+    version='0.9.1',
     url='http://github.com/mrjoes/flask-babelex',
     license='BSD',
     author='Serge S. Koval',
@@ -40,8 +40,7 @@ setup(
     platforms='any',
     install_requires=[
         'Flask',
-        'Babel',
-        'pytz',
+        'Babel>=1.0',
         'speaklater>=1.2',
         'Jinja2>=2.5'
     ],
@@ -52,6 +51,7 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ]

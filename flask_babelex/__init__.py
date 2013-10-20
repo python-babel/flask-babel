@@ -29,6 +29,7 @@ else:
     timezone = pytz.timezone
     UTC = pytz.UTC
 
+from flask_babelex._compat import string_types
 
 _DEFAULT_LOCALE = Locale.parse('en')
 
@@ -251,7 +252,7 @@ def get_timezone():
                 if rv is None:
                     tzinfo = babel.default_timezone
                 else:
-                    if isinstance(rv, basestring):
+                    if isinstance(rv, string_types):
                         tzinfo = timezone(rv)
                     else:
                         tzinfo = rv
