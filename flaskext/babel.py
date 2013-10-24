@@ -116,7 +116,10 @@ class Babel(object):
                 charset = translations.charset() 
 
                 if charset:
-                    x = unicode(x, charset)
+                    try:
+                        x = unicode(x, charset)
+                    except TypeError:
+                        pass
                     
                 return translations.ugettext(x)
             
@@ -125,9 +128,12 @@ class Babel(object):
                 charset = translations.charset()
                 
                 if charset:
-                    s = unicode(s, charset)
-                    p = unicode(p, charset)
-                    n = unicode(n, charset)
+                    try:
+                        s = unicode(s, charset)
+                        p = unicode(p, charset)
+                        n = unicode(n, charset)
+                    except TypeError:
+                        pass
                     
                 return translations.ungettext(s, p, n)
             
