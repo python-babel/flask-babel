@@ -195,7 +195,7 @@ def get_translations():
     if translations is None:
         dirname = os.path.join(ctx.app.root_path, 'translations')
         translations = support.Translations.load(dirname, [get_locale()])
-        translations.merge(support.Translations.load(self.pkg_translations.__path__[0], [get_locale()])
+        translations.merge(support.Translations.load(self.pkg_translations.__path__[0], [get_locale()]))
         print dir(translations)
         print "DIR PKG", self.pkg_translations.__path__[0]
         ctx.babel_translations = translations
