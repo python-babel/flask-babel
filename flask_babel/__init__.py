@@ -195,6 +195,7 @@ def get_translations():
     pkg_translations = ctx.app.extensions.get('babel').pkg_translations
     if translations is None:
         dirname = os.path.join(ctx.app.root_path, 'translations')
+        print "BABEL DIRNAME", dirname
         translations = support.Translations.load(dirname, [get_locale()])
         if not translations or isinstance(translations, support.NullTranslations):
             print "BABEL no translation found for APP"
