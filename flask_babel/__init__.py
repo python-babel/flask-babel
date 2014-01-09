@@ -165,7 +165,6 @@ class Babel(object):
                 result.append(Locale.parse(folder))
         if not result:
             result.append(Locale.parse(self._default_locale))
-        print "LIST TRANSLATIONS", result
         return result
 
     @property
@@ -201,8 +200,6 @@ def get_translations():
             translations = support.Translations.load(pkg_translations.__path__[0], [get_locale()])
         else:
             translations.merge(support.Translations.load(pkg_translations.__path__[0], [get_locale()]))
-        print dir(translations)
-        print "DIR PKG", pkg_translations.__path__[0]
         ctx.babel_translations = translations
     return translations
 
