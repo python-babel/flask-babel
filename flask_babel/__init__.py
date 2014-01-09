@@ -197,9 +197,12 @@ def get_translations():
         dirname = os.path.join(ctx.app.root_path, 'translations')
         translations = support.Translations.load(dirname, [get_locale()])
         if not translations or isinstance(translations, support.NullTranslations):
+            print "BABEL no translation found for APP"
             translations = support.Translations.load(pkg_translations.__path__[0], [get_locale()])
         else:
+            print "BABEL MERGE"
             translations.merge(support.Translations.load(pkg_translations.__path__[0], [get_locale()]))
+        print "TRANS", translations
         ctx.babel_translations = translations
     return translations
 
