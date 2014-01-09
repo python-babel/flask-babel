@@ -72,7 +72,7 @@ class Babel(object):
         the constructor.
         """
         self.app = app
-        self.pkg_translations = pkg_tranlations
+        self.pkg_translations = pkg_translations
         app.babel_instance = self
         if not hasattr(app, 'extensions'):
             app.extensions = {}
