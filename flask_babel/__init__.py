@@ -202,7 +202,7 @@ def get_translations():
         else:
             translations.merge(support.Translations.load(pkg_translations.__path__[0], [get_locale()]))
         print dir(translations)
-        print "DIR PKG", self.pkg_translations.__path__[0]
+        print "DIR PKG", pkg_translations.__path__[0]
         ctx.babel_translations = translations
     return translations
 
