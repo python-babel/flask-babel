@@ -165,6 +165,7 @@ class Babel(object):
                 result.append(Locale.parse(folder))
         if not result:
             result.append(Locale.parse(self._default_locale))
+        print "LIST TRANSLATIONS", result
         return result
 
     @property
