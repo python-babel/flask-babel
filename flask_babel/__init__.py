@@ -198,7 +198,7 @@ def get_translations():
         print "BABEL DIRNAME", dirname
         translations = support.Translations.load(dirname, [get_locale()])
         print "BEFORE TRANS", translations
-        if isinstance(translations, support.NullTranslations):
+        if not hasattr(translations, 'merge'):
             print "BABEL no translation found for APP"
             translations = support.Translations.load(pkg_translations.__path__[0], [get_locale()])
         else:
