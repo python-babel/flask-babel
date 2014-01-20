@@ -192,15 +192,14 @@ def get_translations():
     if ctx is None:
         return None
     translations = getattr(ctx, 'babel_translations', None)
-    pkg_translations = ctx.app.extensions.get('babel').pkg_translations
-    if translations is None:
+    if translations is None and hasattr(ctx.app.extensions.get('babel'), 'pkg_translations'):
         dirname = os.path.join(ctx.app.root_path, 'translations')
         translations = support.Translations.load(dirname, [get_locale()])
-        if pkg_translations:
-            if not hasattr(translations, 'merge'):
-                translations = support.Translations.load(pkg_translations.__path__[0], [get_locale()])
-            else:
-                translations.merge(support.Translations.load(pkg_translations.__path__[0], [get_locale()]))
+        pkg_translations = ctx.app.extensions.get('babel').pkg_translations
+        if not hasattr(translations, 'merge'):
+            translations = support.Translations.load(pkg_translations.__path__[0], [get_locale()])
+        else:
+            translations.merge(support.Translations.load(pkg_translations.__path__[0], [get_locale()]))
         ctx.babel_translations = translations
     return translations
 
