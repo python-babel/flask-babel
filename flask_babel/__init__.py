@@ -31,6 +31,12 @@ else:
 from flask_babel._compat import string_types
 
 
+def _format_variables(string, variables):
+    if variables:
+        return string % variables
+    return string
+
+
 class Babel(object):
     """Central controller class that can be used to configure how
     Flask-Babel behaves.  Each application that wants to use Flask-Babel
@@ -386,7 +392,7 @@ def _date_format(formatter, obj, format, rebase, **extra):
 
 def format_number(number):
     """Return the given number formatted for the locale in request
-    
+
     :param number: the number to format
     :return: the formatted number
     :rtype: unicode
@@ -457,8 +463,8 @@ def gettext(string, **variables):
     """
     t = get_translations()
     if t is None:
-        return string % variables
-    return t.ugettext(string) % variables
+        return _format_variables(string, variables)
+    return _format_variables(t.ugettext(string), variables)
 _ = gettext
 
 
@@ -477,8 +483,8 @@ def ngettext(singular, plural, num, **variables):
     variables.setdefault('num', num)
     t = get_translations()
     if t is None:
-        return (singular if num == 1 else plural) % variables
-    return t.ungettext(singular, plural, num) % variables
+        return _format_variables(singular if num == 1 else plural, variables)
+    return _format_variables(t.ungettext(singular, plural, num), variables)
 
 
 def pgettext(context, string, **variables):
@@ -488,8 +494,8 @@ def pgettext(context, string, **variables):
     """
     t = get_translations()
     if t is None:
-        return string % variables
-    return t.upgettext(context, string) % variables
+        return _format_variables(string, variables)
+    return _format_variables(t.upgettext(context, string), variables)
 
 
 def npgettext(context, singular, plural, num, **variables):
@@ -500,8 +506,9 @@ def npgettext(context, singular, plural, num, **variables):
     variables.setdefault('num', num)
     t = get_translations()
     if t is None:
-        return (singular if num == 1 else plural) % variables
-    return t.unpgettext(context, singular, plural, num) % variables
+        return _format_variables(singular if num == 1 else plural, variables)
+    return _format_variables(t.unpgettext(context, singular, plural, num),
+                             variables)
 
 
 def lazy_gettext(string, **variables):
