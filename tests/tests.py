@@ -133,6 +133,7 @@ class GettextTestCase(unittest.TestCase):
             assert gettext(u'Hello %(name)s!', name='Peter') == 'Hallo Peter!'
             assert ngettext(u'%(num)s Apple', u'%(num)s Apples', 3) == u'3 Äpfel'
             assert ngettext(u'%(num)s Apple', u'%(num)s Apples', 1) == u'1 Apfel'
+            assert gettext(u'Hello %(name)s!') == 'Hallo %(name)s!'
 
     def test_template_basics(self):
         app = flask.Flask(__name__)
