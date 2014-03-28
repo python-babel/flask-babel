@@ -18,8 +18,8 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
 
 from datetime import datetime
 from flask import _request_ctx_stack
-from gettext import NullTranslations
 from babel import dates, numbers, support, Locale
+from babel.support import NullTranslations
 from werkzeug import ImmutableDict
 try:
     from pytz.gae import pytz
