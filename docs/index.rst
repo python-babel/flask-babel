@@ -158,6 +158,10 @@ To use such a lazy string, use the :func:`lazy_gettext` function::
     class MyForm(formlibrary.FormBase):
         success_message = lazy_gettext(u'The form was successfully saved.')
 
+"Laziness" is only provided if :mod:`speaklater` package is installed.
+Otherwise the functions :func:`lazy_gettext` and :func:`lazy_pgettext`
+won't be registered.
+
 So how does Flask-Babel find the translations?  Well first you have to
 create some.  Here is how you do it:
 

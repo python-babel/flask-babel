@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Flask-Babel
 -----------
@@ -20,7 +21,7 @@ from setuptools import setup
 
 setup(
     name='Flask-Babel',
-    version='0.9',
+    version='0.10',
     url='http://github.com/mitsuhiko/flask-babel',
     license='BSD',
     author='Armin Ronacher',
@@ -33,9 +34,12 @@ setup(
     install_requires=[
         'Flask',
         'Babel>=1.0',
-        'speaklater>=1.2',
         'Jinja2>=2.5'
     ],
+    extras_require={
+        'laziness': ['speaklater>=1.2']
+    },
+    test_suite="tests",
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',

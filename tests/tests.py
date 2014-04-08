@@ -10,8 +10,13 @@ from decimal import Decimal
 import flask
 from datetime import datetime
 import flask_babel as babel
-from flask_babel import gettext, ngettext, lazy_gettext
+from flask_babel import gettext, ngettext
 from flask_babel._compat import text_type
+
+try:
+    from flask_babel import lazy_gettext
+except ImportError:
+    lazy_gettext = None
 
 
 class DateFormattingTestCase(unittest.TestCase):
@@ -152,6 +157,7 @@ class GettextTestCase(unittest.TestCase):
                 {%- pluralize %}{{ num }} Apples{% endtrans %}
             ''', name='Peter').strip() == u'3 Äpfel'
 
+    @unittest.skipIf(not lazy_gettext, 'Require speaklater')
     def test_lazy_gettext(self):
         app = flask.Flask(__name__)
         b = babel.Babel(app, default_locale='de_DE')

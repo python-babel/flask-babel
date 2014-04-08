@@ -30,6 +30,11 @@ else:
 
 from flask_babel._compat import string_types
 
+try:
+    from speaklater import make_lazy_string
+except ImportError:  # Will provide "laziness" only if speaklater installed.
+    make_lazy_string = None
+
 
 class Babel(object):
     """Central controller class that can be used to configure how
@@ -386,7 +391,7 @@ def _date_format(formatter, obj, format, rebase, **extra):
 
 def format_number(number):
     """Return the given number formatted for the locale in request
-    
+
     :param number: the number to format
     :return: the formatted number
     :rtype: unicode
@@ -504,27 +509,30 @@ def npgettext(context, singular, plural, num, **variables):
     return t.unpgettext(context, singular, plural, num) % variables
 
 
-def lazy_gettext(string, **variables):
-    """Like :func:`gettext` but the string returned is lazy which means
-    it will be translated when it is used as an actual string.
+if make_lazy_string:
+    def lazy_gettext(string, **variables):
+        """Like :func:`gettext` but the string returned is lazy which means
+        it will be translated when it is used as an actual string.
 
-    Example::
+        Example::
 
-        hello = lazy_gettext(u'Hello World')
+            hello = lazy_gettext(u'Hello World')
 
-        @app.route('/')
-        def index():
-            return unicode(hello)
-    """
-    from speaklater import make_lazy_string
-    return make_lazy_string(gettext, string, **variables)
+            @app.route('/')
+            def index():
+                return unicode(hello)
+
+        Only if :mod:`speaklater` package installed.
+        """
+        return make_lazy_string(gettext, string, **variables)
 
 
-def lazy_pgettext(context, string, **variables):
-    """Like :func:`pgettext` but the string returned is lazy which means
-    it will be translated when it is used as an actual string.
+    def lazy_pgettext(context, string, **variables):
+        """Like :func:`pgettext` but the string returned is lazy which means
+        it will be translated when it is used as an actual string.
 
-    .. versionadded:: 0.7
-    """
-    from speaklater import make_lazy_string
-    return make_lazy_string(pgettext, context, string, **variables)
+        Only if :mod:`speaklater` package installed.
+
+        .. versionadded:: 0.7
+        """
+        return make_lazy_string(pgettext, context, string, **variables)

@@ -1,6 +1,6 @@
 .DS_Store
-*.pyc
-*.pyo
+*.py[co]
+*.egg
 *.egg-info
 dist/
 docs/_build
