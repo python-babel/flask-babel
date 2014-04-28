@@ -11,6 +11,7 @@
 from __future__ import absolute_import
 import os
 
+
 # this is a workaround for a snow leopard bug that babel does not
 # work around :)
 if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
