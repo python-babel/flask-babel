@@ -21,13 +21,13 @@ or alternatively if you have pip installed::
     $ pip install Flask-Babel
 
 Please note that Flask-Babel requires Jinja 2.5.  If you are using an
-older version you will have to upgrade or disable the Jinja support.
+older version you will have to upgrade or disable Jinja support.
 
 
 Configuration
 -------------
 
-To get started all you need to do is to instanciate a :class:`Babel`
+To get started all you need to do is to instantiate a :class:`Babel`
 object after configuring the application::
 
     from flask import Flask
@@ -37,7 +37,7 @@ object after configuring the application::
     app.config.from_pyfile('mysettings.cfg')
     babel = Babel(app)
 
-The babel object itself can be used to configure the babel support
+The babel object itself can be used to configure babel support
 further.  Babel has two configuration values that can be used to change
 some internal defaults:
 
@@ -58,9 +58,9 @@ the first time the timezone is needed it will call a
 :meth:`~Babel.timezoneselector` function.
 
 If any of these methods return `None` the extension will automatically
-fall back to what's in the config.  Furthermore for efficiency that
+fall back to what's in the config.  Furthermore, for efficiency that
 function is called only once and the return value then cached.  If you
-need to switch the language between a request, you can :func:`refresh` the
+need to switch the language within a request, you can :func:`refresh` the
 cache.
 
 Example selector functions::
@@ -126,7 +126,7 @@ And again with a different language:
 >>> format_datetime(datetime(1987, 3, 5, 17, 12), 'EEEE, d. MMMM yyyy H:mm')
 u'Donnerstag, 5. M\xe4rz 1987 17:12'
 
-For more format examples head over to the `babel`_ documentation.
+For more formatting examples head over to the `babel`_ documentation.
 
 Using Translations
 ------------------
@@ -134,13 +134,14 @@ Using Translations
 The other big part next to date formatting are translations.  For that,
 Flask uses :mod:`gettext` together with Babel.  The idea of gettext is
 that you can mark certain strings as translatable and a tool will pick all
-those app, collect them in a separate file for you to translate.  At
+those up and collect them in a separate file for you to translate.  At
 runtime the original strings (which should be English) will be replaced by
 the language you selected.
 
 There are two functions responsible for translating: :func:`gettext` and
-:func:`ngettext`.  The first to translate singular strings and the second
-to translate strings that might become plural.  Here some examples::
+:func:`ngettext`.  The first is used to translate singular strings and
+the second to translate strings that might become plural.  Here are some
+examples::
 
     from flask.ext.babel import gettext, ngettext
 
@@ -149,7 +150,7 @@ to translate strings that might become plural.  Here some examples::
     ngettext(u'%(num)s Apple', u'%(num)s Apples', number_of_apples)
 
 Additionally if you want to use constant strings somewhere in your
-application and define them outside of a request, you can use a lazy
+application and define them outside of a request, you can use lazy
 strings.  Lazy strings will not be evaluated until they are actually used.
 To use such a lazy string, use the :func:`lazy_gettext` function::
 
@@ -170,9 +171,9 @@ time to create a ``.pot`` file.  A ``.pot`` file contains all the strings
 and is the template for a ``.po`` file which contains the translated
 strings.  Babel can do all that for you.
 
-First of all you have to get into the folder where you have your
-application and create a mapping file.  For typical Flask applications, this
-is what you want in there:
+First of all you have to create a mapping file in the folder where you have
+your application.  For typical Flask applications, this is what you should
+include:
 
 .. sourcecode:: ini
 
