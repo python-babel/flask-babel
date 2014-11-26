@@ -17,7 +17,7 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
     os.environ['LC_CTYPE'] = 'en_US.utf-8'
 
 from datetime import datetime
-from flask import _request_ctx_stack
+from flask import _request_ctx_stack, _app_ctx_stack
 from babel import dates, numbers, support, Locale
 from werkzeug import ImmutableDict
 try:
@@ -189,7 +189,9 @@ def get_translations():
     """
     ctx = _request_ctx_stack.top
     if ctx is None:
-        return None
+        ctx = _app_ctx_stack.top
+        if ctx is None:
+            return None
     translations = getattr(ctx, 'babel_translations', None)
     if translations is None:
         dirname = os.path.join(ctx.app.root_path, 'translations')
