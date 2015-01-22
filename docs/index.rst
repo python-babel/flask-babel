@@ -255,6 +255,8 @@ Context Functions
 
 .. autofunction:: get_timezone
 
+.. autofunction:: get_domain
+
 Datetime Functions
 ``````````````````
 

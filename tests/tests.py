@@ -97,6 +97,24 @@ class DateFormattingTestCase(unittest.TestCase):
         with app.test_request_context():
             assert babel.format_datetime(d) == '12.04.2010 15:46:00'
 
+    def test_custom_domain_selector(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app)
+
+        the_domain = None
+
+        @b.domainselector
+        def select_domain():
+            return the_domain
+
+        with app.test_request_context():
+            assert babel.get_domain() == 'messages'
+
+        the_domain = 'custom_domain'
+
+        with app.test_request_context():
+            assert babel.get_domain() == 'custom_domain'
+
     def test_refreshing(self):
         app = flask.Flask(__name__)
         b = babel.Babel(app)
@@ -168,6 +186,26 @@ class GettextTestCase(unittest.TestCase):
         translations = b.list_translations()
         assert len(translations) == 1
         assert str(translations[0]) == 'de'
+
+    def test_multi_domain(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app, default_locale='de_DE')
+        translations = b.list_translations()
+
+        the_domain = None
+        @b.domainselector
+        def select_domain():
+            return the_domain
+
+        with app.test_request_context():
+            assert gettext(u'Hello %(name)s!', name='Peter') == 'Hallo Peter!'
+
+        the_domain = 'custom-domain'
+
+        with app.test_request_context():
+            assert gettext(u'Hello %(name)s!', name='Peter') == 'Custom Hallo Peter!'
+
+
 
 
 if __name__ == '__main__':
