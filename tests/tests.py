@@ -9,8 +9,9 @@ import unittest
 from decimal import Decimal
 import flask
 from datetime import datetime
-from flaskext import babel
-from flaskext.babel import gettext, ngettext, lazy_gettext
+import flask_babel as babel
+from flask_babel import gettext, ngettext, lazy_gettext
+from flask_babel._compat import text_type
 
 
 class DateFormattingTestCase(unittest.TestCase):
@@ -21,13 +22,13 @@ class DateFormattingTestCase(unittest.TestCase):
         d = datetime(2010, 4, 12, 13, 46)
 
         with app.test_request_context():
-            assert babel.format_datetime(d) == 'Apr 12, 2010 1:46:00 PM'
+            assert babel.format_datetime(d) == 'Apr 12, 2010, 1:46:00 PM'
             assert babel.format_date(d) == 'Apr 12, 2010'
             assert babel.format_time(d) == '1:46:00 PM'
 
         with app.test_request_context():
             app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europe/Vienna'
-            assert babel.format_datetime(d) == 'Apr 12, 2010 3:46:00 PM'
+            assert babel.format_datetime(d) == 'Apr 12, 2010, 3:46:00 PM'
             assert babel.format_date(d) == 'Apr 12, 2010'
             assert babel.format_time(d) == '3:46:00 PM'
 
@@ -43,13 +44,13 @@ class DateFormattingTestCase(unittest.TestCase):
         d = datetime(2010, 4, 12, 13, 46)
 
         with app.test_request_context():
-            assert babel.format_datetime(d) == 'Apr 12, 2010 1:46:00 PM'
+            assert babel.format_datetime(d) == 'Apr 12, 2010, 1:46:00 PM'
             assert babel.format_date(d) == 'Apr 12, 2010'
             assert babel.format_time(d) == '1:46:00 PM'
 
         with app.test_request_context():
             app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europe/Vienna'
-            assert babel.format_datetime(d) == 'Apr 12, 2010 3:46:00 PM'
+            assert babel.format_datetime(d) == 'Apr 12, 2010, 3:46:00 PM'
             assert babel.format_date(d) == 'Apr 12, 2010'
             assert babel.format_time(d) == '3:46:00 PM'
 
@@ -88,7 +89,7 @@ class DateFormattingTestCase(unittest.TestCase):
             return the_timezone
 
         with app.test_request_context():
-            assert babel.format_datetime(d) == 'Apr 12, 2010 1:46:00 PM'
+            assert babel.format_datetime(d) == 'Apr 12, 2010, 1:46:00 PM'
 
         the_locale = 'de_DE'
         the_timezone = 'Europe/Vienna'
@@ -101,10 +102,10 @@ class DateFormattingTestCase(unittest.TestCase):
         b = babel.Babel(app)
         d = datetime(2010, 4, 12, 13, 46)
         with app.test_request_context():
-            assert babel.format_datetime(d) == 'Apr 12, 2010 1:46:00 PM'
+            assert babel.format_datetime(d) == 'Apr 12, 2010, 1:46:00 PM'
             app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europe/Vienna'
             babel.refresh()
-            assert babel.format_datetime(d) == 'Apr 12, 2010 3:46:00 PM'
+            assert babel.format_datetime(d) == 'Apr 12, 2010, 3:46:00 PM'
 
     def test_force_locale(self):
         app = flask.Flask(__name__)
@@ -170,10 +171,10 @@ class GettextTestCase(unittest.TestCase):
         b = babel.Babel(app, default_locale='de_DE')
         yes = lazy_gettext(u'Yes')
         with app.test_request_context():
-            assert unicode(yes) == 'Ja'
+            assert text_type(yes) == 'Ja'
         app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
         with app.test_request_context():
-            assert unicode(yes) == 'Yes'
+            assert text_type(yes) == 'Yes'
 
     def test_list_translations(self):
         app = flask.Flask(__name__)
