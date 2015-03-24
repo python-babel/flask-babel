@@ -17,7 +17,7 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
     os.environ['LC_CTYPE'] = 'en_US.utf-8'
 
 from datetime import datetime
-from flask import _request_ctx_stack
+from flask import _request_ctx_stack, _app_ctx_stack
 from babel import dates, numbers, support, Locale
 from werkzeug import ImmutableDict
 try:
@@ -187,9 +187,7 @@ def get_translations():
     object if used outside of the request or if a translation cannot be
     found.
     """
-    ctx = _request_ctx_stack.top
-    if ctx is None:
-        return None
+    ctx = _try_to_get_ctx_top()
     translations = getattr(ctx, 'babel_translations', None)
     if translations is None:
         dirname = os.path.join(ctx.app.root_path, 'translations')
@@ -203,9 +201,7 @@ def get_locale():
     `babel.Locale` object.  This returns `None` if used outside of
     a request.
     """
-    ctx = _request_ctx_stack.top
-    if ctx is None:
-        return None
+    ctx = _try_to_get_ctx_top()
     locale = getattr(ctx, 'babel_locale', None)
     if locale is None:
         babel = ctx.app.extensions['babel']
@@ -226,7 +222,7 @@ def get_timezone():
     `pytz.timezone` object.  This returns `None` if used outside of
     a request.
     """
-    ctx = _request_ctx_stack.top
+    ctx = _try_to_get_ctx_top()
     tzinfo = getattr(ctx, 'babel_tzinfo', None)
     if tzinfo is None:
         babel = ctx.app.extensions['babel']
@@ -258,7 +254,7 @@ def refresh():
     Without that refresh, the :func:`~flask.flash` function would probably
     return English text and a now German page.
     """
-    ctx = _request_ctx_stack.top
+    ctx = _try_to_get_ctx_top()
     for key in 'babel_locale', 'babel_tzinfo', 'babel_translations':
         if hasattr(ctx, key):
             delattr(ctx, key)
@@ -268,7 +264,7 @@ def _get_format(key, format):
     """A small helper for the datetime formatting functions.  Looks up
     format defaults for different kinds.
     """
-    babel = _request_ctx_stack.top.app.extensions['babel']
+    babel = _try_to_get_ctx_top().app.extensions['babel']
     if format is None:
         format = babel.date_formats[key]
     if format in ('short', 'medium', 'full', 'long'):
@@ -386,7 +382,7 @@ def _date_format(formatter, obj, format, rebase, **extra):
 
 def format_number(number):
     """Return the given number formatted for the locale in request
-    
+
     :param number: the number to format
     :return: the formatted number
     :rtype: unicode
@@ -528,3 +524,15 @@ def lazy_pgettext(context, string, **variables):
     """
     from speaklater import make_lazy_string
     return make_lazy_string(pgettext, context, string, **variables)
+
+
+def _try_to_get_ctx_top():
+    """Try to get current context. Working with application context
+    if request context is not available.
+    """
+    ctx = _request_ctx_stack.top
+    if ctx is None:
+        ctx = _app_ctx_stack.top
+    if ctx is None:
+        raise RuntimeError('Working outside application context')
+    return ctx
