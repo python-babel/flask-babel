@@ -629,6 +629,8 @@ def pgettext(*args, **kwargs):
 def npgettext(*args, **kwargs):
     return get_domain().npgettext(*args, **kwargs)
 def lazy_gettext(*args, **kwargs):
-    return get_domain().lazy_gettext(*args, **kwargs)
+    from speaklater import make_lazy_string
+    return make_lazy_string(gettext, *args, **kwargs)
 def lazy_pgettext(*args, **kwargs):
-    return get_domain().lazy_pgettext(*args, **kwargs)
+    from speaklater import make_lazy_string
+    return make_lazy_string(pgettext, *args, **kwargs)
