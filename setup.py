@@ -1,43 +1,41 @@
 """
-Flask-Babel
+Flask-ICU
 -----------
 
 Adds i18n/l10n support to Flask applications with the help of the
-`Babel`_ library.
+`PyICU`_ library.
 
 Links
 `````
 
-* `documentation <http://packages.python.org/Flask-Babel>`_
-* `development version
-  <http://github.com/mitsuhiko/flask-babel/zipball/master#egg=Flask-Babel-dev>`_
+* `documentation <http://packages.python.org/Flask-ICU>`_
+* `development version [Add later]`_ # TODO: Provide link to dev repo
 
-.. _Babel: http://babel.edgewall.org/
+.. _PyICU: https://pypi.python.org/pypi/PyICU/
 
 """
 from setuptools import setup
 
 
 setup(
-    name='Flask-Babel',
+    name='Flask-ICU',
     version='0.9',
-    url='http://github.com/mitsuhiko/flask-babel',
+    url='https://github.com/beavyHQ/flask-icu',
     license='BSD',
-    author='Armin Ronacher',
-    author_email='armin.ronacher@active-4.com',
+    author='Ethan Miller',
+    author_email='ethan@code-cuts.com',
     description='Adds i18n/l10n support to Flask applications',
     long_description=__doc__,
-    packages=['flask_babel'],
+    packages=['flask_icu'],
     zip_safe=False,
     platforms='any',
     install_requires=[
         'Flask',
-        'Babel>=1.0',
+        'pyicu',
         'speaklater>=1.2',
-        'Jinja2>=2.5'
     ],
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 4 - Beta',  # TODO: update dev status
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
