@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
+    # TODO: Change this header 
     flaskext.babel
     ~~~~~~~~~~~~~~
 
-    Implements i18n/l10n support for Flask applications based on Babel.
+    Implements i18n/l10n support for Flask applications based on PyICU.
 
     :copyright: (c) 2013 by Armin Ronacher, Daniel Neuhäuser.
     :license: BSD, see LICENSE for more details.
