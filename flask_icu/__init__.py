@@ -11,6 +11,7 @@
 """
 from __future__ import absolute_import
 import os
+import json
 
 # this is a workaround for a snow leopard bug that babel does not
 # work around :)
@@ -39,6 +40,8 @@ class ICU(object):
     after the configuration was initialized.
     """
 
+    messages = {}
+
     default_date_formats = ImmutableDict({
         'time':             'medium',
         'date':             'medium',
@@ -63,6 +66,8 @@ class ICU(object):
         self._default_timezone = default_timezone
         self._date_formats = date_formats
         self.app = app
+
+        self.load_data()
 
         if app is not None:
             self.init_app(app)
@@ -148,6 +153,32 @@ class ICU(object):
         if not result:
             result.append(Locale.parse(self._default_locale))
         return result
+
+    def load_locale_files(self, locale):
+        translations = {}
+        locale_dir = 'translations/' + locale
+        for subdir, dirs, files in os.walk(locale_dir):
+            for file in files:
+                with open(subdir + '/' + file) as data_file:
+                    data = json.load(data_file)
+                    z = translations.copy()
+                    z.update(data)
+                    translations = z
+        return {locale : translations}
+
+    def load_data(self):
+        """Loads the server translation data from the translation files"""
+        # TODO: The root directory should probably be a setting?
+        root_translation_dir = 'translations'
+        locales_list = [name for name in os.listdir(root_translation_dir)
+                        if os.path.isdir(os.path.join(root_translation_dir, name))]
+        # all_translations =
+        #     [self.load_locale_files(locale) for locale in locales_list]
+        loaded_sets = map(lambda locale : load_locale_files(locale), locales_list)
+        translations = {}
+        for translation in loaded_sets:
+            translations.update(translation)
+        self.messages = translations
 
     @property
     def default_locale(self):
