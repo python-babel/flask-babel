@@ -504,10 +504,10 @@ def npgettext(context, singular, plural, num, **variables):
     return t.unpgettext(context, singular, plural, num) % variables
 
 class LazyJsonProxy(object):
-    """Wraps a :class:`speaklater._LazyString`-like object in an object that
-    Flask can JSON-serialize.  This is done by providing an :method:`__html__`
-    method and proxying everything else to the given :class:`_LazyString`
-    object."""
+    """Wraps a :class:`speaklater._LazyString`-like object in an object
+    that Flask can JSON-serialize.  This is done by providing an
+    :method:`__html__` method and proxying everything else to the given
+    :class:`speaklater._LazyString` object."""
     def __init__(self, __proxyinner):
         self.__dict__['__proxyinner'] = __proxyinner
 
