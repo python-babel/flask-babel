@@ -503,6 +503,26 @@ def npgettext(context, singular, plural, num, **variables):
         return (singular if num == 1 else plural) % variables
     return t.unpgettext(context, singular, plural, num) % variables
 
+class LazyJsonProxy(object):
+    """Wraps a :class:`speaklater._LazyString`-like object in an object that
+    Flask can JSON-serialize.  This is done by providing an :method:`__html__`
+    method and proxying everything else to the given :class:`_LazyString`
+    object."""
+    def __init__(self, __proxyinner):
+        self.__dict__['__proxyinner'] = __proxyinner
+
+    def __html__(self):
+        return unicode(self)
+
+    def __getattr__(self, name):
+        if name == '__proxyinner':
+            return self.__dict__['__proxyinner']
+        return getattr(self.__proxyinner, name)
+
+    def __setattr__(self, name, value):
+        if name == '__proxyinner':
+            self.__dict__['__proxyinner'] = value
+        setattr(self.__proxyinner, name, value)
 
 def lazy_gettext(string, **variables):
     """Like :func:`gettext` but the string returned is lazy which means
@@ -517,7 +537,7 @@ def lazy_gettext(string, **variables):
             return unicode(hello)
     """
     from speaklater import make_lazy_string
-    return make_lazy_string(gettext, string, **variables)
+    return LazyJsonProxy(make_lazy_string(gettext, string, **variables))
 
 
 def lazy_pgettext(context, string, **variables):
@@ -527,4 +547,4 @@ def lazy_pgettext(context, string, **variables):
     .. versionadded:: 0.7
     """
     from speaklater import make_lazy_string
-    return make_lazy_string(pgettext, context, string, **variables)
+    return LazyJsonProxy(make_lazy_string(pgettext, context, string, **variables))
