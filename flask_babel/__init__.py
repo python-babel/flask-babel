@@ -503,19 +503,6 @@ def npgettext(context, singular, plural, num, **variables):
         return (singular if num == 1 else plural) % variables
     return t.unpgettext(context, singular, plural, num) % variables
 
-def make_json_lazy_string(func, *args, **kwargs):
-    """Like :method:`speaklater.make_lazy_string` but returns a subclass
-    that provides an :method:`__html__` method.  That method is used by
-    :class:`flask.json.JSONEncoder` to serialize objects of unrecognized
-    types.
-    """
-    from speaklater import _LazyString
-    
-    class JsonLazyString(_LazyString):
-        __slots__ = _LazyString.__slots__ + ('__html__',)
-        def __html__(self):
-            return unicode(self)
-    return JsonLazyString(func, args, kwargs)
 
 def lazy_gettext(string, **variables):
     """Like :func:`gettext` but the string returned is lazy which means
@@ -529,7 +516,8 @@ def lazy_gettext(string, **variables):
         def index():
             return unicode(hello)
     """
-    return make_json_lazy_string(gettext, string, **variables)
+    from speaklater import make_lazy_string
+    return make_lazy_string(gettext, string, **variables)
 
 
 def lazy_pgettext(context, string, **variables):
@@ -538,4 +526,5 @@ def lazy_pgettext(context, string, **variables):
 
     .. versionadded:: 0.7
     """
-    return make_json_lazy_string(pgettext, context, string, **variables)
+    from speaklater import make_lazy_string
+    return make_lazy_string(pgettext, context, string, **variables)
