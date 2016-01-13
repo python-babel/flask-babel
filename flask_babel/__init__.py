@@ -28,7 +28,7 @@ else:
     timezone = pytz.timezone
     UTC = pytz.UTC
 
-from flask_babel._compat import string_types
+from flask_babel._compat import string_types, text_type
 
 
 class Babel(object):
@@ -512,9 +512,9 @@ def make_json_lazy_string(func, *args, **kwargs):
     from speaklater import _LazyString
     
     class JsonLazyString(_LazyString):
-        __slots__ = _LazyString.__slots__ + ('__html__',)
         def __html__(self):
-            return unicode(self)
+            return text_type(self)
+
     return JsonLazyString(func, args, kwargs)
 
 def lazy_gettext(string, **variables):
