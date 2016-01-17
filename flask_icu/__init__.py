@@ -172,12 +172,10 @@ class ICU(object):
         root_translation_dir = 'translations'
         locales_list = [name for name in os.listdir(root_translation_dir)
                         if os.path.isdir(os.path.join(root_translation_dir, name))]
-        # all_translations =
-        #     [self.load_locale_files(locale) for locale in locales_list]
-        loaded_sets = map(lambda locale : load_locale_files(locale), locales_list)
-        translations = {}
-        for translation in loaded_sets:
-            translations.update(translation)
+        loaded_sets = [self.load_locale_files(locale) for locale in locales_list]
+        messages = {}
+        for item in loaded_sets:
+            message.update(item)
         self.messages = translations
 
     @property
