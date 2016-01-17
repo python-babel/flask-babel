@@ -175,8 +175,8 @@ class ICU(object):
         loaded_sets = [self.load_locale_files(locale) for locale in locales_list]
         messages = {}
         for item in loaded_sets:
-            message.update(item)
-        self.messages = translations
+            messages.update(item)
+        self.messages = messages
 
     @property
     def default_locale(self):
