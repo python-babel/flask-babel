@@ -62,10 +62,11 @@ class ICU(object):
     })
 
     def __init__(self, app=None, default_locale='en', default_timezone='UTC',
-                 date_formats=None):
+                 date_formats=None, configure_jinja=True):
         self._default_locale = default_locale
         self._default_timezone = default_timezone
         self._date_formats = date_formats
+        self._configure_jinja = configure_jinja
         self.app = app
 
         self.load_data()
@@ -106,6 +107,9 @@ class ICU(object):
 
         self.locale_selector_func = None
         self.timezone_selector_func = None
+
+        if self._configure_jinja:
+            app.jinja_env.globals.update(format=format)
 
     def localeselector(self, f):
         """Registers a callback function for locale selection.  The default
