@@ -69,8 +69,6 @@ class ICU(object):
         self._configure_jinja = configure_jinja
         self.app = app
 
-        self.load_data()
-
         if app is not None:
             self.init_app(app)
 
@@ -159,30 +157,6 @@ class ICU(object):
             result.append(Locale.parse(self._default_locale))
         return result
 
-    def load_locale_files(self, locale):
-        translations = {}
-        locale_dir = 'translations/' + locale
-        for subdir, dirs, files in os.walk(locale_dir):
-            for file in files:
-                with open(subdir + '/' + file) as data_file:
-                    data = json.load(data_file)
-                    z = translations.copy()
-                    z.update(data)
-                    translations = z
-        return {locale : translations}
-
-    def load_data(self):
-        """Loads the server translation data from the translation files"""
-        # TODO: The root directory should probably be a setting?
-        root_translation_dir = 'translations'
-        locales_list = [name for name in os.listdir(root_translation_dir)
-                        if os.path.isdir(os.path.join(root_translation_dir, name))]
-        loaded_sets = [self.load_locale_files(locale) for locale in locales_list]
-        messages = {}
-        for item in loaded_sets:
-            messages.update(item)
-        self.messages = messages
-
     @property
     def default_locale(self):
         """The default locale from the configuration as instance of a
@@ -197,6 +171,27 @@ class ICU(object):
         """
         return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
 
+def load_messages(locale):
+    """Loads icu messages for a given locale from the source files."""
+    ctx = _request_ctx_stack.top
+    if ctx is None:
+        return None
+    dirname = os.path.join(ctx.app.root_path, 'translations')
+    # TODO: Handle case where the translations dir is not present
+    locales_list = [name for name in os.listdir(dirname)
+                    if os.path.isdir(os.path.join(dirname, name))]
+    messages = {}
+    if locale not in locales_list:
+        raise Exception('No locale ICU message files found for the locale: %d'.format(locale))
+    else:
+        for subdir, dirs, files in os.walk(dirname + '/' + locale):
+            for file in files:
+                with open(subdir + '/' + file) as data_file:
+                    data = json.load(data_file)
+                    z = messages.copy()
+                    z.update(data)
+                    messages = z
+    return messages
 
 def get_message(key):
     """Returns a ICU format message string for the given key."""
@@ -204,28 +199,30 @@ def get_message(key):
     ctx = _request_ctx_stack.top
     if ctx is None:
         return None
-    icu = ctx.app.extensions['icu']
-    locale = get_locale()
-    messages = icu.messages[locale.getName()]
-    msg = messages[key]
+    messages = getattr(ctx, 'icu_messages', None)
+    if messages is None:
+        messages = get_messages()
+    if key in messages:
+        msg = messages[key]
+    else:
+        msg = key
     return msg
 
-def get_translations():
-    """Returns the correct gettext translations that should be used for
-    this request.  This will never fail and return a dummy translation
-    object if used outside of the request or if a translation cannot be
+def get_messages():
+    """Returns the correct icu message set that should be used for
+    this request. This will never fail and return a dummy translation
+    object if used outside of the request or if a message cannot be
     found.
     """
     ctx = _request_ctx_stack.top
     if ctx is None:
         return None
-    translations = getattr(ctx, 'babel_translations', None)
-    if translations is None:
-        dirname = os.path.join(ctx.app.root_path, 'translations')
-        translations = support.Translations.load(dirname, [get_locale()])
-        ctx.babel_translations = translations
-    return translations
-
+    messages = getattr(ctx, 'icu_messages', None)
+    if messages is None:
+        locale = get_locale()
+        messages = load_messages(locale.getName())
+        ctx.icu_messages = messages
+    return messages
 
 def get_locale():
     """Returns the locale that should be used for this request as
