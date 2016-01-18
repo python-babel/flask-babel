@@ -21,6 +21,7 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
 from datetime import datetime
 from flask import _request_ctx_stack
 # from babel import dates, numbers, support, Locale
+from icu import Locale, MessageFormat, Formattable
 from werkzeug import ImmutableDict
 try:
     from pytz.gae import pytz
@@ -192,6 +193,18 @@ class ICU(object):
         """
         return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
 
+
+def get_message(key):
+    """Returns a ICU format message string for the given key."""
+
+    ctx = _request_ctx_stack.top
+    if ctx is None:
+        return None
+    icu = ctx.app.extensions['icu']
+    locale = get_locale()
+    messages = icu.messages[locale.getName()]
+    msg = messages[key]
+    return msg
 
 def get_translations():
     """Returns the correct gettext translations that should be used for
@@ -456,3 +469,16 @@ def format_scientific(number, format=None):
     """
     locale = get_locale()
     return numbers.format_scientific(number, format=format, locale=locale)
+
+def format(string, values=None):
+    """Translates a string with the given current locale"""
+
+    ctx = _request_ctx_stack.top
+    locale = get_locale()
+    icu_msg = get_message(string)
+    msg = MessageFormat(icu_msg)
+    if values is not None:
+        args = list(values.keys())
+        values = list(map(lambda v : Formattable(v), values.values()))
+        return msg.format(args, values)
+    return msg.format('')
