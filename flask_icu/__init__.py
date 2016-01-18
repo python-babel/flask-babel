@@ -218,18 +218,18 @@ def get_locale():
     ctx = _request_ctx_stack.top
     if ctx is None:
         return None
-    locale = getattr(ctx, 'babel_locale', None)
+    locale = getattr(ctx, 'icu_locale', None)
     if locale is None:
-        babel = ctx.app.extensions['babel']
-        if babel.locale_selector_func is None:
-            locale = babel.default_locale
+        icu = ctx.app.extensions['icu']
+        if icu.locale_selector_func is None:
+            locale = icu.default_locale
         else:
-            rv = babel.locale_selector_func()
+            rv = icu.locale_selector_func()
             if rv is None:
-                locale = babel.default_locale
+                locale = icu.default_locale
             else:
-                locale = Locale.parse(rv)
-        ctx.babel_locale = locale
+                locale = Locale(rv)
+        ctx.icu_locale = locale
     return locale
 
 
