@@ -28,7 +28,7 @@ from setuptools import setup
 
 setup(
     name='Flask-BabelEx',
-    version='0.9.1',
+    version='0.9.3',
     url='http://github.com/mrjoes/flask-babelex',
     license='BSD',
     author='Serge S. Koval',
