@@ -168,6 +168,17 @@ class GettextTestCase(unittest.TestCase):
         with app.test_request_context():
             assert text_type(yes) == 'Yes'
 
+    def test_lazy_gettext_defaultdomain(self):
+        app = flask.Flask(__name__)
+        domain = babel.Domain(domain='test')
+        b = babel.Babel(app, default_locale='de_DE', default_domain=domain)
+        first = lazy_gettext('first')
+        with app.test_request_context():
+            assert text_type(first) == 'erste'
+        app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
+        with app.test_request_context():
+            assert text_type(first) == 'first'
+
     def test_list_translations(self):
         app = flask.Flask(__name__)
         b = babel.Babel(app, default_locale='de_DE')
