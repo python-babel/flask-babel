@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-    flaskext.babel
-    ~~~~~~~~~~~~~~
+    flask.ext.babelex
+    ~~~~~~~~~~~~~~~~~
 
     Implements i18n/l10n support for Flask applications based on Babel.
 
-    :copyright: (c) 2013 by Armin Ronacher, Daniel Neuhäuser.
+    :copyright: (c) 2013 by Serge S. Koval, Armin Ronacher and contributors.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import absolute_import
@@ -19,6 +19,7 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
 from datetime import datetime
 from flask import _request_ctx_stack
 from babel import dates, numbers, support, Locale
+from babel.support import NullTranslations
 from werkzeug import ImmutableDict
 try:
     from pytz.gae import pytz
@@ -28,7 +29,9 @@ else:
     timezone = pytz.timezone
     UTC = pytz.UTC
 
-from flask_babel._compat import string_types
+from flask_babelex._compat import string_types
+
+_DEFAULT_LOCALE = Locale.parse('en')
 
 
 class Babel(object):
@@ -57,12 +60,22 @@ class Babel(object):
     })
 
     def __init__(self, app=None, default_locale='en', default_timezone='UTC',
-                 date_formats=None, configure_jinja=True):
+                 date_formats=None, configure_jinja=True, default_domain=None):
         self._default_locale = default_locale
         self._default_timezone = default_timezone
         self._date_formats = date_formats
         self._configure_jinja = configure_jinja
         self.app = app
+
+        self._locale_cache = dict()
+
+        if default_domain is None:
+            self._default_domain = Domain()
+        else:
+            self._default_domain = default_domain
+
+        self.locale_selector_func = None
+        self.timezone_selector_func = None
 
         if app is not None:
             self.init_app(app)
@@ -95,9 +108,6 @@ class Babel(object):
         #:      otherwise the default for that language is used.
         self.date_formats = self._date_formats
 
-        self.locale_selector_func = None
-        self.timezone_selector_func = None
-
         if self._configure_jinja:
             app.jinja_env.filters.update(
                 datetimeformat=format_datetime,
@@ -113,8 +123,8 @@ class Babel(object):
             )
             app.jinja_env.add_extension('jinja2.ext.i18n')
             app.jinja_env.install_gettext_callables(
-                lambda x: get_translations().ugettext(x),
-                lambda s, p, n: get_translations().ungettext(s, p, n),
+                lambda x: get_domain().get_translations().ugettext(x),
+                lambda s, p, n: get_domain().get_translations().ungettext(s, p, n),
                 newstyle=True
             )
 
@@ -144,7 +154,6 @@ class Babel(object):
         self.timezone_selector_func = f
         return f
 
-
     def list_translations(self):
         """Returns a list of all the locales translations exist for.  The
         list returned will be filled with actual locale objects and not just
@@ -171,7 +180,7 @@ class Babel(object):
         """The default locale from the configuration as instance of a
         `babel.Locale` object.
         """
-        return Locale.parse(self.app.config['BABEL_DEFAULT_LOCALE'])
+        return self.load_locale(self.app.config['BABEL_DEFAULT_LOCALE'])
 
     @property
     def default_timezone(self):
@@ -180,68 +189,76 @@ class Babel(object):
         """
         return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
 
-
-def get_translations():
-    """Returns the correct gettext translations that should be used for
-    this request.  This will never fail and return a dummy translation
-    object if used outside of the request or if a translation cannot be
-    found.
-    """
-    ctx = _request_ctx_stack.top
-    if ctx is None:
-        return None
-    translations = getattr(ctx, 'babel_translations', None)
-    if translations is None:
-        dirname = os.path.join(ctx.app.root_path, 'translations')
-        translations = support.Translations.load(dirname, [get_locale()])
-        ctx.babel_translations = translations
-    return translations
+    def load_locale(self, locale):
+        """Load locale by name and cache it. Returns instance of a `babel.Locale`
+        object.
+        """
+        rv = self._locale_cache.get(locale)
+        if rv is None:
+            self._locale_cache[locale] = rv = Locale.parse(locale)
+        return rv
 
 
 def get_locale():
     """Returns the locale that should be used for this request as
     `babel.Locale` object.  This returns `None` if used outside of
-    a request.
+    a request. If flask-babel was not attached to the Flask application,
+    will return 'en' locale.
     """
     ctx = _request_ctx_stack.top
     if ctx is None:
         return None
+
     locale = getattr(ctx, 'babel_locale', None)
     if locale is None:
-        babel = ctx.app.extensions['babel']
-        if babel.locale_selector_func is None:
-            locale = babel.default_locale
+        babel = ctx.app.extensions.get('babel')
+
+        if babel is None:
+            locale = _DEFAULT_LOCALE
         else:
-            rv = babel.locale_selector_func()
-            if rv is None:
-                locale = babel.default_locale
+            if babel.locale_selector_func is not None:
+                rv = babel.locale_selector_func()
+                if rv is None:
+                    locale = babel.default_locale
+                else:
+                    locale = babel.load_locale(rv)
             else:
-                locale = Locale.parse(rv)
+                locale = babel.default_locale
+
         ctx.babel_locale = locale
+
     return locale
 
 
 def get_timezone():
     """Returns the timezone that should be used for this request as
     `pytz.timezone` object.  This returns `None` if used outside of
-    a request.
+    a request. If flask-babel was not attached to application, will
+    return UTC timezone object.
     """
     ctx = _request_ctx_stack.top
     tzinfo = getattr(ctx, 'babel_tzinfo', None)
+
     if tzinfo is None:
-        babel = ctx.app.extensions['babel']
-        if babel.timezone_selector_func is None:
-            tzinfo = babel.default_timezone
+        babel = ctx.app.extensions.get('babel')
+
+        if babel is None:
+            tzinfo = UTC
         else:
-            rv = babel.timezone_selector_func()
-            if rv is None:
+            if babel.timezone_selector_func is None:
                 tzinfo = babel.default_timezone
             else:
-                if isinstance(rv, string_types):
-                    tzinfo = timezone(rv)
+                rv = babel.timezone_selector_func()
+                if rv is None:
+                    tzinfo = babel.default_timezone
                 else:
-                    tzinfo = rv
+                    if isinstance(rv, string_types):
+                        tzinfo = timezone(rv)
+                    else:
+                        tzinfo = rv
+
         ctx.babel_tzinfo = tzinfo
+
     return tzinfo
 
 
@@ -259,7 +276,7 @@ def refresh():
     return English text and a now German page.
     """
     ctx = _request_ctx_stack.top
-    for key in 'babel_locale', 'babel_tzinfo', 'babel_translations':
+    for key in 'babel_locale', 'babel_tzinfo':
         if hasattr(ctx, key):
             delattr(ctx, key)
 
@@ -268,11 +285,17 @@ def _get_format(key, format):
     """A small helper for the datetime formatting functions.  Looks up
     format defaults for different kinds.
     """
-    babel = _request_ctx_stack.top.app.extensions['babel']
+    babel = _request_ctx_stack.top.app.extensions.get('babel')
+
+    if babel is not None:
+        formats = babel.date_formats
+    else:
+        formats = Babel.default_date_formats
+
     if format is None:
-        format = babel.date_formats[key]
+        format = formats[key]
     if format in ('short', 'medium', 'full', 'long'):
-        rv = babel.date_formats['%s.%s' % (key, format)]
+        rv = formats['%s.%s' % (key, format)]
         if rv is not None:
             format = rv
     return format
@@ -386,7 +409,7 @@ def _date_format(formatter, obj, format, rebase, **extra):
 
 def format_number(number):
     """Return the given number formatted for the locale in request
-    
+
     :param number: the number to format
     :return: the formatted number
     :rtype: unicode
@@ -446,85 +469,168 @@ def format_scientific(number, format=None):
     return numbers.format_scientific(number, format=format, locale=locale)
 
 
-def gettext(string, **variables):
-    """Translates a string with the current locale and passes in the
-    given keyword arguments as mapping to a string formatting string.
-
-    ::
-
-        gettext(u'Hello World!')
-        gettext(u'Hello %(name)s!', name='World')
+class Domain(object):
+    """Localization domain. By default will use look for tranlations in Flask application directory
+    and "messages" domain - all message catalogs should be called ``messages.mo``.
     """
-    t = get_translations()
-    if t is None:
-        return string % variables
-    return t.ugettext(string) % variables
+    def __init__(self, dirname=None, domain='messages'):
+        self.dirname = dirname
+        self.domain = domain
+
+        self.cache = dict()
+
+    def as_default(self):
+        """Set this domain as default for the current request"""
+        ctx = _request_ctx_stack.top
+        if ctx is None:
+            raise RuntimeError("No request context")
+
+        ctx.babel_domain = self
+
+    def get_translations_cache(self, ctx):
+        """Returns dictionary-like object for translation caching"""
+        return self.cache
+
+    def get_translations_path(self, ctx):
+        """Returns translations directory path. Override if you want
+        to implement custom behavior.
+        """
+        return self.dirname or os.path.join(ctx.app.root_path, 'translations')
+
+    def get_translations(self):
+        """Returns the correct gettext translations that should be used for
+        this request.  This will never fail and return a dummy translation
+        object if used outside of the request or if a translation cannot be
+        found.
+        """
+        ctx = _request_ctx_stack.top
+        if ctx is None:
+            return NullTranslations()
+
+        locale = get_locale()
+
+        cache = self.get_translations_cache(ctx)
+
+        translations = cache.get(str(locale))
+        if translations is None:
+            dirname = self.get_translations_path(ctx)
+            translations = support.Translations.load(dirname,
+                                                     locale,
+                                                     domain=self.domain)
+            cache[str(locale)] = translations
+
+        return translations
+
+    def gettext(self, string, **variables):
+        """Translates a string with the current locale and passes in the
+        given keyword arguments as mapping to a string formatting string.
+
+        ::
+
+            gettext(u'Hello World!')
+            gettext(u'Hello %(name)s!', name='World')
+        """
+        t = self.get_translations()
+        return t.ugettext(string) % variables
+
+    def ngettext(self, singular, plural, num, **variables):
+        """Translates a string with the current locale and passes in the
+        given keyword arguments as mapping to a string formatting string.
+        The `num` parameter is used to dispatch between singular and various
+        plural forms of the message.  It is available in the format string
+        as ``%(num)d`` or ``%(num)s``.  The source language should be
+        English or a similar language which only has one plural form.
+
+        ::
+
+            ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(apples))
+        """
+        variables.setdefault('num', num)
+        t = self.get_translations()
+        return t.ungettext(singular, plural, num) % variables
+
+    def pgettext(self, context, string, **variables):
+        """Like :func:`gettext` but with a context.
+
+        .. versionadded:: 0.7
+        """
+        t = self.get_translations()
+        return t.upgettext(context, string) % variables
+
+    def npgettext(self, context, singular, plural, num, **variables):
+        """Like :func:`ngettext` but with a context.
+
+        .. versionadded:: 0.7
+        """
+        variables.setdefault('num', num)
+        t = self.get_translations()
+        return t.unpgettext(context, singular, plural, num) % variables
+
+    def lazy_gettext(self, string, **variables):
+        """Like :func:`gettext` but the string returned is lazy which means
+        it will be translated when it is used as an actual string.
+
+        Example::
+
+            hello = lazy_gettext(u'Hello World')
+
+            @app.route('/')
+            def index():
+                return unicode(hello)
+        """
+        from speaklater import make_lazy_string
+        return make_lazy_string(self.gettext, string, **variables)
+
+    def lazy_pgettext(self, context, string, **variables):
+        """Like :func:`pgettext` but the string returned is lazy which means
+        it will be translated when it is used as an actual string.
+
+        .. versionadded:: 0.7
+        """
+        from speaklater import make_lazy_string
+        return make_lazy_string(self.pgettext, context, string, **variables)
+
+# This is the domain that will be used if there is no request context (and thus no app)
+# or if the app isn't initialized for babel. Note that if there is no request context,
+# then the standard Domain will use NullTranslations
+domain = Domain()
+
+def get_domain():
+    """Return the correct translation domain that is used for this request.
+    This will return the default domain (e.g. "messages" in <approot>/translations")
+    if none is set for this request.
+    """
+    ctx = _request_ctx_stack.top
+    if ctx is None:
+        return domain
+
+    try:
+        return ctx.babel_domain
+    except AttributeError:
+        pass
+
+    babel = ctx.app.extensions.get('babel')
+    if babel is not None:
+        d = babel._default_domain
+    else:
+        d = domain
+
+    ctx.babel_domain = d
+    return d
+
+# Create shortcuts for the default Flask domain
+def gettext(*args, **kwargs):
+    return get_domain().gettext(*args, **kwargs)
 _ = gettext
-
-
-def ngettext(singular, plural, num, **variables):
-    """Translates a string with the current locale and passes in the
-    given keyword arguments as mapping to a string formatting string.
-    The `num` parameter is used to dispatch between singular and various
-    plural forms of the message.  It is available in the format string
-    as ``%(num)d`` or ``%(num)s``.  The source language should be
-    English or a similar language which only has one plural form.
-
-    ::
-
-        ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(apples))
-    """
-    variables.setdefault('num', num)
-    t = get_translations()
-    if t is None:
-        return (singular if num == 1 else plural) % variables
-    return t.ungettext(singular, plural, num) % variables
-
-
-def pgettext(context, string, **variables):
-    """Like :func:`gettext` but with a context.
-
-    .. versionadded:: 0.7
-    """
-    t = get_translations()
-    if t is None:
-        return string % variables
-    return t.upgettext(context, string) % variables
-
-
-def npgettext(context, singular, plural, num, **variables):
-    """Like :func:`ngettext` but with a context.
-
-    .. versionadded:: 0.7
-    """
-    variables.setdefault('num', num)
-    t = get_translations()
-    if t is None:
-        return (singular if num == 1 else plural) % variables
-    return t.unpgettext(context, singular, plural, num) % variables
-
-
-def lazy_gettext(string, **variables):
-    """Like :func:`gettext` but the string returned is lazy which means
-    it will be translated when it is used as an actual string.
-
-    Example::
-
-        hello = lazy_gettext(u'Hello World')
-
-        @app.route('/')
-        def index():
-            return unicode(hello)
-    """
+def ngettext(*args, **kwargs):
+    return get_domain().ngettext(*args, **kwargs)
+def pgettext(*args, **kwargs):
+    return get_domain().pgettext(*args, **kwargs)
+def npgettext(*args, **kwargs):
+    return get_domain().npgettext(*args, **kwargs)
+def lazy_gettext(*args, **kwargs):
     from speaklater import make_lazy_string
-    return make_lazy_string(gettext, string, **variables)
-
-
-def lazy_pgettext(context, string, **variables):
-    """Like :func:`pgettext` but the string returned is lazy which means
-    it will be translated when it is used as an actual string.
-
-    .. versionadded:: 0.7
-    """
+    return make_lazy_string(gettext, *args, **kwargs)
+def lazy_pgettext(*args, **kwargs):
     from speaklater import make_lazy_string
-    return make_lazy_string(pgettext, context, string, **variables)
+    return make_lazy_string(pgettext, *args, **kwargs)

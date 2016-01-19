@@ -1,5 +1,11 @@
-Flask Babel
+Flask-BabelEx
 
-Implements i18n and l10n support for Flask.  This is based on the Python
-babel module as well as pytz both of which are installed automatically
-for you if you install this library.
+Implements i18n and l10n support for Flask.  This is fork of the official Flask-Babel
+extension with additional features:
+
+1. It is possible to use multiple language catalogs in one Flask application;
+2. Localization domains: your extension can package localization file(s) and use them
+   if necessary;
+3. Does not reload localizations for each request.
+
+Flask-BabelEx is API-compatible with Flask-Babel.
