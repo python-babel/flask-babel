@@ -33,10 +33,11 @@ else:
 
 from flask_babel._compat import string_types
 
+import pdb
 
 class ICU(object):
     """Central controller class that can be used to configure how
-    Flask-Babel behaves.  Each application that wants to use Flask-Babel
+    Flask-ICU behaves. Each application that wants to use Flask-ICU
     has to create, or run :meth:`init_app` on, an instance of this class
     after the configuration was initialized.
     """
