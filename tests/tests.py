@@ -9,7 +9,7 @@ import unittest
 from decimal import Decimal
 import flask
 from datetime import datetime
-from flask_icu import ICU, format_datetime, format_date
+from flask_icu import ICU, format_datetime, format_date, format_time
 # from flask_babel import gettext, ngettext, lazy_gettext
 from flask_icu._compat import text_type
 
@@ -24,7 +24,7 @@ class DateFormattingTestCase(unittest.TestCase):
         with app.test_request_context():
             assert format_datetime(d) == 'Apr 12, 2010, 1:46:00 PM'
             assert format_date(d) == 'Apr 12, 2010'
-            # assert icu.format_time(d) == '1:46:00 PM'
+            assert format_time(d) == '1:46:00 PM'
 
         # with app.test_request_context():
         #     app.config['ICU_DEFAULT_TIMEZONE'] = 'Europe/Vienna'
