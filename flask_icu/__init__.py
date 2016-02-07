@@ -289,7 +289,7 @@ def get_timezone():
 #             delattr(ctx, key)
 #
 #
-def _get_format(key, format):
+def _get_formatter(key, format, rebase):
     """A small helper for the datetime formatting functions.  Looks up
     format defaults for different kinds.
     """
@@ -298,8 +298,11 @@ def _get_format(key, format):
     if format is None:
         format = icu.date_formats[key]
     if key is 'datetime':
-        return DateFormat.createDateTimeInstance(format, format, locale)
-    return format
+        if rebase:
+            formatter = DateFormat.createDateTimeInstance(format, format, locale)
+        else:
+            formatter = DateFormat.createDateTimeInstance(format, format)
+    return formatter
 
 
 # def to_user_timezone(datetime):
@@ -339,8 +342,8 @@ def format_datetime(datetime=None, format=None, rebase=True):
     This function is also available in the template context as filter
     named `datetimeformat`.
     """
-    formatter = _get_format('datetime', format)
-    return _date_format(formatter, datetime, rebase)
+    formatter = _get_formatter('datetime', format, rebase)
+    return _date_format(formatter, datetime)
 
 
 # def format_date(date=None, format=None, rebase=True):
@@ -399,7 +402,7 @@ def format_datetime(datetime=None, format=None, rebase=True):
 #                                   locale=get_locale())
 #
 #
-def _date_format(formatter, date, rebase, **extra):
+def _date_format(formatter, date, **extra):
     """Internal helper that formats the date."""
     # extra = {}
     # if formatter is not dates.format_date and rebase:
