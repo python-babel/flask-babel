@@ -46,7 +46,7 @@ class ICU(object):
 
     default_date_formats = ImmutableDict({
         'time':             'medium',
-        'date':             'medium',
+        'date':             DateFormat.MEDIUM,
         'datetime':         DateFormat.MEDIUM,
         'time.short':       None,
         'time.medium':      None,
@@ -293,15 +293,18 @@ def _get_formatter(key, format, rebase):
     """A small helper for the datetime formatting functions.  Looks up
     format defaults for different kinds.
     """
-    icu = _request_ctx_stack.top.app.extensions['icu']
     locale = get_locale()
+    icu = _request_ctx_stack.top.app.extensions['icu']
     if format is None:
         format = icu.date_formats[key]
-    if key is 'datetime':
-        if rebase:
-            formatter = DateFormat.createDateTimeInstance(format, format, locale)
-        else:
-            formatter = DateFormat.createDateTimeInstance(format, format)
+    if key is 'date' and rebase:
+        formatter = DateFormat.createDateInstance(format, locale)
+    if key is 'date' and not rebase:
+        formatter = DateFormat.createDateInstance(format)
+    if key is 'datetime' and rebase:
+        formatter = DateFormat.createDateTimeInstance(format, format, locale)
+    if key is 'datetime' and not rebase:
+        formatter = DateFormat.createDateTimeInstance(format, format)
     return formatter
 
 
@@ -346,28 +349,26 @@ def format_datetime(datetime=None, format=None, rebase=True):
     return _date_format(formatter, datetime)
 
 
-# def format_date(date=None, format=None, rebase=True):
-#     """Return a date formatted according to the given pattern.  If no
-#     :class:`~datetime.datetime` or :class:`~datetime.date` object is passed,
-#     the current time is assumed.  By default rebasing happens which causes
-#     the object to be converted to the users's timezone (as returned by
-#     :func:`to_user_timezone`).  This function only formats the date part
-#     of a :class:`~datetime.datetime` object.
-#
-#     The format parameter can either be ``'short'``, ``'medium'``,
-#     ``'long'`` or ``'full'`` (in which cause the language's default for
-#     that setting is used, or the default from the :attr:`Babel.date_formats`
-#     mapping is used) or a format string as documented by Babel.
-#
-#     This function is also available in the template context as filter
-#     named `dateformat`.
-#     """
-#     if rebase and isinstance(date, datetime):
-#         date = to_user_timezone(date)
-#     format = _get_format('date', format)
-#     return _date_format(dates.format_date, date, format, rebase)
-#
-#
+def format_date(date=None, format=None, rebase=True):
+    """Return a date formatted according to the given pattern.  If no
+    :class:`~datetime.datetime` or :class:`~datetime.date` object is passed,
+    the current time is assumed.  By default rebasing happens which causes
+    the object to be converted to the users's timezone (as returned by
+    :func:`to_user_timezone`).  This function only formats the date part
+    of a :class:`~datetime.datetime` object.
+
+    The format parameter can either be ``'short'``, ``'medium'``,
+    ``'long'`` or ``'full'`` (in which cause the language's default for
+    that setting is used, or the default from the :attr:`Babel.date_formats`
+    mapping is used) or a format string as documented by Babel.
+
+    This function is also available in the template context as filter
+    named `dateformat`.
+    """
+    formatter = _get_formatter('date', format, rebase)
+    return _date_format(formatter, date)
+
+
 # def format_time(time=None, format=None, rebase=True):
 #     """Return a time formatted according to the given pattern.  If no
 #     :class:`~datetime.datetime` object is passed, the current time is
