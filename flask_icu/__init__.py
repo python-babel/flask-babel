@@ -64,7 +64,7 @@ class ICU(object):
 
     def __init__(self, app=None, default_locale='en', default_timezone='UTC',
                  date_formats=None, configure_jinja=True):
-        self._default_locale = Locale(default_locale)
+        self._default_locale = default_locale
         self._default_timezone = default_timezone
         self._date_formats = date_formats
         self._configure_jinja = configure_jinja
@@ -154,20 +154,20 @@ class ICU(object):
     #     if not result:
     #         result.append(Locale.parse(self._default_locale))
     #     return result
-    #
-    # @property
-    # def default_locale(self):
-    #     """The default locale from the configuration as instance of a
-    #     `babel.Locale` object.
-    #     """
-    #     return Locale.parse(self.app.config['BABEL_DEFAULT_LOCALE'])
-    #
     # @property
     # def default_timezone(self):
     #     """The default timezone from the configuration as instance of a
     #     `pytz.timezone` object.
     #     """
     #     return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
+
+    @property
+    def default_locale(self):
+        """The default locale from the configuration as instance of a
+        `babel.Locale` object.
+        """
+        return Locale(self.app.config['ICU_DEFAULT_LOCALE'])
+
 
 def load_messages(locale):
     """Loads icu messages for a given locale from the source files."""
@@ -234,7 +234,7 @@ def get_locale():
     if locale is None:
         icu = ctx.app.extensions['icu']
         if icu.locale_selector_func is None:
-            locale = icu._default_locale
+            locale = icu.default_locale
         else:
             rv = icu.locale_selector_func()
             if rv is None:
