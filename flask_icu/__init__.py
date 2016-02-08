@@ -21,7 +21,7 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
 from datetime import datetime
 from flask import _request_ctx_stack
 # from babel import dates, numbers, support, Locale
-from icu import Locale, MessageFormat, DateFormat, Formattable
+from icu import Locale, MessageFormat, DateFormat, Formattable, TimeZone, ICUtzinfo
 from werkzeug import ImmutableDict
 try:
     from pytz.gae import pytz
@@ -154,12 +154,6 @@ class ICU(object):
     #     if not result:
     #         result.append(Locale.parse(self._default_locale))
     #     return result
-    # @property
-    # def default_timezone(self):
-    #     """The default timezone from the configuration as instance of a
-    #     `pytz.timezone` object.
-    #     """
-    #     return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
 
     @property
     def default_locale(self):
@@ -168,6 +162,13 @@ class ICU(object):
         """
         return Locale(self.app.config['ICU_DEFAULT_LOCALE'])
 
+    @property
+    def default_timezone(self):
+        """The default timezone from the configuration as instance of a
+        `pytz.timezone` object.
+        """
+        return (ICUtzinfo.getInstance(
+            self.app.config['ICU_DEFAULT_TIMEZONE']).timezone)
 
 def load_messages(locale):
     """Loads icu messages for a given locale from the source files."""
@@ -250,7 +251,6 @@ def get_timezone():
     `pytz.timezone` object.  This returns `None` if used outside of
     a request.
     """
-    print('get_timezone() called')
     ctx = _request_ctx_stack.top
     tzinfo = getattr(ctx, 'icu_tzinfo', None)
     if tzinfo is None:
@@ -287,9 +287,9 @@ def get_timezone():
 #     for key in 'babel_locale', 'babel_tzinfo', 'babel_translations':
 #         if hasattr(ctx, key):
 #             delattr(ctx, key)
-#
-#
-def _get_formatter(key, format, rebase):
+
+
+def _get_formatter(key, format):
     """A small helper for the datetime formatting functions.  Looks up
     format defaults for different kinds.
     """
@@ -297,18 +297,12 @@ def _get_formatter(key, format, rebase):
     icu = _request_ctx_stack.top.app.extensions['icu']
     if format is None:
         format = icu.date_formats[key]
-    if key is 'time' and rebase:
-        formatter = DateFormat.createTimeInstance(format)
-    if key is 'time' and not rebase:
+    if key is 'time':
         formatter = DateFormat.createTimeInstance(format, locale)
-    if key is 'date' and rebase:
+    if key is 'date':
         formatter = DateFormat.createDateInstance(format, locale)
-    if key is 'date' and not rebase:
-        formatter = DateFormat.createDateInstance(format)
-    if key is 'datetime' and rebase:
+    if key is 'datetime':
         formatter = DateFormat.createDateTimeInstance(format, format, locale)
-    if key is 'datetime' and not rebase:
-        formatter = DateFormat.createDateTimeInstance(format, format)
     return formatter
 
 
@@ -349,8 +343,8 @@ def format_datetime(datetime=None, format=None, rebase=True):
     This function is also available in the template context as filter
     named `datetimeformat`.
     """
-    formatter = _get_formatter('datetime', format, rebase)
-    return _date_format(formatter, datetime)
+    formatter = _get_formatter('datetime', format)
+    return _date_format(formatter, datetime, rebase)
 
 
 def format_date(date=None, format=None, rebase=True):
@@ -369,8 +363,8 @@ def format_date(date=None, format=None, rebase=True):
     This function is also available in the template context as filter
     named `dateformat`.
     """
-    formatter = _get_formatter('date', format, rebase)
-    return _date_format(formatter, date)
+    formatter = _get_formatter('date', format)
+    return _date_format(formatter, date, rebase)
 
 
 def format_time(time=None, format=None, rebase=True):
@@ -389,8 +383,8 @@ def format_time(time=None, format=None, rebase=True):
     This function is also available in the template context as filter
     named `timeformat`.
     """
-    formatter = _get_formatter('time', format, rebase)
-    return _date_format(formatter, time)
+    formatter = _get_formatter('time', format)
+    return _date_format(formatter, time, rebase)
 
 
 # def format_timedelta(datetime_or_timedelta, granularity='second'):
@@ -407,12 +401,14 @@ def format_time(time=None, format=None, rebase=True):
 #                                   locale=get_locale())
 #
 #
-def _date_format(formatter, date, **extra):
+def _date_format(formatter, date, rebase, **extra):
     """Internal helper that formats the date."""
     # extra = {}
     # if formatter is not dates.format_date and rebase:
     #     extra['tzinfo'] = get_timezone()
     # return formatter(obj, format, locale=locale, **extra)
+    if rebase:
+        formatter.setTimeZone(get_timezone())
     return formatter.format(date)
 
 
