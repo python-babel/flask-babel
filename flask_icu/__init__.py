@@ -44,10 +44,17 @@ class ICU(object):
 
     messages = {}
 
+    icu_date_formats = ImmutableDict({
+        'short':        DateFormat.SHORT,
+        'medium':       DateFormat.MEDIUM,
+        'long':         DateFormat.LONG,
+        'full':         DateFormat.FULL,
+    })
+
     default_date_formats = ImmutableDict({
-        'time':             DateFormat.MEDIUM,
-        'date':             DateFormat.MEDIUM,
-        'datetime':         DateFormat.MEDIUM,
+        'time':             'medium',
+        'date':             'medium',
+        'datetime':         'medium',
         'time.short':       None,
         'time.medium':      None,
         'time.full':        None,
@@ -297,6 +304,9 @@ def _get_formatter(key, format):
     icu = _request_ctx_stack.top.app.extensions['icu']
     if format is None:
         format = icu.date_formats[key]
+    if format in ('short', 'medium', 'long', 'full'):
+        tmp = icu.date_formats["{0}.{1}".format(key, format)]
+        format = tmp if tmp is not None else icu.icu_date_formats[format]
     if key is 'time':
         formatter = DateFormat.createTimeInstance(format, locale)
     if key is 'date':

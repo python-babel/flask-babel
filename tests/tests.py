@@ -29,13 +29,14 @@ class DateFormattingTestCase(unittest.TestCase):
         with app.test_request_context():
             app.config['ICU_DEFAULT_TIMEZONE'] = 'Europe/Vienna'
             assert format_datetime(d) == 'Apr 12, 2010, 3:46:00 PM'
-        #     assert icu.format_date(d) == 'Apr 12, 2010'
-        #     assert icu.format_time(d) == '3:46:00 PM'
-        #
-        # with app.test_request_context():
-        #     app.config['ICU_DEFAULT_LOCALE'] = 'de_DE'
-        #     assert icu.format_datetime(d, 'long') == \
-        #         '12. April 2010 15:46:00 MESZ'
+            assert format_date(d) == 'Apr 12, 2010'
+            assert format_time(d) == '3:46:00 PM'
+
+        with app.test_request_context():
+            app.config['ICU_DEFAULT_LOCALE'] = 'de_DE'
+            print("result: "+format_datetime(d, 'long'))
+            assert format_datetime(d, 'long') == \
+                '12. April 2010 15:46:00 MESZ'
 
     # def test_init_app(self):
     #     icu = icu.ICU()
