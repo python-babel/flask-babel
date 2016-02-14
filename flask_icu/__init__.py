@@ -178,7 +178,9 @@ class ICU(object):
             self.app.config['ICU_DEFAULT_TIMEZONE']).timezone)
 
 def load_messages(locale):
-    """Loads icu messages for a given locale from the source files."""
+    """Loads ICU messages for a given locale from the source files. Translation
+    files must be located in path pattern: '<root>/translations/<lang>/'.
+    """
     ctx = _request_ctx_stack.top
     if ctx is None:
         return None
