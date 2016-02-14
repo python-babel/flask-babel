@@ -417,12 +417,8 @@ def format_time(time=None, format=None, rebase=True):
 #                                   locale=get_locale())
 #
 #
-def _date_format(formatter, date, rebase, **extra):
+def _date_format(formatter, date, rebase):
     """Internal helper that formats the date."""
-    # extra = {}
-    # if formatter is not dates.format_date and rebase:
-    #     extra['tzinfo'] = get_timezone()
-    # return formatter(obj, format, locale=locale, **extra)
     if rebase:
         formatter.setTimeZone(get_timezone())
     return formatter.format(date)
