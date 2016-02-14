@@ -60,20 +60,20 @@ class DateFormattingTestCase(unittest.TestCase):
             assert format_datetime(d, 'long') == \
                 '12. April 2010 15:46:00 MESZ'
 
-    # def test_custom_formats(self):
-    #     app = flask.Flask(__name__)
-    #     app.config.update(
-    #         BABEL_DEFAULT_LOCALE='en_US',
-    #         BABEL_DEFAULT_TIMEZONE='Pacific/Johnston'
-    #     )
-    #     b = babel.Babel(app)
-    #     b.date_formats['datetime'] = 'long'
-    #     b.date_formats['datetime.long'] = 'MMMM d, yyyy h:mm:ss a'
-    #     d = datetime(2010, 4, 12, 13, 46)
-    #
-    #     with app.test_request_context():
-    #         assert babel.format_datetime(d) == 'April 12, 2010 3:46:00 AM'
-    #
+    def test_custom_formats(self):
+        app = flask.Flask(__name__)
+        app.config.update(
+            ICU_DEFAULT_LOCALE='en_US',
+            ICU_DEFAULT_TIMEZONE='Pacific/Johnston'
+        )
+        icu = ICU(app)
+        icu.date_formats['datetime'] = 'long'
+        icu.date_formats['datetime.long'] = 'MMMM d, yyyy h:mm:ss a'
+        d = datetime(2010, 4, 12, 13, 46)
+
+        with app.test_request_context():
+            assert format_datetime(d) == 'April 12, 2010 3:46:00 AM'
+
     # def test_custom_locale_selector(self):
     #     app = flask.Flask(__name__)
     #     b = babel.Babel(app)

@@ -21,7 +21,7 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
 from datetime import datetime
 from flask import _request_ctx_stack
 # from babel import dates, numbers, support, Locale
-from icu import Locale, MessageFormat, DateFormat, Formattable, TimeZone, ICUtzinfo
+from icu import Locale, MessageFormat, DateFormat, SimpleDateFormat, Formattable, TimeZone, ICUtzinfo
 from werkzeug import ImmutableDict
 try:
     from pytz.gae import pytz
@@ -307,14 +307,18 @@ def _get_formatter(key, format):
     if format is None:
         format = icu.date_formats[key]
     if format in ('short', 'medium', 'long', 'full'):
-        tmp = icu.date_formats["{0}.{1}".format(key, format)]
-        format = tmp if tmp is not None else icu.icu_date_formats[format]
-    if key is 'time':
-        formatter = DateFormat.createTimeInstance(format, locale)
-    if key is 'date':
-        formatter = DateFormat.createDateInstance(format, locale)
-    if key is 'datetime':
-        formatter = DateFormat.createDateTimeInstance(format, format, locale)
+        tmp = icu.date_formats["{}.{}".format(key, format)]
+        is_custom = False if tmp is None else True
+        format = tmp if is_custom else icu.icu_date_formats[format]
+    if is_custom:
+        formatter = SimpleDateFormat(format, locale)
+    else:
+        if key is 'time':
+            formatter = DateFormat.createTimeInstance(format, locale)
+        if key is 'date':
+            formatter = DateFormat.createDateInstance(format, locale)
+        if key is 'datetime':
+            formatter = DateFormat.createDateTimeInstance(format, format, locale)
     return formatter
 
 
