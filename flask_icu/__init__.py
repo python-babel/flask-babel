@@ -279,23 +279,23 @@ def get_timezone():
     return tzinfo
 
 
-# def refresh():
-#     """Refreshes the cached timezones and locale information.  This can
-#     be used to switch a translation between a request and if you want
-#     the changes to take place immediately, not just with the next request::
-#
-#         user.timezone = request.form['timezone']
-#         user.locale = request.form['locale']
-#         refresh()
-#         flash(gettext('Language was changed'))
-#
-#     Without that refresh, the :func:`~flask.flash` function would probably
-#     return English text and a now German page.
-#     """
-#     ctx = _request_ctx_stack.top
-#     for key in 'babel_locale', 'babel_tzinfo', 'babel_translations':
-#         if hasattr(ctx, key):
-#             delattr(ctx, key)
+def icu_refresh():
+    """Refreshes the cached timezones and locale information.  This can
+    be used to switch a translation between a request and if you want
+    the changes to take place immediately, not just with the next request::
+
+        user.timezone = request.form['timezone']
+        user.locale = request.form['locale']
+        refresh()
+        flash(gettext('Language was changed'))
+
+    Without that refresh, the :func:`~flask.flash` function would probably
+    return English text and a now German page.
+    """
+    ctx = _request_ctx_stack.top
+    for key in 'icu_locale', 'icu_tzinfo', 'icu_translations':
+        if hasattr(ctx, key):
+            delattr(ctx, key)
 
 
 def _get_formatter(key, format):
