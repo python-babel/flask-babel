@@ -272,7 +272,7 @@ def get_timezone():
                 tzinfo = icu.default_timezone
             else:
                 if isinstance(rv, string_types):
-                    tzinfo = timezone(rv)
+                    tzinfo = TimeZone.createTimeZone(rv)
                 else:
                     tzinfo = rv
         ctx.icu_tzinfo = tzinfo
