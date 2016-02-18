@@ -190,7 +190,7 @@ def load_messages(locale):
                     if os.path.isdir(os.path.join(dirname, name))]
     messages = {}
     if locale not in locales_list:
-        raise Exception('No locale ICU message files found for the locale: %d'.format(locale))
+        raise Exception('No locale ICU message files found for the locale: {}'.format(locale))
     else:
         for subdir, dirs, files in os.walk(dirname + '/' + locale):
             for file in files:
