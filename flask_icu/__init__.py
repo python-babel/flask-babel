@@ -71,8 +71,10 @@ class ICU(object):
 
     def __init__(self, app=None, default_locale='en', default_timezone='UTC',
                  date_formats=None, configure_jinja=True):
-        self._default_locale = default_locale
-        self._default_timezone = default_timezone
+        self._default_locale = 'en' if default_locale is None else 'en'
+        self._default_timezone = (
+            'UTC' if default_timezone is None else default_timezone
+        )
         self._date_formats = date_formats
         self._configure_jinja = configure_jinja
         self.app = app
