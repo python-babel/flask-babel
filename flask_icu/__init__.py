@@ -19,10 +19,11 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
     os.environ['LC_CTYPE'] = 'en_US.utf-8'
 
 from datetime import datetime
+from decimal import Decimal
 from flask import _request_ctx_stack
 # from babel import dates, numbers, support, Locale
 from icu import (Locale, MessageFormat, DateFormat, SimpleDateFormat,
-                Formattable, TimeZone, ICUtzinfo, NumberFormat)
+                 Formattable, TimeZone, ICUtzinfo, NumberFormat, DecimalFormat)
 from werkzeug import ImmutableDict
 try:
     from pytz.gae import pytz
@@ -434,18 +435,21 @@ def format_number(number):
     return formatter.format(number)
 
 
-# def format_decimal(number, format=None):
-#     """Return the given decimal number formatted for the locale in request
-#
-#     :param number: the number to format
-#     :param format: the format to use
-#     :return: the formatted number
-#     :rtype: unicode
-#     """
-#     locale = get_locale()
-#     return numbers.format_decimal(number, format=format, locale=locale)
-#
-#
+# TODO: Enable a custom 'format' argment on this method like in flask-babel?
+def format_decimal(number):
+    """Return the given decimal number formatted for the locale in request
+
+    :param number: the number to format
+    :return: the formatted number
+    :rtype: unicode
+    """
+    locale = get_locale()
+    formatter = DecimalFormat.createInstance(locale)
+    if type(number) is Decimal:
+        number = float(number)
+    return formatter.format(number)
+
+
 # def format_currency(number, currency, format=None):
 #     """Return the given number formatted for the locale in request
 #
