@@ -128,7 +128,9 @@ class NumberFormattingTestCase(unittest.TestCase):
         with app.test_request_context():
             assert format_number(n) == u'1,099'
             assert format_decimal(Decimal('1010.99')) == u'1,010.99'
-#             assert babel.format_currency(n, 'USD') == '$1,099.00'
+            assert format_currency(n, 'EUR') == '€1,099.00'
+            assert format_currency(n, 'USD') == '$1,099.00'
+            assert format_currency(n, 'ILS') == '₪1,099.00'
 #             assert babel.format_percent(0.19) == '19%'
 #             assert babel.format_scientific(10000) == u'1E4'
 #

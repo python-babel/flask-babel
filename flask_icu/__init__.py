@@ -450,21 +450,21 @@ def format_decimal(number):
     return formatter.format(number)
 
 
-# def format_currency(number, currency, format=None):
-#     """Return the given number formatted for the locale in request
-#
-#     :param number: the number to format
-#     :param currency: the currency code
-#     :param format: the format to use
-#     :return: the formatted number
-#     :rtype: unicode
-#     """
-#     locale = get_locale()
-#     return numbers.format_currency(
-#         number, currency, format=format, locale=locale
-#     )
-#
-#
+# TODO: Enable a custom 'format' argment on this method like in flask-babel?
+def format_currency(number, currency):
+    """Return the given number formatted for the locale in request
+
+    :param number: the number to format
+    :param currency: the currency code
+    :return: the formatted number
+    :rtype: unicode
+    """
+    formatter = NumberFormat.createCurrencyInstance()
+    if currency is not None:
+        formatter.setCurrency(currency)
+    return formatter.format(number).replace('\xa0', ' ')
+
+
 # def format_percent(number, format=None):
 #     """Return formatted percent value for the locale in request
 #
