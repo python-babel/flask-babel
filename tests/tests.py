@@ -132,9 +132,9 @@ class NumberFormattingTestCase(unittest.TestCase):
             assert format_currency(n, 'USD') == '$1,099.00'
             assert format_currency(n, 'ILS') == '₪1,099.00'
             assert format_percent(0.19) == '19%'
-#             assert babel.format_scientific(10000) == u'1E4'
-#
-#
+            assert format_scientific(10000) == u'1E4'
+
+
 # class GettextTestCase(unittest.TestCase):
 #
 #     def test_basics(self):

@@ -479,16 +479,17 @@ def format_percent(number):
     return formatter.format(number)
 
 
-# def format_scientific(number, format=None):
-#     """Return value formatted in scientific notation for the locale in request
-#
-#     :param number: the number to format
-#     :param format: the format to use
-#     :return: the formatted percent number
-#     :rtype: unicode
-#     """
-#     locale = get_locale()
-#     return numbers.format_scientific(number, format=format, locale=locale)
+def format_scientific(number, format=None):
+    """Return value formatted in scientific notation for the locale in request
+
+    :param number: the number to format
+    :param format: the format to use
+    :return: the formatted percent number
+    :rtype: unicode
+    """
+    locale = get_locale()
+    formatter = NumberFormat.createScientificInstance(locale)
+    return formatter.format(number)
 
 def format(string, values=None):
     """Translates a string with the given current locale"""
