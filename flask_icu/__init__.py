@@ -169,7 +169,7 @@ class ICU(object):
         """
         default = self.app.config['ICU_DEFAULT_LOCALE']
         if default is None:
-            default_locale = 'en'
+            default = 'en'
         return Locale(default)
 
     @property
