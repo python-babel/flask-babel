@@ -465,18 +465,20 @@ def format_currency(number, currency):
     return formatter.format(number).replace('\xa0', ' ')
 
 
-# def format_percent(number, format=None):
-#     """Return formatted percent value for the locale in request
-#
-#     :param number: the number to format
-#     :param format: the format to use
-#     :return: the formatted percent number
-#     :rtype: unicode
-#     """
-#     locale = get_locale()
-#     return numbers.format_percent(number, format=format, locale=locale)
-#
-#
+# TODO: Enable a custom 'format' argment on this method like in flask-babel?
+def format_percent(number):
+    """Return formatted percent value for the locale in request
+
+    :param number: the number to format
+    :param format: the format to use
+    :return: the formatted percent number
+    :rtype: unicode
+    """
+    locale = get_locale()
+    formatter = NumberFormat.createPercentInstance(locale)
+    return formatter.format(number)
+
+
 # def format_scientific(number, format=None):
 #     """Return value formatted in scientific notation for the locale in request
 #
