@@ -71,10 +71,8 @@ class ICU(object):
 
     def __init__(self, app=None, default_locale='en', default_timezone='UTC',
                  date_formats=None, configure_jinja=True):
-        self._default_locale = 'en' if default_locale is None else 'en'
-        self._default_timezone = (
-            'UTC' if default_timezone is None else default_timezone
-        )
+        self._default_locale = default_locale
+        self._default_timezone = default_timezone
         self._date_formats = date_formats
         self._configure_jinja = configure_jinja
         self.app = app
@@ -169,15 +167,20 @@ class ICU(object):
         """The default locale from the configuration as instance of a
         `babel.Locale` object.
         """
-        return Locale(self.app.config['ICU_DEFAULT_LOCALE'])
+        default = self.app.config['ICU_DEFAULT_LOCALE']
+        if default is None:
+            default_locale = 'en'
+        return Locale(default)
 
     @property
     def default_timezone(self):
         """The default timezone from the configuration as instance of a
         `pytz.timezone` object.
         """
-        return (ICUtzinfo.getInstance(
-            self.app.config['ICU_DEFAULT_TIMEZONE']).timezone)
+        default = self.app.config['ICU_DEFAULT_TIMEZONE']
+        if default is None:
+            default = 'UTC'
+        return (ICUtzinfo.getInstance(default).timezone)
 
 def load_messages(locale):
     """Loads ICU messages for a given locale from the source files. Translation
