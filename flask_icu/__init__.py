@@ -21,7 +21,8 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
 from datetime import datetime
 from flask import _request_ctx_stack
 # from babel import dates, numbers, support, Locale
-from icu import Locale, MessageFormat, DateFormat, SimpleDateFormat, Formattable, TimeZone, ICUtzinfo
+from icu import (Locale, MessageFormat, DateFormat, SimpleDateFormat,
+                Formattable, TimeZone, ICUtzinfo, NumberFormat)
 from werkzeug import ImmutableDict
 try:
     from pytz.gae import pytz
@@ -421,19 +422,18 @@ def _date_format(datetime, rebase, datetime_type, format):
     return formatter.format(datetime)
 
 
+def format_number(number):
+    """Return the given number formatted for the locale in request
+
+    :param number: the number to format
+    :return: the formatted number
+    :rtype: unicode
+    """
+    locale = get_locale()
+    formatter = NumberFormat.createInstance(locale)
+    return formatter.format(number)
 
 
-# def format_number(number):
-#     """Return the given number formatted for the locale in request
-#
-#     :param number: the number to format
-#     :return: the formatted number
-#     :rtype: unicode
-#     """
-#     locale = get_locale()
-#     return numbers.format_number(number, locale=locale)
-#
-#
 # def format_decimal(number, format=None):
 #     """Return the given decimal number formatted for the locale in request
 #
