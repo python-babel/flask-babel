@@ -9,7 +9,7 @@ import unittest
 from decimal import Decimal
 import flask
 from datetime import datetime
-from flask_icu import ICU, format_datetime, format_date, format_time, icu_refresh
+from flask_icu import *
 # from flask_babel import gettext, ngettext, lazy_gettext
 from flask_icu._compat import text_type
 
