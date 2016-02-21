@@ -403,7 +403,7 @@ def _date_format(datetime, rebase, datetime_type, format):
     icu = _request_ctx_stack.top.app.extensions['icu']
     if format is None:
         format = icu.date_formats[datetime_type]
-    elif format in ('short', 'medium', 'long', 'full'):
+    if format in ('short', 'medium', 'long', 'full'):
         tmp = icu.date_formats["{}.{}".format(datetime_type, format)]
         is_custom = False if tmp is None else True
         format = tmp if is_custom else icu.icu_date_formats[format]
