@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 """
+    # TODO: Change this header 
     flaskext.babel
     ~~~~~~~~~~~~~~
 
-    Implements i18n/l10n support for Flask applications based on Babel.
+    Implements i18n/l10n support for Flask applications based on PyICU.
 
     :copyright: (c) 2013 by Armin Ronacher, Daniel Neuhäuser.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import absolute_import
 import os
+import json
 
 # this is a workaround for a snow leopard bug that babel does not
 # work around :)
@@ -17,8 +19,11 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
     os.environ['LC_CTYPE'] = 'en_US.utf-8'
 
 from datetime import datetime
+from decimal import Decimal
 from flask import _request_ctx_stack
-from babel import dates, numbers, support, Locale
+# from babel import dates, numbers, support, Locale
+from icu import (Locale, MessageFormat, DateFormat, SimpleDateFormat,
+                 Formattable, TimeZone, ICUtzinfo, NumberFormat, DecimalFormat)
 from werkzeug import ImmutableDict
 try:
     from pytz.gae import pytz
@@ -28,15 +33,25 @@ else:
     timezone = pytz.timezone
     UTC = pytz.UTC
 
-from flask_babel._compat import string_types
+from flask_icu._compat import string_types
 
+import pdb
 
-class Babel(object):
+class ICU(object):
     """Central controller class that can be used to configure how
-    Flask-Babel behaves.  Each application that wants to use Flask-Babel
+    Flask-ICU behaves. Each application that wants to use Flask-ICU
     has to create, or run :meth:`init_app` on, an instance of this class
     after the configuration was initialized.
     """
+
+    messages = {}
+
+    icu_date_formats = ImmutableDict({
+        'short':        DateFormat.SHORT,
+        'medium':       DateFormat.MEDIUM,
+        'long':         DateFormat.LONG,
+        'full':         DateFormat.FULL,
+    })
 
     default_date_formats = ImmutableDict({
         'time':             'medium',
@@ -72,13 +87,13 @@ class Babel(object):
         the constructor.
         """
         self.app = app
-        app.babel_instance = self
+        app.icu_instance = self
         if not hasattr(app, 'extensions'):
             app.extensions = {}
-        app.extensions['babel'] = self
+        app.extensions['icu'] = self
 
-        app.config.setdefault('BABEL_DEFAULT_LOCALE', self._default_locale)
-        app.config.setdefault('BABEL_DEFAULT_TIMEZONE', self._default_timezone)
+        app.config.setdefault('ICU_DEFAULT_LOCALE', self._default_locale)
+        app.config.setdefault('ICU_DEFAULT_TIMEZONE', self._default_timezone)
         if self._date_formats is None:
             self._date_formats = self.default_date_formats.copy()
 
@@ -99,24 +114,7 @@ class Babel(object):
         self.timezone_selector_func = None
 
         if self._configure_jinja:
-            app.jinja_env.filters.update(
-                datetimeformat=format_datetime,
-                dateformat=format_date,
-                timeformat=format_time,
-                timedeltaformat=format_timedelta,
-
-                numberformat=format_number,
-                decimalformat=format_decimal,
-                currencyformat=format_currency,
-                percentformat=format_percent,
-                scientificformat=format_scientific,
-            )
-            app.jinja_env.add_extension('jinja2.ext.i18n')
-            app.jinja_env.install_gettext_callables(
-                lambda x: get_translations().ugettext(x),
-                lambda s, p, n: get_translations().ungettext(s, p, n),
-                newstyle=True
-            )
+            app.jinja_env.globals.update(format=format)
 
     def localeselector(self, f):
         """Registers a callback function for locale selection.  The default
@@ -145,58 +143,101 @@ class Babel(object):
         return f
 
 
-    def list_translations(self):
-        """Returns a list of all the locales translations exist for.  The
-        list returned will be filled with actual locale objects and not just
-        strings.
-
-        .. versionadded:: 0.6
-        """
-        dirname = os.path.join(self.app.root_path, 'translations')
-        if not os.path.isdir(dirname):
-            return []
-        result = []
-        for folder in os.listdir(dirname):
-            locale_dir = os.path.join(dirname, folder, 'LC_MESSAGES')
-            if not os.path.isdir(locale_dir):
-                continue
-            if filter(lambda x: x.endswith('.mo'), os.listdir(locale_dir)):
-                result.append(Locale.parse(folder))
-        if not result:
-            result.append(Locale.parse(self._default_locale))
-        return result
+    # def list_translations(self):
+    #     """Returns a list of all the locales translations exist for.  The
+    #     list returned will be filled with actual locale objects and not just
+    #     strings.
+    #
+    #     .. versionadded:: 0.6
+    #     """
+    #     dirname = os.path.join(self.app.root_path, 'translations')
+    #     if not os.path.isdir(dirname):
+    #         return []
+    #     result = []
+    #     for folder in os.listdir(dirname):
+    #         locale_dir = os.path.join(dirname, folder, 'LC_MESSAGES')
+    #         if not os.path.isdir(locale_dir):
+    #             continue
+    #         if filter(lambda x: x.endswith('.mo'), os.listdir(locale_dir)):
+    #             result.append(Locale.parse(folder))
+    #     if not result:
+    #         result.append(Locale.parse(self._default_locale))
+    #     return result
 
     @property
     def default_locale(self):
         """The default locale from the configuration as instance of a
         `babel.Locale` object.
         """
-        return Locale.parse(self.app.config['BABEL_DEFAULT_LOCALE'])
+        default = self.app.config['ICU_DEFAULT_LOCALE']
+        if default is None:
+            default = 'en'
+        return Locale(default)
 
     @property
     def default_timezone(self):
         """The default timezone from the configuration as instance of a
         `pytz.timezone` object.
         """
-        return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
+        default = self.app.config['ICU_DEFAULT_TIMEZONE']
+        if default is None:
+            default = 'UTC'
+        return (ICUtzinfo.getInstance(default).timezone)
 
+def load_messages(locale):
+    """Loads ICU messages for a given locale from the source files. Translation
+    files must be located in path pattern: '<root>/translations/<lang>/'.
+    """
+    ctx = _request_ctx_stack.top
+    if ctx is None:
+        return None
+    dirname = os.path.join(ctx.app.root_path, 'translations')
+    # TODO: Handle case where the translations dir is not present
+    locales_list = [name for name in os.listdir(dirname)
+                    if os.path.isdir(os.path.join(dirname, name))]
+    messages = {}
+    if locale not in locales_list:
+        raise Exception('No locale ICU message files found for the locale: {}'.format(locale))
+    else:
+        for subdir, dirs, files in os.walk(dirname + '/' + locale):
+            for file in files:
+                with open(subdir + '/' + file) as data_file:
+                    data = json.load(data_file)
+                    z = messages.copy()
+                    z.update(data)
+                    messages = z
+    return messages
 
-def get_translations():
-    """Returns the correct gettext translations that should be used for
-    this request.  This will never fail and return a dummy translation
-    object if used outside of the request or if a translation cannot be
+def get_message(key):
+    """Returns a ICU format message string for the given key."""
+
+    ctx = _request_ctx_stack.top
+    if ctx is None:
+        return None
+    messages = getattr(ctx, 'icu_messages', None)
+    if messages is None:
+        messages = get_messages()
+    if key in messages:
+        msg = messages[key]
+    else:
+        msg = key
+    return msg
+
+def get_messages():
+    """Returns the correct icu message set that should be used for
+    this request. This will never fail and return a dummy translation
+    object if used outside of the request or if a message cannot be
     found.
     """
     ctx = _request_ctx_stack.top
     if ctx is None:
         return None
-    translations = getattr(ctx, 'babel_translations', None)
-    if translations is None:
-        dirname = os.path.join(ctx.app.root_path, 'translations')
-        translations = support.Translations.load(dirname, [get_locale()])
-        ctx.babel_translations = translations
-    return translations
-
+    messages = getattr(ctx, 'icu_messages', None)
+    if messages is None:
+        locale = get_locale()
+        messages = load_messages(locale.getName())
+        ctx.icu_messages = messages
+    return messages
 
 def get_locale():
     """Returns the locale that should be used for this request as
@@ -206,18 +247,18 @@ def get_locale():
     ctx = _request_ctx_stack.top
     if ctx is None:
         return None
-    locale = getattr(ctx, 'babel_locale', None)
+    locale = getattr(ctx, 'icu_locale', None)
     if locale is None:
-        babel = ctx.app.extensions['babel']
-        if babel.locale_selector_func is None:
-            locale = babel.default_locale
+        icu = ctx.app.extensions['icu']
+        if icu.locale_selector_func is None:
+            locale = icu.default_locale
         else:
-            rv = babel.locale_selector_func()
+            rv = icu.locale_selector_func()
             if rv is None:
-                locale = babel.default_locale
+                locale = icu.default_locale
             else:
-                locale = Locale.parse(rv)
-        ctx.babel_locale = locale
+                locale = Locale(rv)
+        ctx.icu_locale = locale
     return locale
 
 
@@ -227,25 +268,25 @@ def get_timezone():
     a request.
     """
     ctx = _request_ctx_stack.top
-    tzinfo = getattr(ctx, 'babel_tzinfo', None)
+    tzinfo = getattr(ctx, 'icu_tzinfo', None)
     if tzinfo is None:
-        babel = ctx.app.extensions['babel']
-        if babel.timezone_selector_func is None:
-            tzinfo = babel.default_timezone
+        icu = ctx.app.extensions['icu']
+        if icu.timezone_selector_func is None:
+            tzinfo = icu.default_timezone
         else:
-            rv = babel.timezone_selector_func()
+            rv = icu.timezone_selector_func()
             if rv is None:
-                tzinfo = babel.default_timezone
+                tzinfo = icu.default_timezone
             else:
                 if isinstance(rv, string_types):
-                    tzinfo = timezone(rv)
+                    tzinfo = TimeZone.createTimeZone(rv)
                 else:
                     tzinfo = rv
-        ctx.babel_tzinfo = tzinfo
+        ctx.icu_tzinfo = tzinfo
     return tzinfo
 
 
-def refresh():
+def icu_refresh():
     """Refreshes the cached timezones and locale information.  This can
     be used to switch a translation between a request and if you want
     the changes to take place immediately, not just with the next request::
@@ -259,46 +300,32 @@ def refresh():
     return English text and a now German page.
     """
     ctx = _request_ctx_stack.top
-    for key in 'babel_locale', 'babel_tzinfo', 'babel_translations':
+    for key in 'icu_locale', 'icu_tzinfo', 'icu_translations':
         if hasattr(ctx, key):
             delattr(ctx, key)
 
 
-def _get_format(key, format):
-    """A small helper for the datetime formatting functions.  Looks up
-    format defaults for different kinds.
-    """
-    babel = _request_ctx_stack.top.app.extensions['babel']
-    if format is None:
-        format = babel.date_formats[key]
-    if format in ('short', 'medium', 'full', 'long'):
-        rv = babel.date_formats['%s.%s' % (key, format)]
-        if rv is not None:
-            format = rv
-    return format
-
-
-def to_user_timezone(datetime):
-    """Convert a datetime object to the user's timezone.  This automatically
-    happens on all date formatting unless rebasing is disabled.  If you need
-    to convert a :class:`datetime.datetime` object at any time to the user's
-    timezone (as returned by :func:`get_timezone` this function can be used).
-    """
-    if datetime.tzinfo is None:
-        datetime = datetime.replace(tzinfo=UTC)
-    tzinfo = get_timezone()
-    return tzinfo.normalize(datetime.astimezone(tzinfo))
-
-
-def to_utc(datetime):
-    """Convert a datetime object to UTC and drop tzinfo.  This is the
-    opposite operation to :func:`to_user_timezone`.
-    """
-    if datetime.tzinfo is None:
-        datetime = get_timezone().localize(datetime)
-    return datetime.astimezone(UTC).replace(tzinfo=None)
-
-
+# def to_user_timezone(datetime):
+#     """Convert a datetime object to the user's timezone.  This automatically
+#     happens on all date formatting unless rebasing is disabled.  If you need
+#     to convert a :class:`datetime.datetime` object at any time to the user's
+#     timezone (as returned by :func:`get_timezone` this function can be used).
+#     """
+#     if datetime.tzinfo is None:
+#         datetime = datetime.replace(tzinfo=UTC)
+#     tzinfo = get_timezone()
+#     return tzinfo.normalize(datetime.astimezone(tzinfo))
+#
+#
+# def to_utc(datetime):
+#     """Convert a datetime object to UTC and drop tzinfo.  This is the
+#     opposite operation to :func:`to_user_timezone`.
+#     """
+#     if datetime.tzinfo is None:
+#         datetime = get_timezone().localize(datetime)
+#     return datetime.astimezone(UTC).replace(tzinfo=None)
+#
+#
 def format_datetime(datetime=None, format=None, rebase=True):
     """Return a date formatted according to the given pattern.  If no
     :class:`~datetime.datetime` object is passed, the current time is
@@ -315,8 +342,7 @@ def format_datetime(datetime=None, format=None, rebase=True):
     This function is also available in the template context as filter
     named `datetimeformat`.
     """
-    format = _get_format('datetime', format)
-    return _date_format(dates.format_datetime, datetime, format, rebase)
+    return _date_format(datetime, rebase, 'datetime', format)
 
 
 def format_date(date=None, format=None, rebase=True):
@@ -335,10 +361,7 @@ def format_date(date=None, format=None, rebase=True):
     This function is also available in the template context as filter
     named `dateformat`.
     """
-    if rebase and isinstance(date, datetime):
-        date = to_user_timezone(date)
-    format = _get_format('date', format)
-    return _date_format(dates.format_date, date, format, rebase)
+    return _date_format(date, rebase, 'date', format)
 
 
 def format_time(time=None, format=None, rebase=True):
@@ -357,72 +380,93 @@ def format_time(time=None, format=None, rebase=True):
     This function is also available in the template context as filter
     named `timeformat`.
     """
-    format = _get_format('time', format)
-    return _date_format(dates.format_time, time, format, rebase)
+    return _date_format(time, rebase, 'time', format)
 
 
-def format_timedelta(datetime_or_timedelta, granularity='second'):
-    """Format the elapsed time from the given date to now or the given
-    timedelta.  This currently requires an unreleased development
-    version of Babel.
-
-    This function is also available in the template context as filter
-    named `timedeltaformat`.
+# def format_timedelta(datetime_or_timedelta, granularity='second'):
+#     """Format the elapsed time from the given date to now or the given
+#     timedelta.  This currently requires an unreleased development
+#     version of Babel.
+#
+#     This function is also available in the template context as filter
+#     named `timedeltaformat`.
+#     """
+#     if isinstance(datetime_or_timedelta, datetime):
+#         datetime_or_timedelta = datetime.utcnow() - datetime_or_timedelta
+#     return dates.format_timedelta(datetime_or_timedelta, granularity,
+#                                   locale=get_locale())
+#
+#
+def _date_format(datetime, rebase, datetime_type, format):
+    """Internal helper that looks up and creates the correct DateFormat
+    object, and then uses it to format the date string and return it.
     """
-    if isinstance(datetime_or_timedelta, datetime):
-        datetime_or_timedelta = datetime.utcnow() - datetime_or_timedelta
-    return dates.format_timedelta(datetime_or_timedelta, granularity,
-                                  locale=get_locale())
-
-
-def _date_format(formatter, obj, format, rebase, **extra):
-    """Internal helper that formats the date."""
     locale = get_locale()
-    extra = {}
-    if formatter is not dates.format_date and rebase:
-        extra['tzinfo'] = get_timezone()
-    return formatter(obj, format, locale=locale, **extra)
+    icu = _request_ctx_stack.top.app.extensions['icu']
+    if format is None:
+        format = icu.date_formats[datetime_type]
+    if format in ('short', 'medium', 'long', 'full'):
+        tmp = icu.date_formats["{}.{}".format(datetime_type, format)]
+        is_custom = False if tmp is None else True
+        format = tmp if is_custom else icu.icu_date_formats[format]
+    if is_custom:
+        formatter = SimpleDateFormat(format, locale)
+    else:
+        if datetime_type is 'time':
+            formatter = DateFormat.createTimeInstance(format, locale)
+        if datetime_type is 'date':
+            formatter = DateFormat.createDateInstance(format, locale)
+        if datetime_type is 'datetime':
+            formatter = DateFormat.createDateTimeInstance(format, format, locale)
+    if rebase:
+        formatter.setTimeZone(get_timezone())
+    return formatter.format(datetime)
 
 
 def format_number(number):
     """Return the given number formatted for the locale in request
-    
+
     :param number: the number to format
     :return: the formatted number
     :rtype: unicode
     """
     locale = get_locale()
-    return numbers.format_number(number, locale=locale)
+    formatter = NumberFormat.createInstance(locale)
+    return formatter.format(number)
 
 
-def format_decimal(number, format=None):
+# TODO: Enable a custom 'format' argment on this method like in flask-babel?
+def format_decimal(number):
     """Return the given decimal number formatted for the locale in request
 
     :param number: the number to format
-    :param format: the format to use
     :return: the formatted number
     :rtype: unicode
     """
     locale = get_locale()
-    return numbers.format_decimal(number, format=format, locale=locale)
+    formatter = DecimalFormat.createInstance(locale)
+    if type(number) is Decimal:
+        number = float(number)
+    return formatter.format(number)
 
 
-def format_currency(number, currency, format=None):
+# TODO: Enable a custom 'format' argment on this method like in flask-babel?
+def format_currency(number, currency):
     """Return the given number formatted for the locale in request
 
     :param number: the number to format
     :param currency: the currency code
-    :param format: the format to use
     :return: the formatted number
     :rtype: unicode
     """
-    locale = get_locale()
-    return numbers.format_currency(
-        number, currency, format=format, locale=locale
-    )
+    formatter = NumberFormat.createCurrencyInstance()
+    if currency is not None:
+        formatter.setCurrency(currency)
+    return formatter.format(number).replace('\xa0', ' ')
 
 
-def format_percent(number, format=None):
+# TODO: Enable a custom 'format' argment on this method like in flask-babel?
+def format_percent(number):
     """Return formatted percent value for the locale in request
 
     :param number: the number to format
@@ -431,7 +475,8 @@ def format_percent(number, format=None):
     :rtype: unicode
     """
     locale = get_locale()
-    return numbers.format_percent(number, format=format, locale=locale)
+    formatter = NumberFormat.createPercentInstance(locale)
+    return formatter.format(number)
 
 
 def format_scientific(number, format=None):
@@ -443,88 +488,18 @@ def format_scientific(number, format=None):
     :rtype: unicode
     """
     locale = get_locale()
-    return numbers.format_scientific(number, format=format, locale=locale)
+    formatter = NumberFormat.createScientificInstance(locale)
+    return formatter.format(number)
 
+def format(string, values=None):
+    """Translates a string with the given current locale"""
 
-def gettext(string, **variables):
-    """Translates a string with the current locale and passes in the
-    given keyword arguments as mapping to a string formatting string.
-
-    ::
-
-        gettext(u'Hello World!')
-        gettext(u'Hello %(name)s!', name='World')
-    """
-    t = get_translations()
-    if t is None:
-        return string % variables
-    return t.ugettext(string) % variables
-_ = gettext
-
-
-def ngettext(singular, plural, num, **variables):
-    """Translates a string with the current locale and passes in the
-    given keyword arguments as mapping to a string formatting string.
-    The `num` parameter is used to dispatch between singular and various
-    plural forms of the message.  It is available in the format string
-    as ``%(num)d`` or ``%(num)s``.  The source language should be
-    English or a similar language which only has one plural form.
-
-    ::
-
-        ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(apples))
-    """
-    variables.setdefault('num', num)
-    t = get_translations()
-    if t is None:
-        return (singular if num == 1 else plural) % variables
-    return t.ungettext(singular, plural, num) % variables
-
-
-def pgettext(context, string, **variables):
-    """Like :func:`gettext` but with a context.
-
-    .. versionadded:: 0.7
-    """
-    t = get_translations()
-    if t is None:
-        return string % variables
-    return t.upgettext(context, string) % variables
-
-
-def npgettext(context, singular, plural, num, **variables):
-    """Like :func:`ngettext` but with a context.
-
-    .. versionadded:: 0.7
-    """
-    variables.setdefault('num', num)
-    t = get_translations()
-    if t is None:
-        return (singular if num == 1 else plural) % variables
-    return t.unpgettext(context, singular, plural, num) % variables
-
-
-def lazy_gettext(string, **variables):
-    """Like :func:`gettext` but the string returned is lazy which means
-    it will be translated when it is used as an actual string.
-
-    Example::
-
-        hello = lazy_gettext(u'Hello World')
-
-        @app.route('/')
-        def index():
-            return unicode(hello)
-    """
-    from speaklater import make_lazy_string
-    return make_lazy_string(gettext, string, **variables)
-
-
-def lazy_pgettext(context, string, **variables):
-    """Like :func:`pgettext` but the string returned is lazy which means
-    it will be translated when it is used as an actual string.
-
-    .. versionadded:: 0.7
-    """
-    from speaklater import make_lazy_string
-    return make_lazy_string(pgettext, context, string, **variables)
+    ctx = _request_ctx_stack.top
+    locale = get_locale()
+    icu_msg = get_message(string)
+    msg = MessageFormat(icu_msg)
+    if values is not None:
+        args = list(values.keys())
+        values = list(map(lambda v : Formattable(v), values.values()))
+        return msg.format(args, values)
+    return msg.format('')

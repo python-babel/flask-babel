@@ -9,16 +9,17 @@ python:
 install:
   - pip install --upgrade pip
   - pip install pytest
+  - pip install pytz
   - pip install --editable .
 
 script: make test
 
-notifications:
-  email: false
-  irc:
-    channels:
-      - "chat.freenode.net#pocoo"
-    on_success: change
-    on_failure: always
-    use_notice: true
-    skip_join: true
+# notifications:
+#   email: false
+#   irc:
+#     channels:
+#       - "chat.freenode.net#pocoo"
+#     on_success: change
+#     on_failure: always
+#     use_notice: true
+#     skip_join: true
