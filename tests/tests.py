@@ -125,6 +125,7 @@ class NumberFormattingTestCase(unittest.TestCase):
         icu = ICU(app)
         n = 1099
 
+        app.config['ICU_DEFAULT_LOCALE'] = 'en_US'
         with app.test_request_context():
             assert format_number(n) == u'1,099'
             assert format_decimal(Decimal('1010.99')) == u'1,010.99'
@@ -134,6 +135,16 @@ class NumberFormattingTestCase(unittest.TestCase):
             assert format_percent(0.19) == '19%'
             assert format_scientific(10000) == u'1E4'
 
+        app.config['ICU_DEFAULT_LOCALE'] = 'de_DE'
+        with app.test_request_context():
+            # Make sure it actually formats based on locale
+            assert format_number(n) == u'1.099'
+            assert format_decimal(Decimal('1010.99')) == u'1.010,99'
+            assert format_currency(n, 'EUR') == '1.099,00€'
+            assert format_currency(n, 'USD') == '1.099,00$'
+            assert format_currency(n, 'ILS') == '1.099,00₪'
+            assert format_percent(0.19) == '19%'
+            assert format_scientific(10000) == u'1E4'
 
 # class GettextTestCase(unittest.TestCase):
 #
