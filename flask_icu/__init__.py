@@ -451,7 +451,7 @@ def format_decimal(number):
 
 
 # TODO: Enable a custom 'format' argment on this method like in flask-babel?
-def format_currency(number, currency):
+def format_currency(number, currency=None):
     """Return the given number formatted for the locale in request
 
     :param number: the number to format
@@ -459,10 +459,11 @@ def format_currency(number, currency):
     :return: the formatted number
     :rtype: unicode
     """
-    formatter = NumberFormat.createCurrencyInstance()
+    locale = get_locale()
+    formatter = NumberFormat.createCurrencyInstance(locale)
     if currency is not None:
         formatter.setCurrency(currency)
-    return formatter.format(number).replace('\xa0', ' ')
+    return formatter.format(number).replace('\xa0', '')
 
 
 # TODO: Enable a custom 'format' argment on this method like in flask-babel?
