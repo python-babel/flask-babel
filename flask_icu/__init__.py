@@ -477,7 +477,7 @@ def format_percent(number):
     """
     locale = get_locale()
     formatter = NumberFormat.createPercentInstance(locale)
-    return formatter.format(number)
+    return formatter.format(number).replace('\xa0', '')
 
 
 def format_scientific(number, format=None):
