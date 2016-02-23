@@ -15,7 +15,6 @@ install:
   - pip install --editable .
 
 script:
-  - apt-cache show libicu-dev | grep Version
   - make test
 
 # notifications:
