@@ -1,3 +1,7 @@
+# enable linux 14.04 environment
+sudo: required
+dist: trusty
+
 language: python
 
 python:
