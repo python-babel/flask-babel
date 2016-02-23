@@ -12,7 +12,9 @@ install:
   - pip install pytz
   - pip install --editable .
 
-script: make test
+script:
+  - apt-cache show libicu-dev | grep Version
+  - make test
 
 # notifications:
 #   email: false
