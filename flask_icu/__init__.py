@@ -500,7 +500,10 @@ def format(string, values=None):
     icu_msg = get_message(string)
     msg = MessageFormat(icu_msg)
     if values is not None:
-        args = list(values.keys())
-        values = list(map(lambda v : Formattable(v), values.values()))
-        return msg.format(args, values)
+        keys = []
+        vals = []
+        for (k, v) in values.items():
+            keys.append(k)
+            vals.append(Formattable(v))
+        return msg.format(keys, vals)
     return msg.format('')
