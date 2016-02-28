@@ -167,7 +167,7 @@ class MessageFormattingTestCases(unittest.TestCase):
             assert format('Hello {name}!', {'name': 'Peter'}) == 'Hallo Peter!'
 
 
-    def test_plural_message(self):
+    def test_icu_plural(self):
         app = flask.Flask(__name__)
         icu = ICU(app, default_locale='en')
 
