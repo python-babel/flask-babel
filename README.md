@@ -1,7 +1,7 @@
 Flask ICU
 =========
 
-[![Build Status](https://travis-ci.org/beavyHQ/flask-icu.svg?branch=master)](https://travis-ci.org/beavyHQ/flask-icu)
+[![Build Status](https://travis-ci.org/beavyHQ/flask-icu.svg?branch=retrofit-for-pyicu)](https://travis-ci.org/beavyHQ/flask-icu)
 
 Implements i18n and l10n support for Flask using the industry standard
 ICU and pytz.
