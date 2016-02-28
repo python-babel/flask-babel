@@ -239,7 +239,7 @@ class MessageFormattingTestCases(unittest.TestCase):
         icu = ICU(app, default_locale='de')
         translations = icu.list_translations()
         assert len(translations) == 2
-        assert str(translations[0]) == 'de'
+        assert ('en' in translations and 'de' in translations)
 
 
 if __name__ == '__main__':
