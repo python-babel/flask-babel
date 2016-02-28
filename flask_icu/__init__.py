@@ -177,7 +177,8 @@ def load_messages(locale):
     if ctx is None:
         return None
     dirname = os.path.join(ctx.app.root_path, TRANSLATIONS_PATH)
-    # TODO: Handle case where the translations dir is not present
+    if not os.path.isdir(dirname):
+        raise Exception('Unable to find the translations path.')
     locales_list = [name for name in os.listdir(dirname)
                     if os.path.isdir(os.path.join(dirname, name))]
     messages = {}
