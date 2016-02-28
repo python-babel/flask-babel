@@ -203,6 +203,36 @@ class MessageFormattingTestCases(unittest.TestCase):
                 one {one apple} \
                 other {# apples}}.", {'numApples': 3}) == 'Ich habe 3 Äpfeln.'
 
+    def test_icu_select(self):
+        app = flask.Flask(__name__)
+        icu = ICU(app, default_locale='en')
+
+        with app.test_request_context():
+            assert 'He will respond shortly.' == \
+                format("{gender, select, \
+                    male {He} \
+                    female {She} \
+                    other {They}} will respond shortly.", {'gender': 'male'})
+            assert 'She will respond shortly.' == \
+                format("{gender, select, \
+                    male {He} \
+                    female {She} \
+                    other {They}} will respond shortly.", {'gender': 'female'})
+
+        with app.test_request_context():
+            app.config['ICU_DEFAULT_LOCALE'] = 'de'
+            icu_refresh()
+            assert 'Er wird antworten in Kürze.' == \
+                format("{gender, select, \
+                    male {He} \
+                    female {She} \
+                    other {They}} will respond shortly.", {'gender': 'male'})
+            assert 'Sie wird antworten in Kürze.' == \
+                format("{gender, select, \
+                    male {He} \
+                    female {She} \
+                    other {They}} will respond shortly.", {'gender': 'female'})
+
 
 #     def test_template_basics(self):
 #         app = flask.Flask(__name__)

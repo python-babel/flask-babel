@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-02-28 16:26+0000\n"
+"POT-Creation-Date: 2016-02-28 17:16+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.1.1\n"
 
-#: tests.py:155 tests.py:165
+#: tests.py:155 tests.py:167 tests.py:192
 msgid "Hello {name}!"
 msgstr ""
 
@@ -25,9 +25,16 @@ msgstr ""
 msgid "{z} and {a} and {2x} and {new} and {0} like this library."
 msgstr ""
 
-#: tests.py:191 tests.py:195
+#: tests.py:175 tests.py:179 tests.py:183 tests.py:193 tests.py:197
+#: tests.py:201
 msgid ""
 "I have {numApples, plural,                 =0 {no apples}"
 "                 one {one apple}                 other {# apples}}."
+msgstr ""
+
+#: tests.py:212
+msgid ""
+"{gender, select,                     male {He}                     female"
+" {She}                     other {They}} will respond shortly."
 msgstr ""
 
