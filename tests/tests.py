@@ -145,17 +145,65 @@ class NumberFormattingTestCase(unittest.TestCase):
             assert format_percent(0.19) == '19%'
             assert format_scientific(10000) == u'1E4'
 
-# class GettextTestCase(unittest.TestCase):
-#
-#     def test_basics(self):
-#         app = flask.Flask(__name__)
-#         b = babel.Babel(app, default_locale='de_DE')
-#
-#         with app.test_request_context():
-#             assert gettext(u'Hello %(name)s!', name='Peter') == 'Hallo Peter!'
-#             assert ngettext(u'%(num)s Apple', u'%(num)s Apples', 3) == u'3 Äpfel'
-#             assert ngettext(u'%(num)s Apple', u'%(num)s Apples', 1) == u'1 Apfel'
-#
+class MessageFormattingTestCases(unittest.TestCase):
+
+    def test_simple_message(self):
+        app = flask.Flask(__name__)
+        icu = ICU(app, default_locale='en')
+
+        with app.test_request_context():
+            assert format('Hello {name}!', {'name': 'Peter'}) == 'Hello Peter!'
+            # Test that values dict ordering is safe.
+            values = {'a': 'Bob', 'z': 'Sally', '0': 'Nobody', '2x': 'Ruby'}
+            values['z'] = "John"
+            values['new'] = "Who?"
+            assert format('{z} and {a} and {2x} and {new} and {0} like this library.', values) \
+                == 'John and Bob and Ruby and Who? and Nobody like this library.'
+
+
+        with app.test_request_context():
+            app.config['ICU_DEFAULT_LOCALE'] = 'de'
+            icu_refresh()
+            assert format('Hello {name}!', {'name': 'Peter'}) == 'Hallo Peter!'
+
+
+    def test_plural_message(self):
+        app = flask.Flask(__name__)
+        icu = ICU(app, default_locale='en')
+
+        with app.test_request_context():
+            assert format("I have {numApples, plural, \
+                =0 {no apples} \
+                one {one apple} \
+                other {# apples}}.", {'numApples': 0}) == 'I have no apples.'
+            assert format("I have {numApples, plural, \
+                =0 {no apples} \
+                one {one apple} \
+                other {# apples}}.", {'numApples': 1}) == 'I have one apple.'
+            assert format("I have {numApples, plural, \
+                =0 {no apples} \
+                one {one apple} \
+                other {# apples}}.", {'numApples': 3}) == 'I have 3 apples.'
+
+
+        with app.test_request_context():
+            app.config['ICU_DEFAULT_LOCALE'] = 'de'
+            icu_refresh()
+            assert format("Hello {name}!", {'name': 'Peter'}) == "Hallo Peter!"
+            assert format("I have {numApples, plural, \
+                =0 {no apples} \
+                one {one apple} \
+                other {# apples}}.", {'numApples': 0}) == 'Ich habe keine Äpfeln.'
+            assert format("I have {numApples, plural, \
+                =0 {no apples} \
+                one {one apple} \
+                other {# apples}}.", {'numApples': 1}) == 'Ich habe einen Apfel.'
+            assert format("I have {numApples, plural, \
+                =0 {no apples} \
+                one {one apple} \
+                other {# apples}}.", {'numApples': 3}) == 'Ich habe 3 Äpfeln.'
+
+
 #     def test_template_basics(self):
 #         app = flask.Flask(__name__)
 #         b = babel.Babel(app, default_locale='de_DE')
