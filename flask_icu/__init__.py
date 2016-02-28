@@ -96,9 +96,9 @@ class ICU(object):
         if self._date_formats is None:
             self._date_formats = self.default_date_formats.copy()
 
-        #: a mapping of Babel datetime format strings that can be modified
+        #: A mapping of ICU datetime format strings that can be modified
         #: to change the defaults.  If you invoke :func:`format_datetime`
-        #: and do not provide any format string Flask-Babel will do the
+        #: and do not provide any format string Flask-ICU will do the
         #: following things:
         #:
         #: 1.   look up ``date_formats['datetime']``.  By default ``'medium'``
