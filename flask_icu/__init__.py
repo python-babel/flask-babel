@@ -172,7 +172,7 @@ class ICU(object):
 
 def load_messages(locale):
     """Loads ICU messages for a given locale from the source files. Translation
-    files must be located in path pattern: '<root>/translations/<lang>/'.
+    files must be located in path: '<root>/translations/<lang>/'.
     """
     ctx = _request_ctx_stack.top
     if ctx is None:
