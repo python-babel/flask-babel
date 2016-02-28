@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-    # TODO: Change this header
-    flaskext.babel
-    ~~~~~~~~~~~~~~
+    flaskext.icu
+    ~~~~~~~~~~~~
 
     Implements i18n/l10n support for Flask applications based on PyICU.
 
-    :copyright: (c) 2013 by Armin Ronacher, Daniel Neuhäuser.
+    :copyright: (c) 2016 by Ethan Miller
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import absolute_import
