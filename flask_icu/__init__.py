@@ -12,7 +12,6 @@
 from __future__ import absolute_import
 import os
 import json
-from pprint import pprint
 
 # this is a workaround for a snow leopard bug that babel does not
 # work around :)
@@ -22,7 +21,6 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
 from datetime import datetime
 from decimal import Decimal
 from flask import _request_ctx_stack
-# from babel import dates, numbers, support, Locale
 from icu import (Locale, MessageFormat, DateFormat, SimpleDateFormat,
                  Formattable, TimeZone, ICUtzinfo, NumberFormat, DecimalFormat)
 from werkzeug import ImmutableDict
@@ -35,8 +33,6 @@ else:
     UTC = pytz.UTC
 
 from flask_icu._compat import string_types
-
-import pdb
 
 TRANSLATIONS_PATH = 'translations'
 
