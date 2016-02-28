@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    # TODO: Change this header 
+    # TODO: Change this header
     flaskext.babel
     ~~~~~~~~~~~~~~
 
@@ -12,6 +12,7 @@
 from __future__ import absolute_import
 import os
 import json
+from pprint import pprint
 
 # this is a workaround for a snow leopard bug that babel does not
 # work around :)
@@ -145,26 +146,18 @@ class ICU(object):
         return f
 
 
-    # def list_translations(self):
-    #     """Returns a list of all the locales translations exist for.  The
-    #     list returned will be filled with actual locale objects and not just
-    #     strings.
-    #
-    #     .. versionadded:: 0.6
-    #     """
-    #     dirname = os.path.join(self.app.root_path, 'translations')
-    #     if not os.path.isdir(dirname):
-    #         return []
-    #     result = []
-    #     for folder in os.listdir(dirname):
-    #         locale_dir = os.path.join(dirname, folder, 'LC_MESSAGES')
-    #         if not os.path.isdir(locale_dir):
-    #             continue
-    #         if filter(lambda x: x.endswith('.mo'), os.listdir(locale_dir)):
-    #             result.append(Locale.parse(folder))
-    #     if not result:
-    #         result.append(Locale.parse(self._default_locale))
-    #     return result
+    def list_translations(self):
+        """Returns a list of all the locales translations exist for.  The
+        list returned will be filled with actual locale objects and not just
+        strings.
+
+        .. versionadded:: 0.6
+        """
+        dirname = os.path.join(self.app.root_path, TRANSLATIONS_PATH)
+        if not os.path.isdir(dirname):
+            return []
+        return [name for name in os.listdir(dirname)
+            if os.path.isdir(os.path.join(dirname, name))]
 
     @property
     def default_locale(self):
@@ -222,6 +215,7 @@ def get_message(key):
     if key in messages:
         msg = messages[key]
     else:
+        # print('key not found: {}'.format(key))
         msg = key
     return msg
 
@@ -307,27 +301,6 @@ def icu_refresh():
             delattr(ctx, key)
 
 
-# def to_user_timezone(datetime):
-#     """Convert a datetime object to the user's timezone.  This automatically
-#     happens on all date formatting unless rebasing is disabled.  If you need
-#     to convert a :class:`datetime.datetime` object at any time to the user's
-#     timezone (as returned by :func:`get_timezone` this function can be used).
-#     """
-#     if datetime.tzinfo is None:
-#         datetime = datetime.replace(tzinfo=UTC)
-#     tzinfo = get_timezone()
-#     return tzinfo.normalize(datetime.astimezone(tzinfo))
-#
-#
-# def to_utc(datetime):
-#     """Convert a datetime object to UTC and drop tzinfo.  This is the
-#     opposite operation to :func:`to_user_timezone`.
-#     """
-#     if datetime.tzinfo is None:
-#         datetime = get_timezone().localize(datetime)
-#     return datetime.astimezone(UTC).replace(tzinfo=None)
-#
-#
 def format_datetime(datetime=None, format=None, rebase=True):
     """Return a date formatted according to the given pattern.  If no
     :class:`~datetime.datetime` object is passed, the current time is

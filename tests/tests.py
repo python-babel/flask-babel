@@ -234,40 +234,12 @@ class MessageFormattingTestCases(unittest.TestCase):
                     other {They}} will respond shortly.", {'gender': 'female'})
 
 
-#     def test_template_basics(self):
-#         app = flask.Flask(__name__)
-#         b = babel.Babel(app, default_locale='de_DE')
-#
-#         t = lambda x: flask.render_template_string('{{ %s }}' % x)
-#
-#         with app.test_request_context():
-#             assert t("gettext('Hello %(name)s!', name='Peter')") == 'Hallo Peter!'
-#             assert t("ngettext('%(num)s Apple', '%(num)s Apples', 3)") == u'3 Äpfel'
-#             assert t("ngettext('%(num)s Apple', '%(num)s Apples', 1)") == u'1 Apfel'
-#             assert flask.render_template_string('''
-#                 {% trans %}Hello {{ name }}!{% endtrans %}
-#             ''', name='Peter').strip() == 'Hallo Peter!'
-#             assert flask.render_template_string('''
-#                 {% trans num=3 %}{{ num }} Apple
-#                 {%- pluralize %}{{ num }} Apples{% endtrans %}
-#             ''', name='Peter').strip() == u'3 Äpfel'
-#
-#     def test_lazy_gettext(self):
-#         app = flask.Flask(__name__)
-#         b = babel.Babel(app, default_locale='de_DE')
-#         yes = lazy_gettext(u'Yes')
-#         with app.test_request_context():
-#             assert text_type(yes) == 'Ja'
-#         app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
-#         with app.test_request_context():
-#             assert text_type(yes) == 'Yes'
-#
-#     def test_list_translations(self):
-#         app = flask.Flask(__name__)
-#         b = babel.Babel(app, default_locale='de_DE')
-#         translations = b.list_translations()
-#         assert len(translations) == 1
-#         assert str(translations[0]) == 'de'
+    def test_list_translations(self):
+        app = flask.Flask(__name__)
+        icu = ICU(app, default_locale='de')
+        translations = icu.list_translations()
+        assert len(translations) == 2
+        assert str(translations[0]) == 'de'
 
 
 if __name__ == '__main__':
