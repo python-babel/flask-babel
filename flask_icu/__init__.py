@@ -37,6 +37,8 @@ from flask_icu._compat import string_types
 
 import pdb
 
+TRANSLATIONS_PATH = 'translations'
+
 class ICU(object):
     """Central controller class that can be used to configure how
     Flask-ICU behaves. Each application that wants to use Flask-ICU
@@ -191,7 +193,7 @@ def load_messages(locale):
     ctx = _request_ctx_stack.top
     if ctx is None:
         return None
-    dirname = os.path.join(ctx.app.root_path, 'translations')
+    dirname = os.path.join(ctx.app.root_path, TRANSLATIONS_PATH)
     # TODO: Handle case where the translations dir is not present
     locales_list = [name for name in os.listdir(dirname)
                     if os.path.isdir(os.path.join(dirname, name))]
