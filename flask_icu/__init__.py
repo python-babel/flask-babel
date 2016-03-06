@@ -204,9 +204,9 @@ def get_message(key):
     if key in messages:
         msg = messages[key]
     else:
-        # print('key not found: {}'.format(key))
         msg = key
     return msg
+
 
 def get_messages():
     """Returns the correct icu message set that should be used for
@@ -222,6 +222,7 @@ def get_messages():
         messages = load_messages(locale.getName())
         ctx.icu_messages = messages
     return messages
+
 
 def get_locale():
     """Returns the locale that should be used for this request as
@@ -345,20 +346,6 @@ def format_time(time=None, format=None, rebase=True):
     return _date_format(time, rebase, 'time', format)
 
 
-# def format_timedelta(datetime_or_timedelta, granularity='second'):
-#     """Format the elapsed time from the given date to now or the given
-#     timedelta.  This currently requires an unreleased development
-#     version of Babel.
-#
-#     This function is also available in the template context as filter
-#     named `timedeltaformat`.
-#     """
-#     if isinstance(datetime_or_timedelta, datetime):
-#         datetime_or_timedelta = datetime.utcnow() - datetime_or_timedelta
-#     return dates.format_timedelta(datetime_or_timedelta, granularity,
-#                                   locale=get_locale())
-#
-#
 def _date_format(datetime, rebase, datetime_type, format):
     """Internal helper that looks up and creates the correct DateFormat
     object, and then uses it to format the date string and return it.
@@ -455,6 +442,7 @@ def format_scientific(number, format=None):
     locale = get_locale()
     formatter = NumberFormat.createScientificInstance(locale)
     return formatter.format(number)
+
 
 def format(string, values=None):
     """Translates a string with the given current locale"""
