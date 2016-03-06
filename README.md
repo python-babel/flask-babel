@@ -8,47 +8,47 @@ ICU.
 
 This library supports the following formatting methods:
 
-   * `format()`  
+   * **format()**
  ```
  format('You have {num} messages.', {'num': 3})
  # => You have 3 messages.
  ```
-   * `format_date()`  
+   * **format_date()**  
  ```python
  format_date(datetime(2010, 4, 12, 13, 46))
  # => Apr 12, 2010
  ```
-   * `format_time()`
- ```python
+   * **format_time()**  
+```python
  format_time(datetime(2010, 4, 12, 13, 46))
  # => 1:46:00 PM
  ```
-   * `format_datetime()`
+   * **format_datetime()**
  ```python
  format_datetime(datetime(2010, 4, 12, 13, 46))
  # => Apr 12, 2010, 3:46:00 PM
  ```
-   * `format_number()`
+   * **format_number()**  
  ```python
  format_number(1099)
  # => 1,099
  ```
-   * `format_decimal()`
+   * **format_decimal()**  
  ```python
  format_decimal(Decimal('1010.99'))
  # => 1,010.99
  ```
-   * `format_currency()` 
+   * **format_currency()**  
  ```python
  format_currency(1099, 'ILS')
  # => ₪1,099.00
  ```
-   * `format_scientific()`
+   * **format_scientific()**
  ```python
  format_scientific(10000)
  # => 1E4
  ```
-   * `format_percent()`  
+   * **format_percent()**  
  ```python
  format_percent(0.19)
  # => 19%
