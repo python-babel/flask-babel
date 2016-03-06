@@ -423,8 +423,8 @@ def format_percent(number):
     formatter = NumberFormat.createPercentInstance(locale)
     return formatter.format(number).replace('\xa0', '')
 
-
-def format_scientific(number, format=None):
+# TODO: Enable a custom 'format' argment on this method like in flask-babel?
+def format_scientific(number):
     """Return value formatted in scientific notation for the locale in request
 
     :param number: the number to format
