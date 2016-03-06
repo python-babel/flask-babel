@@ -8,16 +8,16 @@ ICU.
 
 This library supports the following formatting methods:
 
-   * **format()**
- ```
- format('You have {num} messages.', {'num': 3})
- # => You have 3 messages.
+   * **format()**  
+```python
+format('You have {num} messages.', {'num': 3})  
+# => You have 3 messages.
  ```
    * **format_date()**  
- ```python
- format_date(datetime(2010, 4, 12, 13, 46))
- # => Apr 12, 2010
- ```
+```python
+format_date(datetime(2010, 4, 12, 13, 46))
+# => Apr 12, 2010
+```
    * **format_time()**  
 ```python
  format_time(datetime(2010, 4, 12, 13, 46))
