@@ -6,11 +6,18 @@ Flask ICU
 Implements i18n and l10n support for Flask using the industry standard
 ICU.
 
-Please consult these links in order to better understand ICU syntax:  
+#### ICU Syntax
+
+Simple example:
+```
+I have {numCats, number} cats.
+```
+
+**Consult these links in order to better understand ICU syntax:**  
 * [http://userguide.icu-project.org/formatparse/messages](http://userguide.icu-project.org/formatparse/messages)
 * http://formatjs.io/guides/message-syntax/
 
-This library supports the following formatting methods:
+#### Formatting Methods  
 
    * **format()**
  ```
