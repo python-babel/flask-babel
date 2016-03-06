@@ -140,8 +140,6 @@ class ICU(object):
         """Returns a list of all the locales translations exist for.  The
         list returned will be filled with actual locale objects and not just
         strings.
-
-        .. versionadded:: 0.6
         """
         dirname = os.path.join(self.app.root_path, TRANSLATIONS_PATH)
         if not os.path.isdir(dirname):
@@ -152,7 +150,7 @@ class ICU(object):
     @property
     def default_locale(self):
         """The default locale from the configuration as instance of a
-        `babel.Locale` object.
+        `icu.Locale` object.
         """
         default = self.app.config['ICU_DEFAULT_LOCALE']
         if default is None:
@@ -162,7 +160,7 @@ class ICU(object):
     @property
     def default_timezone(self):
         """The default timezone from the configuration as instance of a
-        `pytz.timezone` object.
+        `icu.TimeZone` object.
         """
         default = self.app.config['ICU_DEFAULT_TIMEZONE']
         if default is None:
@@ -194,9 +192,9 @@ def load_messages(locale):
                     messages = z
     return messages
 
-def get_message(key):
-    """Returns a ICU format message string for the given key."""
 
+def get_message(key):
+    """Returns an ICU format message string for the given key."""
     ctx = _request_ctx_stack.top
     if ctx is None:
         return None
@@ -212,9 +210,8 @@ def get_message(key):
 
 def get_messages():
     """Returns the correct icu message set that should be used for
-    this request. This will never fail and return a dummy translation
-    object if used outside of the request or if a message cannot be
-    found.
+    this request. This will never fail and returns 'None' if used
+    outside of the request or if a message cannot be found.
     """
     ctx = _request_ctx_stack.top
     if ctx is None:
@@ -228,7 +225,7 @@ def get_messages():
 
 def get_locale():
     """Returns the locale that should be used for this request as
-    `babel.Locale` object.  This returns `None` if used outside of
+    `icu.Locale` object.  Returns `None` if used outside of
     a request.
     """
     ctx = _request_ctx_stack.top
@@ -251,7 +248,7 @@ def get_locale():
 
 def get_timezone():
     """Returns the timezone that should be used for this request as
-    `pytz.timezone` object.  This returns `None` if used outside of
+    `an icu.TimeZone` object.  Returns `None` if used outside of
     a request.
     """
     ctx = _request_ctx_stack.top
@@ -296,9 +293,8 @@ def format_datetime(datetime=None, format=None, rebase=True):
     """Return a date formatted according to the given pattern.  If no
     :class:`~datetime.datetime` object is passed, the current time is
     assumed.  By default rebasing happens which causes the object to
-    be converted to the users's timezone (as returned by
-    :func:`to_user_timezone`).  This function formats both date and
-    time.
+    be converted to the users's timezone.  This function formats both
+    date and time.
 
     The format parameter can either be ``'short'``, ``'medium'``,
     ``'long'`` or ``'full'`` (in which cause the language's default for
@@ -366,6 +362,8 @@ def format_time(time=None, format=None, rebase=True):
 def _date_format(datetime, rebase, datetime_type, format):
     """Internal helper that looks up and creates the correct DateFormat
     object, and then uses it to format the date string and return it.
+    If rebase is set to true, it automatically reformats the time to the
+    user's timezone.
     """
     locale = get_locale()
     icu = _request_ctx_stack.top.app.extensions['icu']
