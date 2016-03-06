@@ -13,7 +13,7 @@ Simple example:
 I have {numCats, number} cats.
 ```
 
-**Consult these links in order to better understand ICU syntax:**  
+Consult these links in order to better understand ICU syntax:  
 * [http://userguide.icu-project.org/formatparse/messages](http://userguide.icu-project.org/formatparse/messages)
 * http://formatjs.io/guides/message-syntax/
 
