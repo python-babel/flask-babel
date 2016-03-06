@@ -23,7 +23,7 @@ This library supports the following formatting methods:
  format_time(datetime(2010, 4, 12, 13, 46))
  # => 1:46:00 PM
  ```
-   * **format_datetime()**
+   * **format_datetime()**  
  ```python
  format_datetime(datetime(2010, 4, 12, 13, 46))
  # => Apr 12, 2010, 3:46:00 PM
