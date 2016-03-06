@@ -18,13 +18,6 @@ from flask import _request_ctx_stack
 from icu import (Locale, MessageFormat, DateFormat, SimpleDateFormat,
                  Formattable, TimeZone, ICUtzinfo, NumberFormat, DecimalFormat)
 from werkzeug import ImmutableDict
-try:
-    from pytz.gae import pytz
-except ImportError:
-    from pytz import timezone, UTC
-else:
-    timezone = pytz.timezone
-    UTC = pytz.UTC
 
 from flask_icu._compat import string_types
 
