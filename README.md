@@ -10,7 +10,10 @@ ICU.
 
 Simple example:
 ```
-I have {numCats, number} cats.
+I have {numCats, plural
+  =0 {no cats}
+  one {one cat}
+  other {{numCats} cats}}.
 ```
 
 Consult these links in order to better understand ICU syntax:  
