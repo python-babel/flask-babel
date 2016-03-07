@@ -3,9 +3,10 @@
     flaskext.icu
     ~~~~~~~~~~~~
 
-    Implements i18n/l10n support for Flask applications based on PyICU.
+    Implements i18n/l10n support for Flask applications based on PyICU. The
+    interface is derived from [Flask-Babel](https://pythonhosted.org/Flask-Babel/).
 
-    :copyright: (c) 2016 by Ethan Miller
+    :copyright: (c) 2016 by Ethan Miller (based on Flask-Babel)
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import absolute_import
