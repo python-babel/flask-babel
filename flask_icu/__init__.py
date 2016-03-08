@@ -183,7 +183,7 @@ def load_messages(locale):
                     if os.path.isdir(os.path.join(dirname, name))]
     messages = {}
     if locale not in locales_list:
-        raise Exception('No locale ICU message files found for the locale: %s' % locale)
+        raise Exception('No locale ICU message files found for the locale: {}'.format(locale))
     else:
         for subdir, dirs, files in os.walk(dirname + '/' + locale):
             for file in files:
@@ -361,7 +361,7 @@ def _date_format(datetime, rebase, datetime_type, format):
     if format is None:
         format = icu.date_formats[datetime_type]
     if format in ('short', 'medium', 'long', 'full'):
-        tmp = icu.date_formats["%s.%s" % (datetime_type, format)]
+        tmp = icu.date_formats["{0}.{1}".format(datetime_type, format)]
         is_custom = False if tmp is None else True
         format = tmp if is_custom else icu.icu_date_formats[format]
     if is_custom:
