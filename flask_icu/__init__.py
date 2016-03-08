@@ -101,7 +101,15 @@ class ICU(object):
         self.timezone_selector_func = None
 
         if self._configure_jinja:
-            app.jinja_env.globals.update(format=format)
+            app.jinja_env.globals.update(
+                format=format,
+                format_date=format_date,
+                format_time=format_time,
+                format_datetime=format_datetime,
+                format_number=format_number,
+                format_decimal=format_decimal,
+                format_scientific=format_scientific,
+                format_percent=format_percent)
 
     def localeselector(self, f):
         """Registers a callback function for locale selection.  The default
