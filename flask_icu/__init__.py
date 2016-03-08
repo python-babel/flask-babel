@@ -281,8 +281,8 @@ def icu_refresh():
 
         user.timezone = request.form['timezone']
         user.locale = request.form['locale']
-        refresh()
-        flash(gettext('Language was changed'))
+        icu_refresh()
+        flash(format('Language was changed'))
 
     Without that refresh, the :func:`~flask.flash` function would probably
     return English text and a now German page.
