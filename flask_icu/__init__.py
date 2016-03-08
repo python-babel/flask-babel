@@ -189,9 +189,7 @@ def load_messages(locale):
             for file in files:
                 with open(subdir + '/' + file) as data_file:
                     data = json.load(data_file)
-                    z = messages.copy()
-                    z.update(data)
-                    messages = z
+                    messages.update(data)
     return messages
 
 
