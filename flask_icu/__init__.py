@@ -385,9 +385,7 @@ def format_number(number):
     :return: the formatted number
     :rtype: unicode
     """
-    locale = get_locale()
-    formatter = NumberFormat.createInstance(locale)
-    return formatter.format(number)
+    return NumberFormat.createInstance(get_locale()).format(number)
 
 
 # TODO: Enable a custom 'format' argment on this method like in flask-babel?
