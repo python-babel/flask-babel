@@ -367,11 +367,11 @@ def _date_format(datetime, rebase, datetime_type, format):
     if is_custom:
         formatter = SimpleDateFormat(format, locale)
     else:
-        if datetime_type is 'time':
+        if datetime_type == 'time':
             formatter = DateFormat.createTimeInstance(format, locale)
-        if datetime_type is 'date':
+        if datetime_type == 'date':
             formatter = DateFormat.createDateInstance(format, locale)
-        if datetime_type is 'datetime':
+        if datetime_type == 'datetime':
             formatter = DateFormat.createDateTimeInstance(format, format, locale)
     if rebase:
         formatter.setTimeZone(get_timezone())
