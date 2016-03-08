@@ -166,6 +166,13 @@ class MessageFormattingTestCases(unittest.TestCase):
             icu_refresh()
             assert format('Hello {name}!', {'name': 'Peter'}) == 'Hallo Peter!'
 
+    def test_non_existant_message(self):
+        app = flask.Flask(__name__)
+        icu = ICU(app, default_locale='en')
+
+        with app.test_request_context():
+            assert format('This message does not exist') == 'This message does not exist'
+
 
     def test_icu_plural(self):
         app = flask.Flask(__name__)
