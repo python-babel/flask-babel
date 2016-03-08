@@ -357,6 +357,7 @@ def _date_format(datetime, rebase, datetime_type, format):
     """
     locale = get_locale()
     icu = _request_ctx_stack.top.app.extensions['icu']
+    is_custom = False
     if format is None:
         format = icu.date_formats[datetime_type]
     if format in ('short', 'medium', 'long', 'full'):
