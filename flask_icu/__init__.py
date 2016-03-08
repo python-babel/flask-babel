@@ -201,11 +201,14 @@ def get_message(key):
     messages = getattr(ctx, 'icu_messages', None)
     if messages is None:
         messages = get_messages()
-    if key in messages:
-        msg = messages[key]
-    else:
-        msg = key
-    return msg
+    # if key in messages:
+    #     msg = messages[key]
+    # else:
+    #     msg = key
+    try:
+        return messages[key]
+    except KeyError:
+        return key
 
 
 def get_messages():
