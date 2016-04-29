@@ -145,7 +145,6 @@ class Babel(object):
         self.timezone_selector_func = f
         return f
 
-
     def list_translations(self):
         """Returns a list of all the locales translations exist for.  The
         list returned will be filled with actual locale objects and not just
@@ -267,25 +266,30 @@ def refresh():
 
 @contextmanager
 def force_locale(locale):
-    """Temporarily overrides the currently selected locale.  Sometimes
-    it is useful to switch the current locale to different one, do
-    some tasks and then revert back to the original one. For example,
-    if the user uses German on the web site, but you want to send
-    them an email in English, you can use this function as a context
-    manager::
+    """Temporarily overrides the currently selected locale.
+
+    Sometimes it is useful to switch the current locale to different one, do
+    some tasks and then revert back to the original one. For example, if the
+    user uses German on the web site, but you want to send them an email in
+    English, you can use this function as a context manager::
 
         with force_locale('en_US'):
             send_email(gettext('Hello!'), ...)
+
+    :param locale: The locale to temporary switch to (ex: 'en_US').
     """
     ctx = _request_ctx_stack.top
     if ctx is None:
         yield
         return
+
     babel = ctx.app.extensions['babel']
+
     orig_locale_selector_func = babel.locale_selector_func
     orig_attrs = {}
     for key in ('babel_translations', 'babel_locale'):
         orig_attrs[key] = getattr(ctx, key, None)
+
     try:
         babel.locale_selector_func = lambda: locale
         for key in orig_attrs:
@@ -419,7 +423,7 @@ def _date_format(formatter, obj, format, rebase, **extra):
 
 def format_number(number):
     """Return the given number formatted for the locale in request
-    
+
     :param number: the number to format
     :return: the formatted number
     :rtype: unicode
