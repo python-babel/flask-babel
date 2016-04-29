@@ -18,7 +18,8 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
 
 from datetime import datetime
 from contextlib import contextmanager
-from flask import _request_ctx_stack
+from flask import current_app, request
+from flask.ctx import has_request_context
 from babel import dates, numbers, support, Locale
 from werkzeug import ImmutableDict
 try:
@@ -187,14 +188,16 @@ def get_translations():
     object if used outside of the request or if a translation cannot be
     found.
     """
-    ctx = _request_ctx_stack.top
+    ctx = _get_current_context()
     if ctx is None:
         return None
+
     translations = getattr(ctx, 'babel_translations', None)
     if translations is None:
-        dirname = os.path.join(ctx.app.root_path, 'translations')
+        dirname = os.path.join(current_app.root_path, 'translations')
         translations = support.Translations.load(dirname, [get_locale()])
         ctx.babel_translations = translations
+
     return translations
 
 
@@ -203,12 +206,12 @@ def get_locale():
     `babel.Locale` object.  This returns `None` if used outside of
     a request.
     """
-    ctx = _request_ctx_stack.top
+    ctx = _get_current_context()
     if ctx is None:
         return None
     locale = getattr(ctx, 'babel_locale', None)
     if locale is None:
-        babel = ctx.app.extensions['babel']
+        babel = current_app.extensions['babel']
         if babel.locale_selector_func is None:
             locale = babel.default_locale
         else:
@@ -226,10 +229,10 @@ def get_timezone():
     `pytz.timezone` object.  This returns `None` if used outside of
     a request.
     """
-    ctx = _request_ctx_stack.top
+    ctx = _get_current_context()
     tzinfo = getattr(ctx, 'babel_tzinfo', None)
     if tzinfo is None:
-        babel = ctx.app.extensions['babel']
+        babel = current_app.extensions['babel']
         if babel.timezone_selector_func is None:
             tzinfo = babel.default_timezone
         else:
@@ -258,7 +261,7 @@ def refresh():
     Without that refresh, the :func:`~flask.flash` function would probably
     return English text and a now German page.
     """
-    ctx = _request_ctx_stack.top
+    ctx = _get_current_context()
     for key in 'babel_locale', 'babel_tzinfo', 'babel_translations':
         if hasattr(ctx, key):
             delattr(ctx, key)
@@ -278,12 +281,12 @@ def force_locale(locale):
 
     :param locale: The locale to temporary switch to (ex: 'en_US').
     """
-    ctx = _request_ctx_stack.top
+    ctx = _get_current_context()
     if ctx is None:
         yield
         return
 
-    babel = ctx.app.extensions['babel']
+    babel = current_app.extensions['babel']
 
     orig_locale_selector_func = babel.locale_selector_func
     orig_attrs = {}
@@ -305,7 +308,7 @@ def _get_format(key, format):
     """A small helper for the datetime formatting functions.  Looks up
     format defaults for different kinds.
     """
-    babel = _request_ctx_stack.top.app.extensions['babel']
+    babel = current_app.extensions['babel']
     if format is None:
         format = babel.date_formats[key]
     if format in ('short', 'medium', 'full', 'long'):
@@ -565,3 +568,11 @@ def lazy_pgettext(context, string, **variables):
     """
     from speaklater import make_lazy_string
     return make_lazy_string(pgettext, context, string, **variables)
+
+
+def _get_current_context():
+    if has_request_context():
+        return request
+
+    if current_app:
+        return current_app
