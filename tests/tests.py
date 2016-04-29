@@ -24,6 +24,35 @@ class IntegrationTestCase(unittest.TestCase):
         with app.app_context():
             assert isinstance(get_translations(), NullTranslations)
 
+    def test_multiple_directories(self):
+        """
+        Ensure we can load translations from multiple directories.
+        """
+        b = babel.Babel()
+        app = flask.Flask(__name__)
+
+        app.config.update({
+            'BABEL_TRANSLATION_DIRECTORIES': ';'.join((
+                'translations',
+                'renamed_translations'
+            )),
+            'BABEL_DEFAULT_LOCALE': 'de_DE'
+        })
+
+        b.init_app(app)
+
+        with app.test_request_context():
+            translations = b.list_translations()
+
+            assert(len(translations) == 2)
+            assert(str(translations[0]) == 'de')
+            assert(str(translations[1]) == 'de')
+
+            assert gettext(
+                u'Hello %(name)s!',
+                name='Peter'
+            ) == 'Hallo Peter!'
+
 
 class DateFormattingTestCase(unittest.TestCase):
 

@@ -152,18 +152,24 @@ class Babel(object):
 
         .. versionadded:: 0.6
         """
-        dirname = os.path.join(self.app.root_path, 'translations')
-        if not os.path.isdir(dirname):
-            return []
         result = []
-        for folder in os.listdir(dirname):
-            locale_dir = os.path.join(dirname, folder, 'LC_MESSAGES')
-            if not os.path.isdir(locale_dir):
+
+        for dirname in self.translation_directories:
+            if not os.path.isdir(dirname):
                 continue
-            if filter(lambda x: x.endswith('.mo'), os.listdir(locale_dir)):
-                result.append(Locale.parse(folder))
+
+            for folder in os.listdir(dirname):
+                locale_dir = os.path.join(dirname, folder, 'LC_MESSAGES')
+                if not os.path.isdir(locale_dir):
+                    continue
+
+                if filter(lambda x: x.endswith('.mo'), os.listdir(locale_dir)):
+                    result.append(Locale.parse(folder))
+
+        # If not other translations are found, add the default locale.
         if not result:
             result.append(Locale.parse(self._default_locale))
+
         return result
 
     @property
@@ -180,6 +186,19 @@ class Babel(object):
         """
         return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
 
+    @property
+    def translation_directories(self):
+        directories = self.app.config.get(
+            'BABEL_TRANSLATION_DIRECTORIES',
+            'translations'
+        ).split(';')
+
+        for path in directories:
+            if os.path.isabs(path):
+                yield path
+            else:
+                yield os.path.join(self.app.root_path, path)
+
 
 def get_translations():
     """Returns the correct gettext translations that should be used for
@@ -188,10 +207,20 @@ def get_translations():
     found.
     """
     ctx = _get_current_context()
+
     translations = getattr(ctx, 'babel_translations', None)
     if translations is None:
-        dirname = os.path.join(current_app.root_path, 'translations')
-        translations = support.Translations.load(dirname, [get_locale()])
+        translations = support.Translations()
+
+        babel = current_app.extensions['babel']
+        for dirname in babel.translation_directories:
+            translations.merge(
+                support.Translations.load(
+                    dirname,
+                    [get_locale()]
+                )
+            )
+
         ctx.babel_translations = translations
 
     return translations
