@@ -1,4 +1,4 @@
-# Flask Babel
+# Flask Babel - 0.9.0
 
 [![Build Status](https://travis-ci.org/python-babel/flask-babel.svg?branch=master)](https://travis-ci.org/python-babel/flask-babel)
 
