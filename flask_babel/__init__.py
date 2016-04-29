@@ -17,6 +17,7 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
     os.environ['LC_CTYPE'] = 'en_US.utf-8'
 
 from datetime import datetime
+from contextlib import contextmanager
 from flask import _request_ctx_stack
 from babel import dates, numbers, support, Locale
 from werkzeug import ImmutableDict
@@ -262,6 +263,38 @@ def refresh():
     for key in 'babel_locale', 'babel_tzinfo', 'babel_translations':
         if hasattr(ctx, key):
             delattr(ctx, key)
+
+
+@contextmanager
+def force_locale(locale):
+    """Temporarily overrides the currently selected locale.  Sometimes
+    it is useful to switch the current locale to different one, do
+    some tasks and then revert back to the original one. For example,
+    if the user uses German on the web site, but you want to send
+    them an email in English, you can use this function as a context
+    manager::
+
+        with force_locale('en_US'):
+            send_email(gettext('Hello!'), ...)
+    """
+    ctx = _request_ctx_stack.top
+    if ctx is None:
+        yield
+        return
+    babel = ctx.app.extensions['babel']
+    orig_locale_selector_func = babel.locale_selector_func
+    orig_attrs = {}
+    for key in ('babel_translations', 'babel_locale'):
+        orig_attrs[key] = getattr(ctx, key, None)
+    try:
+        babel.locale_selector_func = lambda: locale
+        for key in orig_attrs:
+            setattr(ctx, key, None)
+        yield
+    finally:
+        babel.locale_selector_func = orig_locale_selector_func
+        for key, value in orig_attrs.items():
+            setattr(ctx, key, value)
 
 
 def _get_format(key, format):

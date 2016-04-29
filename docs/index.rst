@@ -290,6 +290,8 @@ Low-Level API
 
 .. autofunction:: refresh
 
+.. autofunction:: force_locale
+
 
 .. _Flask: http://flask.pocoo.org/
 .. _babel: http://babel.edgewall.org/
