@@ -188,9 +188,6 @@ def get_translations():
     found.
     """
     ctx = _get_current_context()
-    if ctx is None:
-        return None
-
     translations = getattr(ctx, 'babel_translations', None)
     if translations is None:
         dirname = os.path.join(current_app.root_path, 'translations')

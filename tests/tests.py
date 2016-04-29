@@ -10,8 +10,19 @@ from decimal import Decimal
 import flask
 from datetime import datetime
 import flask_babel as babel
-from flask_babel import gettext, ngettext, lazy_gettext
+from flask_babel import gettext, ngettext, lazy_gettext, get_translations
+from babel.support import NullTranslations
 from flask_babel._compat import text_type
+
+
+class IntegrationTestCase(unittest.TestCase):
+    def test_no_request_context(self):
+        b = babel.Babel()
+        app = flask.Flask(__name__)
+        b.init_app(app)
+
+        with app.app_context():
+            assert isinstance(get_translations(), NullTranslations)
 
 
 class DateFormattingTestCase(unittest.TestCase):
