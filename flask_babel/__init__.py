@@ -532,8 +532,9 @@ def gettext(string, **variables):
     """
     t = get_translations()
     if t is None:
-        return string % variables
-    return t.ugettext(string) % variables
+        return string if not variables else string % variables
+    s = t.ugettext(string)
+    return s if not variables else s % variables
 _ = gettext
 
 
@@ -552,8 +553,11 @@ def ngettext(singular, plural, num, **variables):
     variables.setdefault('num', num)
     t = get_translations()
     if t is None:
-        return (singular if num == 1 else plural) % variables
-    return t.ungettext(singular, plural, num) % variables
+        s = singular if num == 1 else plural
+        return s if not variables else s % variables
+
+    s = t.ungettext(singular, plural, num)
+    return s if not variables else s % variables
 
 
 def pgettext(context, string, **variables):
@@ -563,8 +567,9 @@ def pgettext(context, string, **variables):
     """
     t = get_translations()
     if t is None:
-        return string % variables
-    return t.upgettext(context, string) % variables
+        return string if not variables else string % variables
+    s = t.upgettext(context, string)
+    return s if not variables else s % variables
 
 
 def npgettext(context, singular, plural, num, **variables):
@@ -575,8 +580,10 @@ def npgettext(context, singular, plural, num, **variables):
     variables.setdefault('num', num)
     t = get_translations()
     if t is None:
-        return (singular if num == 1 else plural) % variables
-    return t.unpgettext(context, singular, plural, num) % variables
+        s = singular if num == 1 else plural
+        return s if not variables else s % variables
+    s = t.unpgettext(context, singular, plural, num)
+    return s if not variables else s % variables
 
 
 def lazy_gettext(string, **variables):

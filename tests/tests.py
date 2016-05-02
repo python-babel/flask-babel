@@ -229,6 +229,18 @@ class GettextTestCase(unittest.TestCase):
         assert len(translations) == 1
         assert str(translations[0]) == 'de'
 
+    def test_no_formatting(self):
+        """
+        Ensure we don't format strings unless a variable is passed.
+        """
+        app = flask.Flask(__name__)
+        babel.Babel(app)
+
+        with app.test_request_context():
+            assert gettext(u'Test %s') == u'Test %s'
+            assert gettext(u'Test %(name)s', name=u'test') == u'Test test'
+            assert gettext(u'Test %s') % 'test' == u'Test test'
+
 
 if __name__ == '__main__':
     unittest.main()
