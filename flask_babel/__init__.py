@@ -360,7 +360,8 @@ def format_time(time=None, format=None, rebase=True):
     return _date_format(dates.format_time, time, format, rebase)
 
 
-def format_timedelta(datetime_or_timedelta, granularity='second'):
+def format_timedelta(datetime_or_timedelta, granularity='second',
+                     add_direction=False):
     """Format the elapsed time from the given date to now or the given
     timedelta.  This currently requires an unreleased development
     version of Babel.
@@ -371,6 +372,7 @@ def format_timedelta(datetime_or_timedelta, granularity='second'):
     if isinstance(datetime_or_timedelta, datetime):
         datetime_or_timedelta = datetime.utcnow() - datetime_or_timedelta
     return dates.format_timedelta(datetime_or_timedelta, granularity,
+                                  add_direction=add_direction,
                                   locale=get_locale())
 
 
