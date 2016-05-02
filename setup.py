@@ -2,17 +2,20 @@
 Flask-Babel
 -----------
 
-Adds i18n/l10n support to Flask applications with the help of the
-`Babel`_ library.
+Adds i18n/l10n support to `Flask`_ applications with the help
+of the `Babel`_ library.
 
 Links
 `````
 
-* `documentation <http://packages.python.org/Flask-Babel>`_
-* `development version
-  <http://github.com/mitsuhiko/flask-babel/zipball/master#egg=Flask-Babel-dev>`_
+* `documentation`_
+* `development version`_
 
-.. _Babel: http://babel.edgewall.org/
+.. _documentation: http://packages.python.org/Flask-Babel
+.. _development version: http://
+   github.com/mitsuhiko/flask-babel/zipball/master#egg=Flask-Babel-dev
+.. _Babel: http://babel.pocoo.org/
+.. _Flask: http://flask.pocoo.org/
 
 """
 from setuptools import setup
