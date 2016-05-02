@@ -472,18 +472,28 @@ def format_decimal(number, format=None):
     return numbers.format_decimal(number, format=format, locale=locale)
 
 
-def format_currency(number, currency, format=None):
+def format_currency(number, currency, format=None, currency_digits=True,
+                    format_type='standard'):
     """Return the given number formatted for the locale in request
 
     :param number: the number to format
     :param currency: the currency code
     :param format: the format to use
+    :param currency_digits: use the currency’s number of decimal digits
+                            [default: True]
+    :param format_type: the currency format type to use
+                        [default: standard]
     :return: the formatted number
     :rtype: unicode
     """
     locale = get_locale()
     return numbers.format_currency(
-        number, currency, format=format, locale=locale
+        number,
+        currency,
+        format=format,
+        locale=locale,
+        currency_digits=currency_digits,
+        format_type=format_type
     )
 
 
