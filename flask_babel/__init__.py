@@ -56,7 +56,7 @@ class Babel(object):
         'datetime.long':    None,
     })
 
-    def __init__(self, app=None, default_locale='en', default_timezone='UTC',
+    def __init__(self, app=None, pkg_translations=None, default_locale='en', default_timezone='UTC',
                  date_formats=None, configure_jinja=True):
         self._default_locale = default_locale
         self._default_timezone = default_timezone
@@ -65,13 +65,14 @@ class Babel(object):
         self.app = app
 
         if app is not None:
-            self.init_app(app)
+            self.init_app(app, pkg_translations)
 
-    def init_app(self, app):
+    def init_app(self, app, pkg_translations=None):
         """Set up this instance for use with *app*, if no app was passed to
         the constructor.
         """
         self.app = app
+        self.pkg_translations = pkg_translations
         app.babel_instance = self
         if not hasattr(app, 'extensions'):
             app.extensions = {}
@@ -190,9 +191,15 @@ def get_translations():
     if ctx is None:
         return None
     translations = getattr(ctx, 'babel_translations', None)
-    if translations is None:
+    if translations is None and hasattr(ctx.app.extensions.get('babel'), 'pkg_translations'):
         dirname = os.path.join(ctx.app.root_path, 'translations')
         translations = support.Translations.load(dirname, [get_locale()])
+        pkg_translations = ctx.app.extensions.get('babel').pkg_translations
+        if pkg_translations:
+            if not hasattr(translations, 'merge'):
+                translations = support.Translations.load(pkg_translations.__path__[0], [get_locale()])
+            else:
+                translations.merge(support.Translations.load(pkg_translations.__path__[0], [get_locale()]))
         ctx.babel_translations = translations
     return translations
 
