@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-    flaskext.babel
-    ~~~~~~~~~~~~~~
+    flask_babel
+    ~~~~~~~~~~~
 
     Implements i18n/l10n support for Flask applications based on Babel.
 
     :copyright: (c) 2013 by Armin Ronacher, Daniel Neuhäuser.
     :license: BSD, see LICENSE for more details.
 """
+
+__version__ = '0.9'
+
 from __future__ import absolute_import
 import os
 
