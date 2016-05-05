@@ -161,11 +161,6 @@ To use such a lazy string, use the :func:`lazy_gettext` function::
 So how does Flask-Babel find the translations?  Well first you have to
 create some.  Here is how you do it:
 
-In Jinja2 templates
-```````````````````
-Flask-Babel uses the `i18n`_ extension of Jinja2.
-
-
 Translating Applications
 ------------------------
 
@@ -295,9 +290,10 @@ Low-Level API
 
 .. autofunction:: refresh
 
+.. autofunction:: force_locale
+
 
 .. _Flask: http://flask.pocoo.org/
 .. _babel: http://babel.edgewall.org/
 .. _pytz: http://pytz.sourceforge.net/
 .. _speaklater: http://pypi.python.org/pypi/speaklater
-.. _i18n: http://jinja.pocoo.org/docs/templates/#i18n-in-templates

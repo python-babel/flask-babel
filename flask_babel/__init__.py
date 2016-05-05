@@ -17,7 +17,9 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
     os.environ['LC_CTYPE'] = 'en_US.utf-8'
 
 from datetime import datetime
-from flask import _request_ctx_stack
+from contextlib import contextmanager
+from flask import current_app, request
+from flask.ctx import has_request_context
 from babel import dates, numbers, support, Locale
 from werkzeug import ImmutableDict
 try:
@@ -63,6 +65,8 @@ class Babel(object):
         self._date_formats = date_formats
         self._configure_jinja = configure_jinja
         self.app = app
+        self.locale_selector_func = None
+        self.timezone_selector_func = None
 
         if app is not None:
             self.init_app(app)
@@ -94,9 +98,6 @@ class Babel(object):
         #:      is anything but `None` this is used as new format string.
         #:      otherwise the default for that language is used.
         self.date_formats = self._date_formats
-
-        self.locale_selector_func = None
-        self.timezone_selector_func = None
 
         if self._configure_jinja:
             app.jinja_env.filters.update(
@@ -151,18 +152,24 @@ class Babel(object):
 
         .. versionadded:: 0.6
         """
-        dirname = os.path.join(self.app.root_path, 'translations')
-        if not os.path.isdir(dirname):
-            return []
         result = []
-        for folder in os.listdir(dirname):
-            locale_dir = os.path.join(dirname, folder, 'LC_MESSAGES')
-            if not os.path.isdir(locale_dir):
+
+        for dirname in self.translation_directories:
+            if not os.path.isdir(dirname):
                 continue
-            if filter(lambda x: x.endswith('.mo'), os.listdir(locale_dir)):
-                result.append(Locale.parse(folder))
+
+            for folder in os.listdir(dirname):
+                locale_dir = os.path.join(dirname, folder, 'LC_MESSAGES')
+                if not os.path.isdir(locale_dir):
+                    continue
+
+                if filter(lambda x: x.endswith('.mo'), os.listdir(locale_dir)):
+                    result.append(Locale.parse(folder))
+
+        # If not other translations are found, add the default locale.
         if not result:
             result.append(Locale.parse(self._default_locale))
+
         return result
 
     @property
@@ -179,6 +186,19 @@ class Babel(object):
         """
         return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
 
+    @property
+    def translation_directories(self):
+        directories = self.app.config.get(
+            'BABEL_TRANSLATION_DIRECTORIES',
+            'translations'
+        ).split(';')
+
+        for path in directories:
+            if os.path.isabs(path):
+                yield path
+            else:
+                yield os.path.join(self.app.root_path, path)
+
 
 def get_translations():
     """Returns the correct gettext translations that should be used for
@@ -186,14 +206,23 @@ def get_translations():
     object if used outside of the request or if a translation cannot be
     found.
     """
-    ctx = _request_ctx_stack.top
-    if ctx is None:
-        return None
+    ctx = _get_current_context()
+
     translations = getattr(ctx, 'babel_translations', None)
     if translations is None:
-        dirname = os.path.join(ctx.app.root_path, 'translations')
-        translations = support.Translations.load(dirname, [get_locale()])
+        translations = support.Translations()
+
+        babel = current_app.extensions['babel']
+        for dirname in babel.translation_directories:
+            translations.merge(
+                support.Translations.load(
+                    dirname,
+                    [get_locale()]
+                )
+            )
+
         ctx.babel_translations = translations
+
     return translations
 
 
@@ -202,12 +231,12 @@ def get_locale():
     `babel.Locale` object.  This returns `None` if used outside of
     a request.
     """
-    ctx = _request_ctx_stack.top
+    ctx = _get_current_context()
     if ctx is None:
         return None
     locale = getattr(ctx, 'babel_locale', None)
     if locale is None:
-        babel = ctx.app.extensions['babel']
+        babel = current_app.extensions['babel']
         if babel.locale_selector_func is None:
             locale = babel.default_locale
         else:
@@ -225,10 +254,10 @@ def get_timezone():
     `pytz.timezone` object.  This returns `None` if used outside of
     a request.
     """
-    ctx = _request_ctx_stack.top
+    ctx = _get_current_context()
     tzinfo = getattr(ctx, 'babel_tzinfo', None)
     if tzinfo is None:
-        babel = ctx.app.extensions['babel']
+        babel = current_app.extensions['babel']
         if babel.timezone_selector_func is None:
             tzinfo = babel.default_timezone
         else:
@@ -257,17 +286,54 @@ def refresh():
     Without that refresh, the :func:`~flask.flash` function would probably
     return English text and a now German page.
     """
-    ctx = _request_ctx_stack.top
+    ctx = _get_current_context()
     for key in 'babel_locale', 'babel_tzinfo', 'babel_translations':
         if hasattr(ctx, key):
             delattr(ctx, key)
+
+
+@contextmanager
+def force_locale(locale):
+    """Temporarily overrides the currently selected locale.
+
+    Sometimes it is useful to switch the current locale to different one, do
+    some tasks and then revert back to the original one. For example, if the
+    user uses German on the web site, but you want to send them an email in
+    English, you can use this function as a context manager::
+
+        with force_locale('en_US'):
+            send_email(gettext('Hello!'), ...)
+
+    :param locale: The locale to temporary switch to (ex: 'en_US').
+    """
+    ctx = _get_current_context()
+    if ctx is None:
+        yield
+        return
+
+    babel = current_app.extensions['babel']
+
+    orig_locale_selector_func = babel.locale_selector_func
+    orig_attrs = {}
+    for key in ('babel_translations', 'babel_locale'):
+        orig_attrs[key] = getattr(ctx, key, None)
+
+    try:
+        babel.locale_selector_func = lambda: locale
+        for key in orig_attrs:
+            setattr(ctx, key, None)
+        yield
+    finally:
+        babel.locale_selector_func = orig_locale_selector_func
+        for key, value in orig_attrs.items():
+            setattr(ctx, key, value)
 
 
 def _get_format(key, format):
     """A small helper for the datetime formatting functions.  Looks up
     format defaults for different kinds.
     """
-    babel = _request_ctx_stack.top.app.extensions['babel']
+    babel = current_app.extensions['babel']
     if format is None:
         format = babel.date_formats[key]
     if format in ('short', 'medium', 'full', 'long'):
@@ -371,9 +437,12 @@ def format_timedelta(datetime_or_timedelta, granularity='second',
     """
     if isinstance(datetime_or_timedelta, datetime):
         datetime_or_timedelta = datetime.utcnow() - datetime_or_timedelta
-    return dates.format_timedelta(datetime_or_timedelta, granularity,
-                                  add_direction=add_direction,
-                                  locale=get_locale())
+    return dates.format_timedelta(
+        datetime_or_timedelta,
+        granularity,
+        add_direction=add_direction,
+        locale=get_locale()
+    )
 
 
 def _date_format(formatter, obj, format, rebase, **extra):
@@ -408,18 +477,28 @@ def format_decimal(number, format=None):
     return numbers.format_decimal(number, format=format, locale=locale)
 
 
-def format_currency(number, currency, format=None):
+def format_currency(number, currency, format=None, currency_digits=True,
+                    format_type='standard'):
     """Return the given number formatted for the locale in request
 
     :param number: the number to format
     :param currency: the currency code
     :param format: the format to use
+    :param currency_digits: use the currency’s number of decimal digits
+                            [default: True]
+    :param format_type: the currency format type to use
+                        [default: standard]
     :return: the formatted number
     :rtype: unicode
     """
     locale = get_locale()
     return numbers.format_currency(
-        number, currency, format=format, locale=locale
+        number,
+        currency,
+        format=format,
+        locale=locale,
+        currency_digits=currency_digits,
+        format_type=format_type
     )
 
 
@@ -458,8 +537,9 @@ def gettext(string, **variables):
     """
     t = get_translations()
     if t is None:
-        return string % variables
-    return t.ugettext(string) % variables
+        return string if not variables else string % variables
+    s = t.ugettext(string)
+    return s if not variables else s % variables
 _ = gettext
 
 
@@ -478,8 +558,11 @@ def ngettext(singular, plural, num, **variables):
     variables.setdefault('num', num)
     t = get_translations()
     if t is None:
-        return (singular if num == 1 else plural) % variables
-    return t.ungettext(singular, plural, num) % variables
+        s = singular if num == 1 else plural
+        return s if not variables else s % variables
+
+    s = t.ungettext(singular, plural, num)
+    return s if not variables else s % variables
 
 
 def pgettext(context, string, **variables):
@@ -489,8 +572,9 @@ def pgettext(context, string, **variables):
     """
     t = get_translations()
     if t is None:
-        return string % variables
-    return t.upgettext(context, string) % variables
+        return string if not variables else string % variables
+    s = t.upgettext(context, string)
+    return s if not variables else s % variables
 
 
 def npgettext(context, singular, plural, num, **variables):
@@ -501,8 +585,10 @@ def npgettext(context, singular, plural, num, **variables):
     variables.setdefault('num', num)
     t = get_translations()
     if t is None:
-        return (singular if num == 1 else plural) % variables
-    return t.unpgettext(context, singular, plural, num) % variables
+        s = singular if num == 1 else plural
+        return s if not variables else s % variables
+    s = t.unpgettext(context, singular, plural, num)
+    return s if not variables else s % variables
 
 
 def lazy_gettext(string, **variables):
@@ -529,3 +615,11 @@ def lazy_pgettext(context, string, **variables):
     """
     from speaklater import make_lazy_string
     return make_lazy_string(pgettext, context, string, **variables)
+
+
+def _get_current_context():
+    if has_request_context():
+        return request
+
+    if current_app:
+        return current_app
