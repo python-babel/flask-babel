@@ -218,9 +218,11 @@ class GettextTestCase(unittest.TestCase):
         yes = lazy_gettext(u'Yes')
         with app.test_request_context():
             assert text_type(yes) == 'Ja'
+            assert yes.__html__() == 'Ja'
         app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
         with app.test_request_context():
             assert text_type(yes) == 'Yes'
+            assert yes.__html__() == 'Yes'
 
     def test_list_translations(self):
         app = flask.Flask(__name__)
