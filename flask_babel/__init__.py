@@ -59,9 +59,11 @@ class Babel(object):
     })
 
     def __init__(self, app=None, default_locale='en', default_timezone='UTC',
-                 date_formats=None, configure_jinja=True):
+                 default_domain='messages', date_formats=None,
+                 configure_jinja=True):
         self._default_locale = default_locale
         self._default_timezone = default_timezone
+        self._default_domain = default_domain
         self._date_formats = date_formats
         self._configure_jinja = configure_jinja
         self.app = app
@@ -83,6 +85,7 @@ class Babel(object):
 
         app.config.setdefault('BABEL_DEFAULT_LOCALE', self._default_locale)
         app.config.setdefault('BABEL_DEFAULT_TIMEZONE', self._default_timezone)
+        app.config.setdefault('BABEL_DOMAIN', self._default_domain)
         if self._date_formats is None:
             self._date_formats = self.default_date_formats.copy()
 
@@ -187,6 +190,12 @@ class Babel(object):
         return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
 
     @property
+    def domain(self):
+        """The message domain for the translations as a string.
+        """
+        return self.app.config['BABEL_DOMAIN']
+
+    @property
     def translation_directories(self):
         directories = self.app.config.get(
             'BABEL_TRANSLATION_DIRECTORIES',
@@ -217,7 +226,8 @@ def get_translations():
             translations.merge(
                 support.Translations.load(
                     dirname,
-                    [get_locale()]
+                    [get_locale()],
+                    babel.domain
                 )
             )
 

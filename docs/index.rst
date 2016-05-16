@@ -38,17 +38,23 @@ object after configuring the application::
     babel = Babel(app)
 
 The babel object itself can be used to configure the babel support
-further.  Babel has two configuration values that can be used to change
-some internal defaults:
+further.  Babel has the following configuration values that can be used to
+change some internal defaults:
 
-=========================== =============================================
-`BABEL_DEFAULT_LOCALE`      The default locale to use if no locale
-                            selector is registered.  This defaults
-                            to ``'en'``.
-`BABEL_DEFAULT_TIMEZONE`    The timezone to use for user facing dates.
-                            This defaults to ``'UTC'`` which also is the
-                            timezone your application must use internally.
-=========================== =============================================
+=============================== =============================================
+`BABEL_DEFAULT_LOCALE`          The default locale to use if no locale
+                                selector is registered.  This defaults
+                                to ``'en'``.
+`BABEL_DEFAULT_TIMEZONE`        The timezone to use for user facing dates.
+                                This defaults to ``'UTC'`` which also is the
+                                timezone your application must use internally.
+`BABEL_TRANSLATION_DIRECTORIES` A semi-colon (``;``) separated string of
+                                absolute and relative (to the app root) paths
+                                to translation folders. Defaults to
+                                ``translations``.
+`BABEL_DOMAIN`                  The message domain used by the application.
+                                Defaults to ``messages``.
+=============================== =============================================
 
 For more complex applications you might want to have multiple applications
 for different users which is where selector functions come in handy.  The
