@@ -194,6 +194,9 @@ class _LazyString(object):
         except Exception:
             return '<%s broken>' % self.__class__.__name__
 
+    def __hash__(self):
+        return hash(self.value)
+
 
 if __name__ == '__main__':
     import doctest
