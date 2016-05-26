@@ -1,4 +1,4 @@
-# Flask Babel - 0.10.0
+# Flask Babel - 0.11.0
 
 [![Build Status](https://travis-ci.org/python-babel/flask-babel.svg?branch=master)](https://travis-ci.org/python-babel/flask-babel)
 [![PyPI](https://img.shields.io/pypi/v/flask-babel.svg?maxAge=2592000)](https://pypi.python.org/pypi/Flask-Babel)
