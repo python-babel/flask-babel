@@ -20,7 +20,7 @@ from setuptools import setup
 
 setup(
     name='Flask-Babel',
-    version='0.10.0',
+    version='0.11.0',
     url='http://github.com/python-babel/flask-babel',
     license='BSD',
     author='Armin Ronacher',
@@ -33,7 +33,6 @@ setup(
     install_requires=[
         'Flask',
         'Babel>=2.3',
-        'speaklater>=1.2',
         'Jinja2>=2.5'
     ],
     classifiers=[

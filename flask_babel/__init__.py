@@ -11,11 +11,6 @@
 from __future__ import absolute_import
 import os
 
-# this is a workaround for a snow leopard bug that babel does not
-# work around :)
-if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
-    os.environ['LC_CTYPE'] = 'en_US.utf-8'
-
 from datetime import datetime
 from contextlib import contextmanager
 from flask import current_app, request
@@ -30,7 +25,8 @@ else:
     timezone = pytz.timezone
     UTC = pytz.UTC
 
-from flask_babel._compat import string_types, text_type
+from flask_babel._compat import string_types
+from flask_babel.speaklater import LazyString
 
 
 class Babel(object):
@@ -591,21 +587,6 @@ def npgettext(context, singular, plural, num, **variables):
     return s if not variables else s % variables
 
 
-def make_json_lazy_string(func, *args, **kwargs):
-    """Like :method:`speaklater.make_lazy_string` but returns a subclass
-    that provides an :method:`__html__` method.  That method is used by
-    :class:`flask.json.JSONEncoder` to serialize objects of unrecognized
-    types.
-    """
-    from speaklater import _LazyString
-
-    class JsonLazyString(_LazyString):
-        def __html__(self):
-            return text_type(self)
-
-    return JsonLazyString(func, args, kwargs)
-
-
 def lazy_gettext(string, **variables):
     """Like :func:`gettext` but the string returned is lazy which means
     it will be translated when it is used as an actual string.
@@ -618,7 +599,7 @@ def lazy_gettext(string, **variables):
         def index():
             return unicode(hello)
     """
-    return make_json_lazy_string(gettext, string, **variables)
+    return LazyString(gettext, string, **variables)
 
 
 def lazy_pgettext(context, string, **variables):
@@ -627,7 +608,7 @@ def lazy_pgettext(context, string, **variables):
 
     .. versionadded:: 0.7
     """
-    return make_json_lazy_string(pgettext, context, string, **variables)
+    return LazyString(pgettext, context, string, **variables)
 
 
 def _get_current_context():
