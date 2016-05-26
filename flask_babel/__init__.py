@@ -204,18 +204,23 @@ def get_translations():
     """
     ctx = _get_current_context()
 
+    if ctx is None:
+        return support.NullTranslations()
+
     translations = getattr(ctx, 'babel_translations', None)
     if translations is None:
         translations = support.Translations()
 
         babel = current_app.extensions['babel']
         for dirname in babel.translation_directories:
-            translations.merge(
-                support.Translations.load(
-                    dirname,
-                    [get_locale()]
-                )
-            )
+            catalog = support.Translations.load(dirname, [get_locale()])
+            translations.merge(catalog)
+            # FIXME: Workaround for merge() being really, really stupid. It
+            # does not copy _info, plural(), or any other instance variables
+            # populated by GNUTranslations. We probably want to stop using
+            # `support.Translations.merge` entirely.
+            if hasattr(catalog, 'plural'):
+                translations.plural = catalog.plural
 
         ctx.babel_translations = translations
 
