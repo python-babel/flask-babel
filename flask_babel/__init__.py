@@ -31,6 +31,7 @@ else:
     UTC = pytz.UTC
 
 from flask_babel._compat import string_types, text_type
+from flask_babel.speaklater import _LazyString
 
 
 class Babel(object):
@@ -597,8 +598,6 @@ def make_json_lazy_string(func, *args, **kwargs):
     :class:`flask.json.JSONEncoder` to serialize objects of unrecognized
     types.
     """
-    from speaklater import _LazyString
-
     class JsonLazyString(_LazyString):
         def __html__(self):
             return text_type(self)

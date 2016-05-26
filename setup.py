@@ -33,7 +33,6 @@ setup(
     install_requires=[
         'Flask',
         'Babel>=2.3',
-        'speaklater>=1.2',
         'Jinja2>=2.5'
     ],
     classifiers=[
