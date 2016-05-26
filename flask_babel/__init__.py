@@ -11,11 +11,6 @@
 from __future__ import absolute_import
 import os
 
-# this is a workaround for a snow leopard bug that babel does not
-# work around :)
-if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
-    os.environ['LC_CTYPE'] = 'en_US.utf-8'
-
 from datetime import datetime
 from contextlib import contextmanager
 from flask import current_app, request
