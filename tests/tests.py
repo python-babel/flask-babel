@@ -53,6 +53,13 @@ class IntegrationTestCase(unittest.TestCase):
                 name='Peter'
             ) == 'Hallo Peter!'
 
+    def test_lazy_old_style_formatting(self):
+        lazy_string = lazy_gettext(u'Hello %(name)s')
+        assert lazy_string % {u'name': u'test'} == u'Hello test'
+
+        lazy_string = lazy_gettext(u'test')
+        assert u'Hello %s' % lazy_string == u'Hello test'
+
 
 class DateFormattingTestCase(unittest.TestCase):
 

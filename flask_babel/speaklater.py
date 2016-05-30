@@ -64,3 +64,9 @@ class LazyString(object):
 
     def __hash__(self):
         return hash(text_type(self))
+
+    def __mod__(self, other):
+        return text_type(self) % other
+
+    def __rmod__(self, other):
+        return other + text_type(self)
