@@ -224,6 +224,14 @@ class GettextTestCase(unittest.TestCase):
             assert text_type(yes) == 'Yes'
             assert yes.__html__() == 'Yes'
 
+        hello = lazy_gettext(u'Hello %(name)s!')
+        app.config['BABEL_DEFAULT_LOCALE'] = 'de_DE'
+        with app.test_request_context():
+            assert hello % {'name': 'Peter'} == 'Hallo Peter!'
+        app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
+        with app.test_request_context():
+            assert hello % {'name': 'Peter'} == 'Hello Peter!'
+
     def test_list_translations(self):
         app = flask.Flask(__name__)
         b = babel.Babel(app, default_locale='de_DE')
