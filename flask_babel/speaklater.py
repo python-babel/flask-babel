@@ -9,6 +9,8 @@ class LazyString(object):
         self._kwargs = kwargs
 
     def __getattr__(self, attr):
+        if attr == "__setstate__":
+            raise AttributeError(attr)
         string = text_type(self)
         if hasattr(string, attr):
             return getattr(string, attr)
