@@ -14,6 +14,9 @@ class LazyString(object):
             return getattr(string, attr)
         raise AttributeError(attr)
 
+    def __repr__(self):
+        return "l'{0}'".format(text_type(self))
+
     def __str__(self):
         return text_type(self._func(*self._args, **self._kwargs))
 
