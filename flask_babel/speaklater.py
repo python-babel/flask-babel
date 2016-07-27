@@ -14,6 +14,12 @@ class LazyString(object):
             return getattr(string, attr)
         raise AttributeError(attr)
 
+    def __repr__(self):
+        try:
+            return "l'" + text_type(self) + "'"
+        except Exception:
+            return "<%s broken>" % self.__class__.__name__
+
     def __str__(self):
         return text_type(self._func(*self._args, **self._kwargs))
 
