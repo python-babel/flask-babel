@@ -5,6 +5,8 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
+import pickle
+
 import unittest
 from decimal import Decimal
 import flask
@@ -59,6 +61,13 @@ class IntegrationTestCase(unittest.TestCase):
 
         lazy_string = lazy_gettext(u'test')
         assert u'Hello %s' % lazy_string == u'Hello test'
+
+    def test_lazy_pickling(self):
+        lazy_string = lazy_gettext(u'Foo')
+        pickled = pickle.dumps(lazy_string)
+        unpickled = pickle.loads(pickled)
+
+        assert unpickled == lazy_string
 
 
 class DateFormattingTestCase(unittest.TestCase):
