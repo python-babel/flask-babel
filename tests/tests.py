@@ -9,6 +9,7 @@ import unittest
 from decimal import Decimal
 import flask
 from datetime import datetime
+from pytz import timezone
 from flask_icu import *
 from flask_icu._compat import text_type
 
@@ -19,53 +20,32 @@ class DateFormattingTestCase(unittest.TestCase):
         app = flask.Flask(__name__)
         icu = ICU(app)
         d = datetime(2010, 4, 12, 13, 46)
+        d_utc = timezone('UTC').localize(d)
 
         with app.test_request_context():
-            assert format_datetime(d) == 'Apr 12, 2010, 1:46:00 PM'
-            assert format_date(d) == 'Apr 12, 2010'
-            assert format_time(d) == '1:46:00 PM'
+            assert format_datetime(d_utc) == 'Apr 12, 2010, 1:46:00 PM'
+            assert format_date(d_utc) == 'Apr 12, 2010'
+            assert format_time(d_utc) == '1:46:00 PM'
 
         with app.test_request_context():
-            app.config['ICU_DEFAULT_TIMEZONE'] = 'Europe/Vienna'
-            assert format_datetime(d) == 'Apr 12, 2010, 3:46:00 PM'
-            assert format_date(d) == 'Apr 12, 2010'
-            assert format_time(d) == '3:46:00 PM'
+            app.config['ICU_DEFAULT_TIMEZONE'] = 'Europe/Berlin'
+            assert format_datetime(d_utc) == 'Apr 12, 2010, 3:46:00 PM'
+            assert format_date(d_utc) == 'Apr 12, 2010'
+            assert format_time(d_utc) == '3:46:00 PM'
 
         with app.test_request_context():
-            app.config['ICU_DEFAULT_LOCALE'] = 'de_DE'
-            assert format_datetime(d, 'long') == \
-                '12. April 2010 15:46:00 MESZ'
+            app.config['ICU_DEFAULT_LOCALE'] = 'it_IT'
+            assert format_datetime(d_utc, 'long') == \
+                '12 aprile 2010 15:46:00 CEST'
 
     def test_basics_with_none_for_defaults(self):
         app = flask.Flask(__name__)
         icu = ICU(app, None, None)
         d = datetime(2010, 4, 12, 13, 46)
+        d_utc = timezone('UTC').localize(d)
 
         with app.test_request_context():
-            assert format_datetime(d) == 'Apr 12, 2010, 1:46:00 PM'
-
-
-    def test_init_app(self):
-        app = flask.Flask(__name__)
-        icu = ICU(app)
-        icu.init_app(app)
-        d = datetime(2010, 4, 12, 13, 46)
-
-        with app.test_request_context():
-            assert format_datetime(d) == 'Apr 12, 2010, 1:46:00 PM'
-            assert format_date(d) == 'Apr 12, 2010'
-            assert format_time(d) == '1:46:00 PM'
-
-        with app.test_request_context():
-            app.config['ICU_DEFAULT_TIMEZONE'] = 'Europe/Vienna'
-            assert format_datetime(d) == 'Apr 12, 2010, 3:46:00 PM'
-            assert format_date(d) == 'Apr 12, 2010'
-            assert format_time(d) == '3:46:00 PM'
-
-        with app.test_request_context():
-            app.config['ICU_DEFAULT_LOCALE'] = 'de_DE'
-            assert format_datetime(d, 'long') == \
-                '12. April 2010 15:46:00 MESZ'
+            assert format_datetime(d_utc) == 'Apr 12, 2010, 1:46:00 PM'
 
     def test_custom_formats(self):
         app = flask.Flask(__name__)
@@ -77,14 +57,16 @@ class DateFormattingTestCase(unittest.TestCase):
         icu.date_formats['datetime'] = 'long'
         icu.date_formats['datetime.long'] = 'MMMM d, yyyy h:mm:ss a'
         d = datetime(2010, 4, 12, 13, 46)
+        d_utc= timezone('UTC').localize(d)
 
         with app.test_request_context():
-            assert format_datetime(d) == 'April 12, 2010 3:46:00 AM'
+            assert format_datetime(d_utc) == 'April 12, 2010 3:46:00 AM'
 
     def test_custom_locale_selector(self):
         app = flask.Flask(__name__)
         icu = ICU(app)
         d = datetime(2010, 4, 12, 13, 46)
+        d_utc = timezone('UTC').localize(d)
 
         the_timezone = 'UTC'
         the_locale = 'en_US'
@@ -97,24 +79,25 @@ class DateFormattingTestCase(unittest.TestCase):
             return the_timezone
 
         with app.test_request_context():
-            assert format_datetime(d) == 'Apr 12, 2010, 1:46:00 PM'
+            assert format_datetime(d_utc) == 'Apr 12, 2010, 1:46:00 PM'
 
-        the_locale = 'de_DE'
+        the_locale = 'it_IT'
         the_timezone = 'Europe/Vienna'
 
         with app.test_request_context():
-            assert format_datetime(d) == '12.04.2010 15:46:00'
+            assert format_datetime(d_utc) == '12 apr 2010, 15:46:00'
 
     def test_refreshing(self):
         app = flask.Flask(__name__)
         icu = ICU(app)
         d = datetime(2010, 4, 12, 13, 46)
+        d_utc = timezone('UTC').localize(d)
 
         with app.test_request_context():
-            assert format_datetime(d) == 'Apr 12, 2010, 1:46:00 PM'
+            assert format_datetime(d_utc) == 'Apr 12, 2010, 1:46:00 PM'
             app.config['ICU_DEFAULT_TIMEZONE'] = 'Europe/Vienna'
             icu_refresh()
-            assert format_datetime(d) == 'Apr 12, 2010, 3:46:00 PM'
+            assert format_datetime(d_utc) == 'Apr 12, 2010, 3:46:00 PM'
 
 
 class NumberFormattingTestCase(unittest.TestCase):
