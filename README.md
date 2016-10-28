@@ -68,7 +68,14 @@ format_percent(0.19)
 # => 19%
 ```
 
-Steps for extracting messages for tests:  
+#### Contribution Notes
+
+Contributions are welcome, but please <a href="mailto:ethanzanemiller@gmail.com">contact me</a> first. 
+
+The tests include a limited number of translation messages. The process
+for extracting these messages requires the use of pybabel and po2json.
+Here are the steps:
+
 1. Use pybabel to extract messages from tests file   
 2. Initialize translation files  
 3. Use po2json to generate json translation files  
