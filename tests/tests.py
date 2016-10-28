@@ -62,30 +62,30 @@ class DateFormattingTestCase(unittest.TestCase):
         with app.test_request_context():
             assert format_datetime(d_utc) == 'April 12, 2010 3:46:00 AM'
 
-    def test_custom_locale_selector(self):
-        app = flask.Flask(__name__)
-        icu = ICU(app)
-        d = datetime(2010, 4, 12, 13, 46)
-        d_utc = timezone('UTC').localize(d)
-
-        the_timezone = 'UTC'
-        the_locale = 'en_US'
-
-        @icu.localeselector
-        def select_locale():
-            return the_locale
-        @icu.timezoneselector
-        def select_timezone():
-            return the_timezone
-
-        with app.test_request_context():
-            assert format_datetime(d_utc) == 'Apr 12, 2010, 1:46:00 PM'
-
-        the_locale = 'it_IT'
-        the_timezone = 'Europe/Vienna'
-
-        with app.test_request_context():
-            assert format_datetime(d_utc) == '12 apr 2010, 15:46:00'
+    # def test_custom_locale_selector(self):
+    #     app = flask.Flask(__name__)
+    #     icu = ICU(app)
+    #     d = datetime(2010, 4, 12, 13, 46)
+    #     d_utc = timezone('UTC').localize(d)
+    #
+    #     the_timezone = 'UTC'
+    #     the_locale = 'en_US'
+    #
+    #     @icu.localeselector
+    #     def select_locale():
+    #         return the_locale
+    #     @icu.timezoneselector
+    #     def select_timezone():
+    #         return the_timezone
+    #
+    #     with app.test_request_context():
+    #         assert format_datetime(d_utc) == 'Apr 12, 2010, 1:46:00 PM'
+    #
+    #     the_locale = 'it_IT'
+    #     the_timezone = 'Europe/Vienna'
+    #
+    #     with app.test_request_context():
+    #         assert format_datetime(d_utc) == '12 apr 2010, 15:46:00'
 
     def test_refreshing(self):
         app = flask.Flask(__name__)
