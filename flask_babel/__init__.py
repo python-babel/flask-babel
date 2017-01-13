@@ -428,10 +428,9 @@ def format_time(time=None, format=None, rebase=True):
 
 
 def format_timedelta(datetime_or_timedelta, granularity='second',
-                     add_direction=False):
+                     add_direction=False, threshold=0.85):
     """Format the elapsed time from the given date to now or the given
-    timedelta.  This currently requires an unreleased development
-    version of Babel.
+    timedelta.
 
     This function is also available in the template context as filter
     named `timedeltaformat`.
@@ -441,6 +440,7 @@ def format_timedelta(datetime_or_timedelta, granularity='second',
     return dates.format_timedelta(
         datetime_or_timedelta,
         granularity,
+        threshold=threshold,
         add_direction=add_direction,
         locale=get_locale()
     )
