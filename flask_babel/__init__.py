@@ -121,7 +121,7 @@ class Babel(object):
         time.  If `None` is returned, the locale falls back to the one from
         the configuration.
 
-        This has to return the locale as string (eg: ``'de_AT'``, ''`en_US`'')
+        This has to return the locale as string (eg: ``'de_AT'``, ``'en_US'``)
         """
         assert self.locale_selector_func is None, \
             'a localeselector function is already registered'
