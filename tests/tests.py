@@ -5,10 +5,12 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
+import pickle
+
 import unittest
 from decimal import Decimal
 import flask
-from datetime import datetime
+from datetime import datetime, timedelta
 import flask_babel as babel
 from flask_babel import gettext, ngettext, lazy_gettext, get_translations
 from babel.support import NullTranslations
@@ -76,6 +78,20 @@ class IntegrationTestCase(unittest.TestCase):
 
             assert gettext(u'Good bye') == 'Auf Wiedersehen'
 
+    def test_lazy_old_style_formatting(self):
+        lazy_string = lazy_gettext(u'Hello %(name)s')
+        assert lazy_string % {u'name': u'test'} == u'Hello test'
+
+        lazy_string = lazy_gettext(u'test')
+        assert u'Hello %s' % lazy_string == u'Hello test'
+
+    def test_lazy_pickling(self):
+        lazy_string = lazy_gettext(u'Foo')
+        pickled = pickle.dumps(lazy_string)
+        unpickled = pickle.loads(pickled)
+
+        assert unpickled == lazy_string
+
 
 class DateFormattingTestCase(unittest.TestCase):
 
@@ -83,11 +99,14 @@ class DateFormattingTestCase(unittest.TestCase):
         app = flask.Flask(__name__)
         babel.Babel(app)
         d = datetime(2010, 4, 12, 13, 46)
+        delta = timedelta(days=6)
 
         with app.test_request_context():
             assert babel.format_datetime(d) == 'Apr 12, 2010, 1:46:00 PM'
             assert babel.format_date(d) == 'Apr 12, 2010'
             assert babel.format_time(d) == '1:46:00 PM'
+            assert babel.format_timedelta(delta) == '1 week'
+            assert babel.format_timedelta(delta, threshold=1) == '6 days'
 
         with app.test_request_context():
             app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europe/Vienna'
