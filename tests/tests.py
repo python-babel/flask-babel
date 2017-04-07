@@ -55,6 +55,29 @@ class IntegrationTestCase(unittest.TestCase):
                 name='Peter'
             ) == 'Hallo Peter!'
 
+    def test_different_domain(self):
+        """
+        Ensure we can load translations from multiple directories.
+        """
+        b = babel.Babel()
+        app = flask.Flask(__name__)
+
+        app.config.update({
+            'BABEL_TRANSLATION_DIRECTORIES': 'translations_different_domain',
+            'BABEL_DEFAULT_LOCALE': 'de_DE',
+            'BABEL_DOMAIN': 'myapp'
+        })
+
+        b.init_app(app)
+
+        with app.test_request_context():
+            translations = b.list_translations()
+
+            assert(len(translations) == 1)
+            assert(str(translations[0]) == 'de')
+
+            assert gettext(u'Good bye') == 'Auf Wiedersehen'
+
     def test_lazy_old_style_formatting(self):
         lazy_string = lazy_gettext(u'Hello %(name)s')
         assert lazy_string % {u'name': u'test'} == u'Hello test'
