@@ -54,51 +54,51 @@ class Babel(object):
         'datetime.long':    None,
     })
 
-    def __init__(self, app=None, default_locale='en', default_timezone='UTC',
-                 default_domain='messages', date_formats=None,
-                 configure_jinja=True):
-        self._default_locale = default_locale
-        self._default_timezone = default_timezone
-        self._default_domain = default_domain
-        self._date_formats = date_formats
-        self._configure_jinja = configure_jinja
-        self.app = app
+    def __init__(self, app=None, **kwargs):
         self.locale_selector_func = None
         self.timezone_selector_func = None
-
-        if app is not None:
-            self.init_app(app)
-
-    def init_app(self, app):
-        """Set up this instance for use with *app*, if no app was passed to
-        the constructor.
-        """
         self.app = app
-        app.babel_instance = self
-        if not hasattr(app, 'extensions'):
-            app.extensions = {}
+        if app is not None:
+            self.init_app(app, **kwargs)
+
+    def init_app(self, app, default_locale='en', default_timezone='UTC',
+                 default_domain='messages', date_formats=None,
+                 configure_jinja=True):
+        """Sets up the Flask-BabelEx extension.
+        :param app: The Flask application.
+        :param default_locale: The default locale which should be used.
+        :param default_timezone: The default timezone.
+        :param date_formats: A mapping of Babel datetime format strings
+        :param configure_jinja: If set to ``True`` some convenient jinja2
+                                filters are being added.
+        :param default_domain: The default translation domain.
+        """
+        app.config.setdefault('BABEL_DEFAULT_LOCALE', default_locale)
+        app.config.setdefault('BABEL_DEFAULT_TIMEZONE', default_timezone)
+        app.config.setdefault('BABEL_DOMAIN', default_domain)
+        app.config.setdefault('BABEL_TRANSLATION_DIRECTORIES', "translations")
+
+        if date_formats is None:
+            self.date_formats = self.default_date_formats.copy()
+        else:
+            #: a mapping of Babel datetime format strings that can be modified
+            #: to change the defaults.  If you invoke :func:`format_datetime`
+            #: and do not provide any format string Flask-Babel will do the
+            #: following things:
+            #:
+            #: 1.   look up ``date_formats['datetime']``.
+            #:      By default ``'medium'`` is returned to enforce medium
+            #:      length datetime formats.
+            #: 2.   ``date_formats['datetime.medium'] (if ``'medium'`` was
+            #:      returned in step one) is looked up.  If the return value
+            #:      is anything but `None` this is used as new format string.
+            #:      otherwise the default for that language is used.
+            self.date_formats = date_formats
+
+        app.extensions = getattr(app, 'extensions', {})
         app.extensions['babel'] = self
 
-        app.config.setdefault('BABEL_DEFAULT_LOCALE', self._default_locale)
-        app.config.setdefault('BABEL_DEFAULT_TIMEZONE', self._default_timezone)
-        app.config.setdefault('BABEL_DOMAIN', self._default_domain)
-        if self._date_formats is None:
-            self._date_formats = self.default_date_formats.copy()
-
-        #: a mapping of Babel datetime format strings that can be modified
-        #: to change the defaults.  If you invoke :func:`format_datetime`
-        #: and do not provide any format string Flask-Babel will do the
-        #: following things:
-        #:
-        #: 1.   look up ``date_formats['datetime']``.  By default ``'medium'``
-        #:      is returned to enforce medium length datetime formats.
-        #: 2.   ``date_formats['datetime.medium'] (if ``'medium'`` was
-        #:      returned in step one) is looked up.  If the return value
-        #:      is anything but `None` this is used as new format string.
-        #:      otherwise the default for that language is used.
-        self.date_formats = self._date_formats
-
-        if self._configure_jinja:
+        if configure_jinja:
             app.jinja_env.filters.update(
                 datetimeformat=format_datetime,
                 dateformat=format_date,
@@ -117,6 +117,23 @@ class Babel(object):
                 lambda s, p, n: get_translations().ungettext(s, p, n),
                 newstyle=True
             )
+
+    def get_app(self, reference_app=None):
+        """Helper method that implements the logic to look up an a
+        pplication.
+        """
+        if reference_app is not None:
+            return reference_app
+
+        if self.app is not None:
+            return self.app
+
+        if current_app is not None:
+            return current_app
+
+        raise RuntimeError('application not registered on babel '
+                           'instance and no application bound '
+                           'to current context')
 
     def localeselector(self, f):
         """Registers a callback function for locale selection.  The default
@@ -176,33 +193,32 @@ class Babel(object):
         """The default locale from the configuration as instance of a
         `babel.Locale` object.
         """
-        return Locale.parse(self.app.config['BABEL_DEFAULT_LOCALE'])
+        return Locale.parse(self.get_app().config['BABEL_DEFAULT_LOCALE'])
 
     @property
     def default_timezone(self):
         """The default timezone from the configuration as instance of a
         `pytz.timezone` object.
         """
-        return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
+        return timezone(self.get_app().config['BABEL_DEFAULT_TIMEZONE'])
 
     @property
     def domain(self):
         """The message domain for the translations as a string.
         """
-        return self.app.config['BABEL_DOMAIN']
+        return self.get_app().config['BABEL_DOMAIN']
 
     @property
     def translation_directories(self):
-        directories = self.app.config.get(
-            'BABEL_TRANSLATION_DIRECTORIES',
-            'translations'
-        ).split(';')
+        directories = self.get_app().config[
+            'BABEL_TRANSLATION_DIRECTORIES'
+        ].split(';')
 
         for path in directories:
             if os.path.isabs(path):
                 yield path
             else:
-                yield os.path.join(self.app.root_path, path)
+                yield os.path.join(self.get_app().root_path, path)
 
 
 def get_translations():

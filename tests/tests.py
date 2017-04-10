@@ -92,6 +92,33 @@ class IntegrationTestCase(unittest.TestCase):
 
         assert unpickled == lazy_string
 
+    def test_init_app_multiple_apps(self):
+        b = babel.Babel()
+        app1 = flask.Flask(__name__)
+        app1.config.update({
+            'BABEL_DOMAIN': 'messages',
+            'BABEL_TRANSLATION_DIRECTORIES': 'translations'
+        })
+
+        app2 = flask.Flask(__name__)
+        app2.config.update({
+            'BABEL_DOMAIN': 'myapp',
+            'BABEL_TRANSLATION_DIRECTORIES': ';'.join((
+                'translations',
+                'renamed_translations'
+            )),
+        })
+        b.init_app(app1)
+        b.init_app(app2)
+
+        with app1.test_request_context():
+            translations = b.list_translations()
+            assert (len(translations) == 1)
+
+        with app2.test_request_context():
+            translations = b.list_translations()
+            assert (len(translations) == 2)
+
 
 class DateFormattingTestCase(unittest.TestCase):
 
