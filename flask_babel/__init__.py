@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    flaskext.babel
-    ~~~~~~~~~~~~~~
+    flask_babel
+    ~~~~~~~~~~~
 
     Implements i18n/l10n support for Flask applications based on Babel.
 
@@ -239,10 +239,10 @@ def get_translations():
         babel = current_app.extensions['babel']
         for dirname in babel.translation_directories:
             catalog = support.Translations.load(
-                    dirname,
-                    [get_locale()],
-                    babel.domain
-                )
+                dirname,
+                [get_locale()],
+                babel.domain
+            )
             translations.merge(catalog)
             # FIXME: Workaround for merge() being really, really stupid. It
             # does not copy _info, plural(), or any other instance variables

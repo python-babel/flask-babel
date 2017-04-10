@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-
 import pickle
-
 import unittest
 from decimal import Decimal
-import flask
 from datetime import datetime, timedelta
+
+import flask
+from babel.support import NullTranslations
+
 import flask_babel as babel
 from flask_babel import gettext, ngettext, lazy_gettext, get_translations
-from babel.support import NullTranslations
 from flask_babel._compat import text_type
+
+#sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 
 class IntegrationTestCase(unittest.TestCase):
