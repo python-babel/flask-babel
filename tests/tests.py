@@ -54,6 +54,19 @@ class IntegrationTestCase(unittest.TestCase):
                 name='Peter'
             ) == 'Hallo Peter!'
 
+        app.config.update({
+            'BABEL_TRANSLATION_DIRECTORIES': [
+                'translations',
+                'renamed_translations'
+            ],
+            'BABEL_DEFAULT_LOCALE': 'de_DE'
+        })
+        with app.test_request_context():
+            translations = b.list_translations()
+            assert(len(translations) == 2)
+            assert(str(translations[0]) == 'de')
+            assert(str(translations[1]) == 'de')
+
     def test_different_domain(self):
         """
         Ensure we can load translations from multiple directories.

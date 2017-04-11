@@ -48,7 +48,8 @@ change some internal defaults:
 `BABEL_DEFAULT_TIMEZONE`        The timezone to use for user facing dates.
                                 This defaults to ``'UTC'`` which also is the
                                 timezone your application must use internally.
-`BABEL_TRANSLATION_DIRECTORIES` A semi-colon (``;``) separated string of
+`BABEL_TRANSLATION_DIRECTORIES` A iterable (i.e. a list, set, tuple) or a
+                                semi-colon (``;``) separated string of
                                 absolute and relative (to the app root) paths
                                 to translation folders. Defaults to
                                 ``translations``.
@@ -300,6 +301,6 @@ Low-Level API
 
 
 .. _Flask: http://flask.pocoo.org/
-.. _babel: http://babel.edgewall.org/
+.. _babel: http://babel.pocoo.org/
 .. _pytz: http://pytz.sourceforge.net/
 .. _speaklater: http://pypi.python.org/pypi/speaklater

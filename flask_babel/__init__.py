@@ -79,21 +79,20 @@ class Babel(object):
         app.config.setdefault('BABEL_TRANSLATION_DIRECTORIES', "translations")
 
         if date_formats is None:
-            self.date_formats = self.default_date_formats.copy()
-        else:
-            #: a mapping of Babel datetime format strings that can be modified
-            #: to change the defaults.  If you invoke :func:`format_datetime`
-            #: and do not provide any format string Flask-Babel will do the
-            #: following things:
-            #:
-            #: 1.   look up ``date_formats['datetime']``.
-            #:      By default ``'medium'`` is returned to enforce medium
-            #:      length datetime formats.
-            #: 2.   ``date_formats['datetime.medium'] (if ``'medium'`` was
-            #:      returned in step one) is looked up.  If the return value
-            #:      is anything but `None` this is used as new format string.
-            #:      otherwise the default for that language is used.
-            self.date_formats = date_formats
+            date_formats = self.default_date_formats.copy()
+
+        #: a mapping of Babel datetime format strings that can be modified
+        #: to change the defaults.  If you invoke :func:`format_datetime`
+        #: and do not provide any format string Flask-Babel will do the
+        #: following things:
+        #:
+        #: 1.   look up ``date_formats['datetime']``.  By default ``'medium'``
+        #:      is returned to enforce medium length datetime formats.
+        #: 2.   ``date_formats['datetime.medium'] (if ``'medium'`` was
+        #:      returned in step one) is looked up.  If the return value
+        #:      is anything but `None` this is used as new format string.
+        #:      otherwise the default for that language is used.
+        self.date_formats = date_formats
 
         app.extensions = getattr(app, 'extensions', {})
         app.extensions['babel'] = self
@@ -210,9 +209,13 @@ class Babel(object):
 
     @property
     def translation_directories(self):
-        directories = self.get_app().config[
-            'BABEL_TRANSLATION_DIRECTORIES'
-        ].split(';')
+        try:
+            directories = self.get_app().\
+                config['BABEL_TRANSLATION_DIRECTORIES'].split(';')
+        except AttributeError:
+            # AttributeError happens when trying to split a set, tuple or list
+            directories = self.get_app().\
+                config["BABEL_TRANSLATION_DIRECTORIES"]
 
         for path in directories:
             if os.path.isabs(path):
