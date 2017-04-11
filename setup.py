@@ -8,11 +8,11 @@ Adds i18n/l10n support to Flask applications with the help of the
 Links
 `````
 
-* `documentation <http://packages.python.org/Flask-Babel>`_
+* `documentation <https://pythonhosted.org/Flask-Babel/>`_
 * `development version
-  <http://github.com/mitsuhiko/flask-babel/zipball/master#egg=Flask-Babel-dev>`_
+  <https://github.com/python-babel/flask-babel/archive/master.zip#egg=Flask-Babel-dev>`_
 
-.. _Babel: http://babel.edgewall.org/
+.. _Babel: http://babel.pocoo.org/
 
 """
 from setuptools import setup
@@ -21,7 +21,7 @@ from setuptools import setup
 setup(
     name='Flask-Babel',
     version='0.11.2',
-    url='http://github.com/python-babel/flask-babel',
+    url='https://github.com/python-babel/flask-babel',
     license='BSD',
     author='Armin Ronacher',
     author_email='armin.ronacher@active-4.com',
