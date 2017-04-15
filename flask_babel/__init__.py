@@ -62,6 +62,8 @@ class Babel(object):
         self._default_domain = default_domain
         self._date_formats = date_formats
         self._configure_jinja = configure_jinja
+        self.locale_selector_func = None
+        self.timezone_selector_func = None
         self.app = app
         self.locale_selector_func = None
         self.timezone_selector_func = None
