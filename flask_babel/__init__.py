@@ -64,7 +64,8 @@ class Babel(object):
     def init_app(self, app, default_locale='en', default_timezone='UTC',
                  default_domain='messages', date_formats=None,
                  configure_jinja=True):
-        """Sets up the Flask-BabelEx extension.
+        """Sets up the Flask-Babel extension.
+
         :param app: The Flask application.
         :param default_locale: The default locale which should be used.
         :param default_timezone: The default timezone.
@@ -118,8 +119,8 @@ class Babel(object):
             )
 
     def get_app(self, reference_app=None):
-        """Helper method that implements the logic to look up an a
-        pplication.
+        """Helper method that implements the logic to look up an
+        application.
         """
         if reference_app is not None:
             return reference_app

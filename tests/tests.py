@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
 
+import sys
+import os
 import pickle
 import unittest
 from decimal import Decimal
@@ -13,7 +15,7 @@ import flask_babel as babel
 from flask_babel import gettext, ngettext, lazy_gettext, get_translations
 from flask_babel._compat import text_type
 
-#sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 
 class IntegrationTestCase(unittest.TestCase):
