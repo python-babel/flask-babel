@@ -40,6 +40,9 @@ class LazyString(object):
     def __radd__(self, other):
         return other + text_type(self)
 
+    def __mod__(self, other):
+        return text_type(self) % other
+
     def __mul__(self, other):
         return text_type(self) * other
 
