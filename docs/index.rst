@@ -101,7 +101,7 @@ To format dates you can use the :func:`format_datetime`,
 functions.  They all accept a :class:`datetime.datetime` (or
 :class:`datetime.date`, :class:`datetime.time` and
 :class:`datetime.timedelta`) object as first parameter and then optionally
-a format string.  The application should use naive datetime objects
+a format string.  The application should use native datetime objects
 internally that use UTC as timezone.  On formatting it will automatically
 convert into the user's timezone in case it differs from UTC.
 
