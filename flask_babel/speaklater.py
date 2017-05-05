@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask_babel._compat import text_type
+from flask_babel._compat import text_type, PY2
 
 
 class LazyString(object):
@@ -17,7 +17,12 @@ class LazyString(object):
         raise AttributeError(attr)
 
     def __repr__(self):
-        return "l'{0}'".format(text_type(self))
+        value = self._func(*self._args, **self._kwargs)
+        if PY2 and isinstance(value, unicode):
+            # With Python2 we need to encode unicode strings because those
+            # can contain non-ASCII characters.
+            return "l'{0}'".format(value.encode('utf-8'))
+        return "l'{0}'".format(text_type(value))
 
     def __str__(self):
         return text_type(self._func(*self._args, **self._kwargs))

@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 import flask_babel as babel
 from flask_babel import gettext, ngettext, lazy_gettext, get_translations
 from babel.support import NullTranslations
-from flask_babel._compat import text_type
+from flask_babel._compat import text_type, PY2
 
 
 class IntegrationTestCase(unittest.TestCase):
@@ -284,6 +284,16 @@ class GettextTestCase(unittest.TestCase):
             assert gettext(u'Test %s') == u'Test %s'
             assert gettext(u'Test %(name)s', name=u'test') == u'Test test'
             assert gettext(u'Test %s') % 'test' == u'Test test'
+
+
+class LazyStringTestCase(unittest.TestCase):
+    def test_repr_with_non_ascii(self):
+        lazy_string = lazy_gettext(u'Hei Päivi')
+
+        if PY2:
+            assert repr(lazy_string) == "l'Hei P\xc3\xa4ivi'"
+        else:
+            assert repr(lazy_string) == "l'Hei Päivi'"
 
 
 if __name__ == '__main__':
