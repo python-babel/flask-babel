@@ -45,11 +45,11 @@ class IntegrationTestCase(unittest.TestCase):
         b.init_app(app)
 
         with app.test_request_context():
-            translations = b.list_translations()
+            translations = list(map(str, b.list_translations()))
 
-            assert(len(translations) == 2)
-            assert(str(translations[0]) == 'de')
-            assert(str(translations[1]) == 'de')
+            assert(len(translations) == 3)
+            assert(translations.count('de') == 2)
+            assert(translations.count('xx') == 1)
 
             assert gettext(
                 u'Hello %(name)s!',
@@ -92,6 +92,19 @@ class IntegrationTestCase(unittest.TestCase):
         unpickled = pickle.loads(pickled)
 
         assert unpickled == lazy_string
+
+    def test_unknown_locale(self):
+        """
+        Ensure we can load translations even if locale is unknown by Babel.
+        """
+        app = flask.Flask(__name__)
+        b = babel.Babel(app)
+
+        with app.test_request_context():
+            with babel.force_locale('xx'):
+                assert gettext(
+                    u'Yes'
+                ) == 'Esyay'
 
 
 class DateFormattingTestCase(unittest.TestCase):
@@ -181,6 +194,12 @@ class DateFormattingTestCase(unittest.TestCase):
         with app.test_request_context():
             assert babel.format_datetime(d) == '12.04.2010, 15:46:00'
 
+        the_timezone = 'UTC'
+        the_locale = 'xx'
+
+        with app.test_request_context():
+            assert babel.format_datetime(d) == 'Apr 12, 2010, 1:46:00 PM'
+
     def test_refreshing(self):
         app = flask.Flask(__name__)
         babel.Babel(app)
@@ -260,6 +279,23 @@ class NumberFormattingTestCase(unittest.TestCase):
             assert babel.format_percent(0.19) == '19%'
             assert babel.format_scientific(10000) == u'1E4'
 
+    def test_unknown_locale(self):
+        """
+        Ensure we can format numbers even if locale is unknown by Babel.
+        In that case, locale should fallback to default.
+        """
+        app = flask.Flask(__name__)
+        babel.Babel(app)
+        n = 1099
+
+        with app.test_request_context():
+            with babel.force_locale('xx'):
+                assert babel.format_number(n) == u'1,099'
+                assert babel.format_decimal(Decimal('1010.99')) == u'1,010.99'
+                assert babel.format_currency(n, 'USD') == '$1,099.00'
+                assert babel.format_percent(0.19) == '19%'
+                assert babel.format_scientific(10000) == u'1E4'
+
 
 class GettextTestCase(unittest.TestCase):
 
@@ -322,9 +358,10 @@ class GettextTestCase(unittest.TestCase):
     def test_list_translations(self):
         app = flask.Flask(__name__)
         b = babel.Babel(app, default_locale='de_DE')
-        translations = b.list_translations()
-        assert len(translations) == 1
-        assert str(translations[0]) == 'de'
+        translations = list(map(str, b.list_translations()))
+        assert len(translations) == 2
+        assert 'xx' in translations
+        assert 'de' in translations
 
     def test_no_formatting(self):
         """

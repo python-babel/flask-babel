@@ -16,6 +16,7 @@ from contextlib import contextmanager
 from flask import current_app, request
 from flask.ctx import has_request_context
 from babel import dates, numbers, support, Locale
+from babel.core import UnknownLocaleError
 from pytz import timezone, UTC
 from werkzeug.datastructures import ImmutableDict
 
@@ -140,8 +141,8 @@ class Babel(object):
 
     def list_translations(self):
         """Returns a list of all the locales translations exist for.  The
-        list returned will be filled with actual locale objects and not just
-        strings.
+        list returned will be filled with actual locale objects or with
+        strings when the locale is not known by Babel.
 
         .. versionadded:: 0.6
         """
@@ -157,7 +158,12 @@ class Babel(object):
                     continue
 
                 if filter(lambda x: x.endswith('.mo'), os.listdir(locale_dir)):
-                    result.append(Locale.parse(folder))
+                    try:
+                        locale = Locale.parse(folder)
+                    except UnknownLocaleError:
+                        locale = folder
+                    result.append(locale)
+
 
         # If not other translations are found, add the default locale.
         if not result:
@@ -218,7 +224,7 @@ def get_translations():
         for dirname in babel.translation_directories:
             catalog = support.Translations.load(
                     dirname,
-                    [get_locale()],
+                    [get_locale(fallback_to_default=False)],
                     babel.domain
                 )
             translations.merge(catalog)
@@ -234,10 +240,13 @@ def get_translations():
     return translations
 
 
-def get_locale():
+def get_locale(fallback_to_default=True):
     """Returns the locale that should be used for this request as
     `babel.Locale` object.  This returns `None` if used outside of
-    a request.
+    a request.  If `fallback_to_default` is True, this returns the
+    app's default locale if the requested locale is not supported
+    by Babel. If `fallback_to_default` is False, this returns any
+    unsupported locale as a string.
     """
     ctx = _get_current_context()
     if ctx is None:
@@ -252,8 +261,17 @@ def get_locale():
             if rv is None:
                 locale = babel.default_locale
             else:
-                locale = Locale.parse(rv)
+                try:
+                    locale = Locale.parse(rv)
+                except UnknownLocaleError:
+                    if fallback_to_default:
+                        locale = babel.default_locale
+                    else:
+                        locale = rv
         ctx.babel_locale = locale
+    elif not isinstance(locale, Locale) and fallback_to_default:
+        babel = current_app.extensions['babel']
+        locale = babel.default_locale
     return locale
 
 
@@ -328,6 +346,11 @@ def force_locale(locale):
 
     try:
         ctx.babel_locale = Locale.parse(locale)
+        ctx.forced_babel_locale = ctx.babel_locale
+        ctx.babel_translations = None
+        yield
+    except UnknownLocaleError:
+        ctx.babel_locale = locale
         ctx.forced_babel_locale = ctx.babel_locale
         ctx.babel_translations = None
         yield

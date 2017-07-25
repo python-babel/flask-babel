@@ -1,0 +1,30 @@
+# XX translations for PROJECT.
+# xx represents any locale not yet available in the CLDR.
+# Copyright (C) 2017 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: tests.py:94
+#, python-format
+msgid "Hello %(name)s!"
+msgstr "Ellohay %(name)s!"
+
+#: tests.py:95 tests.py:96
+#, python-format
+msgid "%(num)s Apple"
+msgid_plural "%(num)s Apples"
+msgstr[0] "%(num)s appleyay"
+msgstr[1] "%(num)s applesyay"
+
+#: tests.py:119
+msgid "Yes"
+msgstr "Esyay"
