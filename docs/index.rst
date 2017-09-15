@@ -298,6 +298,8 @@ Low-Level API
 
 .. autofunction:: force_locale
 
+.. autofunction:: force_timezone
+
 
 .. _Flask: http://flask.pocoo.org/
 .. _babel: http://babel.edgewall.org/

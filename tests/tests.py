@@ -204,6 +204,20 @@ class DateFormattingTestCase(unittest.TestCase):
                 assert str(babel.get_locale()) == 'en_US'
             assert str(babel.get_locale()) == 'de_DE'
 
+    def test_force_timezone(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app)
+
+        @b.timezoneselector
+        def select_timezone():
+            return 'Europe/Berlin'
+
+        with app.test_request_context():
+            assert str(babel.get_timezone()) == 'Europe/Berlin'
+            with babel.force_timezone('America/Chicago'):
+                assert str(babel.get_timezone()) == 'America/Chicago'
+            assert str(babel.get_timezone()) == 'Europe/Berlin'
+
 
 class NumberFormattingTestCase(unittest.TestCase):
 

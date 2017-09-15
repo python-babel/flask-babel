@@ -343,6 +343,42 @@ def force_locale(locale):
             setattr(ctx, key, value)
 
 
+@contextmanager
+def force_timezone(timezone):
+    """Temporarily overrides the currently selected timezone.
+
+    Sometimes it is useful to switch the timezone to a different one, do some
+    tasks and then revert back to the original one. For example, if a
+    template is rendered for a specific user, who has a preferred timezone,
+    but is not the currently logged in user.
+
+    You can use this function as a context manager::
+
+        with force_timezone('Europe/Berlin'):
+            render_template('...')
+
+    :param timezone: The timezone to temporary switch to (ex: 'Europe/Berlin').
+    """
+
+    ctx = _get_current_context()
+    if ctx is None:
+        yield
+        return
+
+    babel = current_app.extensions['babel']
+
+    orig_timezone_selector_func = babel.timezone_selector_func
+    orig_babel_tzinfo = getattr(ctx, 'babel_tzinfo', None)
+
+    try:
+        babel.timezone_selector_func = lambda: timezone
+        setattr(ctx, 'babel_tzinfo', None)
+        yield
+    finally:
+        babel.timezone_selector_func = orig_timezone_selector_func
+        setattr(ctx, 'babel_tzinfo', orig_babel_tzinfo)
+
+
 def _get_format(key, format):
     """A small helper for the datetime formatting functions.  Looks up
     format defaults for different kinds.
