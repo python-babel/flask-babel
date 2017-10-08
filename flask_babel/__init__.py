@@ -305,6 +305,9 @@ def refresh():
         if hasattr(ctx, key):
             delattr(ctx, key)
 
+    if hasattr(ctx, 'forced_babel_locale'):
+        ctx.babel_locale = ctx.forced_babel_locale
+
 
 @contextmanager
 def force_locale(locale):
@@ -325,20 +328,19 @@ def force_locale(locale):
         yield
         return
 
-    babel = current_app.extensions['babel']
-
-    orig_locale_selector_func = babel.locale_selector_func
     orig_attrs = {}
     for key in ('babel_translations', 'babel_locale'):
         orig_attrs[key] = getattr(ctx, key, None)
 
     try:
-        babel.locale_selector_func = lambda: locale
-        for key in orig_attrs:
-            setattr(ctx, key, None)
+        ctx.babel_locale = Locale.parse(locale)
+        ctx.forced_babel_locale = ctx.babel_locale
+        ctx.babel_translations = None
         yield
     finally:
-        babel.locale_selector_func = orig_locale_selector_func
+        if hasattr(ctx, 'forced_babel_locale'):
+            del ctx.forced_babel_locale
+
         for key, value in orig_attrs.items():
             setattr(ctx, key, value)
 
