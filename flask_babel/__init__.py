@@ -550,8 +550,6 @@ def gettext(string, **variables):
         gettext(u'Hello %(name)s!', name='World')
     """
     t = get_translations()
-    if t is None:
-        return string if not variables else string % variables
     s = t.ugettext(string)
     return s if not variables else s % variables
 _ = gettext
@@ -571,10 +569,6 @@ def ngettext(singular, plural, num, **variables):
     """
     variables.setdefault('num', num)
     t = get_translations()
-    if t is None:
-        s = singular if num == 1 else plural
-        return s if not variables else s % variables
-
     s = t.ungettext(singular, plural, num)
     return s if not variables else s % variables
 
@@ -585,8 +579,6 @@ def pgettext(context, string, **variables):
     .. versionadded:: 0.7
     """
     t = get_translations()
-    if t is None:
-        return string if not variables else string % variables
     s = t.upgettext(context, string)
     return s if not variables else s % variables
 
@@ -598,9 +590,6 @@ def npgettext(context, singular, plural, num, **variables):
     """
     variables.setdefault('num', num)
     t = get_translations()
-    if t is None:
-        s = singular if num == 1 else plural
-        return s if not variables else s % variables
     s = t.unpgettext(context, singular, plural, num)
     return s if not variables else s % variables
 
