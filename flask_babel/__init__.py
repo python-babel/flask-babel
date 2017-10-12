@@ -214,7 +214,12 @@ def get_translations():
     ctx = _get_current_context()
 
     if ctx is None:
-        return support.NullTranslations()
+        try:
+            return support.NullTranslations()
+        except AttributeError:
+            # Some versions of babel have NullTranslations() in gettext instead of support module
+            import gettext
+            return gettext.NullTranslations()
 
     translations = getattr(ctx, 'babel_translations', None)
     if translations is None:
