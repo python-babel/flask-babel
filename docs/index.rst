@@ -134,6 +134,67 @@ u'Donnerstag, 5. M\xe4rz 1987 17:12'
 
 For more format examples head over to the `babel`_ documentation.
 
+Formatting Numbers
+----------------
+
+To format numbers you can use the :func:`format_number`,
+:func:`format_decimal`, :func:`format_currency`, :func:`format_percent` and :func: `format_scientific`
+functions.
+
+To play with the date formatting from the console, you can use the
+:meth:`~flask.Flask.test_request_context` method:
+
+>>> app.test_request_context().push()
+
+Here some examples:
+
+>>> from flask_babel import format_number
+>>> #format_number(number)
+>>> format_number(1099)
+'1,099'
+
+>>> from flask_babel import format_decimal
+>>> #format_decimal(number, format=None)
+>>> format_decimal(1.2346)
+u'1.235'
+
+>>> from flask_babel import format_currency
+>>> #format_currency(number, currency, format=None, currency_digits=True, format_type='standard')
+>>> format_currency(1099.98, 'USD')
+'$1,099.98'
+
+>>> from flask_babel import format_percent
+>>> #format_percent(number, format=None)
+>>> format_percent(0.34)
+'34%'
+
+>>> from flask_babel import format_scientific
+>>> #format_scientific(number, format=None)
+>>> format_scientific(10000)
+'1E4'
+
+And again with a different language:
+
+>>> app.config['BABEL_DEFAULT_LOCALE'] = 'de'
+>>> from flask_babel import refresh; refresh()
+
+>>> format_number(1099)
+'1.099'
+
+>>> format_decimal(1.2346)
+'1,235'
+
+>>> format_currency(1099.98, 'USD')
+'1.099,98\xa0$'
+
+>>> format_percent(0.34)
+'34\xa0%'
+
+>>> format_scientific(10000)
+'1E4'
+
+For more format examples head over to the `babel`_ documentation.
+
 Using Translations
 ------------------
 
@@ -275,6 +336,19 @@ Datetime Functions
 .. autofunction:: format_time
 
 .. autofunction:: format_timedelta
+
+Number Functions
+``````````````````
+
+.. autofunction:: format_number
+
+.. autofunction:: format_decimal
+
+.. autofunction:: format_currency
+
+.. autofunction:: format_percent
+
+.. autofunction:: format_scientific
 
 Gettext Functions
 `````````````````
