@@ -146,7 +146,7 @@ To play with the date formatting from the console, you can use the
 
 >>> app.test_request_context().push()
 
-Here some examples:
+Here are some examples:
 
 >>> from flask_babel import format_number
 >>> format_number(1099)
