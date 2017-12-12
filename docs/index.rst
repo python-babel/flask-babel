@@ -138,7 +138,7 @@ Formatting Numbers
 ----------------
 
 To format numbers you can use the :func:`format_number`,
-:func:`format_decimal`, :func:`format_currency`, :func:`format_percent` and :func: `format_scientific`
+:func:`format_decimal`, :func:`format_currency`, :func:`format_percent` and :func:`format_scientific`
 functions.
 
 To play with the date formatting from the console, you can use the
