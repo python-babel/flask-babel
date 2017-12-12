@@ -149,27 +149,22 @@ To play with the date formatting from the console, you can use the
 Here some examples:
 
 >>> from flask_babel import format_number
->>> #format_number(number)
 >>> format_number(1099)
 '1,099'
 
 >>> from flask_babel import format_decimal
->>> #format_decimal(number, format=None)
 >>> format_decimal(1.2346)
 u'1.235'
 
 >>> from flask_babel import format_currency
->>> #format_currency(number, currency, format=None, currency_digits=True, format_type='standard')
 >>> format_currency(1099.98, 'USD')
 '$1,099.98'
 
 >>> from flask_babel import format_percent
->>> #format_percent(number, format=None)
 >>> format_percent(0.34)
 '34%'
 
 >>> from flask_babel import format_scientific
->>> #format_scientific(number, format=None)
 >>> format_scientific(10000)
 '1E4'
 
