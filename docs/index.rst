@@ -27,7 +27,7 @@ older version you will have to upgrade or disable the Jinja support.
 Configuration
 -------------
 
-To get started all you need to do is to instanciate a :class:`Babel`
+To get started all you need to do is to instantiate a :class:`Babel`
 object after configuring the application::
 
     from flask import Flask
@@ -49,8 +49,9 @@ change some internal defaults:
                                 This defaults to ``'UTC'`` which also is the
                                 timezone your application must use internally.
 `BABEL_TRANSLATION_DIRECTORIES` A semi-colon (``;``) separated string of
-                                absolute and relative (to the app root) paths
-                                to translation folders. Defaults to
+                                absolute and relative (to the `root_path`
+                                of the application object)
+                                paths to translation folders. Defaults to
                                 ``translations``.
 `BABEL_DOMAIN`                  The message domain used by the application.
                                 Defaults to ``messages``.
@@ -232,8 +233,7 @@ time to create a ``.pot`` file.  A ``.pot`` file contains all the strings
 and is the template for a ``.po`` file which contains the translated
 strings.  Babel can do all that for you.
 
-First of all you have to get into the folder where you have your
-application and create a mapping file.  For typical Flask applications, this
+First of all you have to create a mapping file. For typical Flask applications, this
 is what you want in there:
 
 .. sourcecode:: ini
@@ -242,16 +242,23 @@ is what you want in there:
     [jinja2: **/templates/**.html]
     extensions=jinja2.ext.autoescape,jinja2.ext.with_
 
-Save it as ``babel.cfg`` or something similar next to your application.
+The paths will be considered from the directory where you launch `pybabel` command.
+The `**` in paths will take care of looking through all the subdirectories.
+
+Save it as ``babel.cfg`` or something similar to your config folder,
+or next to your application. Where you save it doesn't matter to the application,
+as it's used only by `pybabel extract` where you have to specify
+the path to your configuration anyway.
+
 Then it's time to run the `pybabel` command that comes with Babel to
 extract your strings::
 
-    $ pybabel extract -F babel.cfg -o messages.pot .
+    $ pybabel extract -F conf/babel.cfg -o messages.pot .
 
 If you are using the :func:`lazy_gettext` function you should tell pybabel
 that it should also look for such function calls::
 
-    $ pybabel extract -F babel.cfg -k lazy_gettext -o messages.pot .
+    $ pybabel extract -F conf/babel.cfg -k lazy_gettext -o messages.pot .
 
 This will use the mapping from the ``babel.cfg`` file and store the
 generated template in ``messages.pot``.  Now we can create the first
@@ -260,8 +267,9 @@ translation.  For example to translate to German use this command::
     $ pybabel init -i messages.pot -d translations -l de
 
 ``-d translations`` tells pybabel to store the translations in this
-folder.  This is where Flask-Babel will look for translations.  Put it
-next to your template folder.
+folder. If you don't want to override `BABEL_TRANSLATION_DIRECTORIES`
+configuration, this should be next to your app's `root_path`
+(the file where you initiate `Flask`).
 
 Now edit the ``translations/de/LC_MESSAGES/messages.po`` file as needed.
 Check out some gettext tutorials if you feel lost.

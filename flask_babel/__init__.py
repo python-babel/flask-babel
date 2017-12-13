@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    flaskext.babel
-    ~~~~~~~~~~~~~~
+    flask_babel
+    ~~~~~~~~~~~
 
     Implements i18n/l10n support for Flask applications based on Babel.
 
@@ -34,6 +34,22 @@ class Babel(object):
     Flask-Babel behaves.  Each application that wants to use Flask-Babel
     has to create, or run :meth:`init_app` on, an instance of this class
     after the configuration was initialized.
+
+    :param app:                         Flask application
+    :param default_locale:              Default locale,
+                                        overridden by `BABEL_DEFAULT_LOCALE` configuration value,
+                                        defaults to `en`
+    :param default_timezone:            Default timezone,
+                                        overridden by `BABEL_DEFAULT_TIMEZONE` configuration value,
+                                        defaults to `UTC`
+    :param default_domain:              Default domain,
+                                        overridden by `BABEL_DOMAIN` configuration value,
+                                        defaults to `messages`
+    :param date_formats:                Date formats, defaults basics to `medium`, others to `None`
+    :param configure_jinja:             Whether to configure jinja environment, defaults to `True`
+    :param translation_directories:     Default path to translation directories,
+                                        overridden by `BABEL_TRANSLATION_DIRECTORIES` configuration value,
+                                        defaults to `translations`
     """
 
     default_date_formats = ImmutableDict({
@@ -56,12 +72,13 @@ class Babel(object):
 
     def __init__(self, app=None, default_locale='en', default_timezone='UTC',
                  default_domain='messages', date_formats=None,
-                 configure_jinja=True):
+                 configure_jinja=True, translation_directories='translations'):
         self._default_locale = default_locale
         self._default_timezone = default_timezone
         self._default_domain = default_domain
         self._date_formats = date_formats
         self._configure_jinja = configure_jinja
+        self._translation_directories = translation_directories
         self.app = app
         self.locale_selector_func = None
         self.timezone_selector_func = None
@@ -82,6 +99,7 @@ class Babel(object):
         app.config.setdefault('BABEL_DEFAULT_LOCALE', self._default_locale)
         app.config.setdefault('BABEL_DEFAULT_TIMEZONE', self._default_timezone)
         app.config.setdefault('BABEL_DOMAIN', self._default_domain)
+        app.config.setdefault('BABEL_TRANSLATION_DIRECTORIES', self._translation_directories)
         if self._date_formats is None:
             self._date_formats = self.default_date_formats.copy()
 
@@ -193,10 +211,7 @@ class Babel(object):
 
     @property
     def translation_directories(self):
-        directories = self.app.config.get(
-            'BABEL_TRANSLATION_DIRECTORIES',
-            'translations'
-        ).split(';')
+        directories = self.app.config['BABEL_TRANSLATION_DIRECTORIES'].split(';')
 
         for path in directories:
             if os.path.isabs(path):
