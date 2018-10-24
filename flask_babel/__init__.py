@@ -13,7 +13,7 @@ import os
 
 from datetime import datetime
 from contextlib import contextmanager
-from flask import current_app, request
+from flask import current_app, request, _app_ctx_stack
 from flask.ctx import has_request_context
 from babel import dates, numbers, support, Locale
 from werkzeug import ImmutableDict
@@ -645,8 +645,5 @@ def lazy_pgettext(context, string, **variables):
 
 
 def _get_current_context():
-    if has_request_context():
-        return request
-
-    if current_app:
-        return current_app
+    if _app_ctx_stack.top:
+        return _app_ctx_stack.top

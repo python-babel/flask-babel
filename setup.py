@@ -20,7 +20,7 @@ setup(
     zip_safe=False,
     platforms='any',
     install_requires=[
-        'Flask',
+        'Flask>=0.9',
         'Babel>=2.3',
         'Jinja2>=2.5'
     ],
