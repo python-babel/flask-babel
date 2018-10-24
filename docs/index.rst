@@ -137,7 +137,7 @@ u'Donnerstag, 5. M\xe4rz 1987 17:12'
 For more format examples head over to the `babel`_ documentation.
 
 Formatting Numbers
-----------------
+------------------
 
 To format numbers you can use the :func:`format_number`,
 :func:`format_decimal`, :func:`format_currency`, :func:`format_percent` and :func:`format_scientific`
