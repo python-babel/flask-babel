@@ -251,10 +251,13 @@ def get_locale():
     locale = getattr(ctx, 'babel_locale', None)
     if locale is None:
         babel = current_app.extensions['babel']
-        if babel.locale_selector_func is None:
+        locale_selector_func = getattr(ctx, 'locale_selector_func', None)
+        if locale_selector_func is None:
+            locale_selector_func = babel.locale_selector_func
+        if locale_selector_func is None:
             locale = babel.default_locale
         else:
-            rv = babel.locale_selector_func()
+            rv = locale_selector_func()
             if rv is None:
                 locale = babel.default_locale
             else:
@@ -325,20 +328,18 @@ def force_locale(locale):
         yield
         return
 
-    babel = current_app.extensions['babel']
-
-    orig_locale_selector_func = babel.locale_selector_func
+    orig_locale_selector_func = getattr(ctx, 'locale_selector_func', None)
     orig_attrs = {}
     for key in ('babel_translations', 'babel_locale'):
         orig_attrs[key] = getattr(ctx, key, None)
 
     try:
-        babel.locale_selector_func = lambda: locale
+        ctx.locale_selector_func = lambda: locale
         for key in orig_attrs:
             setattr(ctx, key, None)
         yield
     finally:
-        babel.locale_selector_func = orig_locale_selector_func
+        ctx.locale_selector_func = orig_locale_selector_func
         for key, value in orig_attrs.items():
             setattr(ctx, key, value)
 

@@ -204,6 +204,29 @@ class DateFormattingTestCase(unittest.TestCase):
                 assert str(babel.get_locale()) == 'en_US'
             assert str(babel.get_locale()) == 'de_DE'
 
+    def test_force_locale_with_two_concurrent_requests(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app)
+
+        @b.localeselector
+        def select_locale():
+            return 'de_DE'
+
+        def make_request(forced_locale):
+            with app.test_request_context():
+                assert str(babel.get_locale()) == 'de_DE'
+                with babel.force_locale(forced_locale):
+                    yield
+
+        request1 = make_request('en_US')
+        next(request1)
+
+        request2 = make_request('en_US')
+        next(request2)
+
+        next(request2, None)
+        next(request1, None)
+
 
 class NumberFormattingTestCase(unittest.TestCase):
 
