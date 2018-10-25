@@ -1,21 +1,9 @@
-"""
-Flask-Babel
------------
-
-Adds i18n/l10n support to Flask applications with the help of the
-`Babel`_ library.
-
-Links
-`````
-
-* `documentation <http://packages.python.org/Flask-Babel>`_
-* `development version
-  <http://github.com/mitsuhiko/flask-babel/zipball/master#egg=Flask-Babel-dev>`_
-
-.. _Babel: http://babel.edgewall.org/
-
-"""
 from setuptools import setup
+
+from os import path
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 
 setup(
@@ -26,7 +14,8 @@ setup(
     author='Armin Ronacher',
     author_email='armin.ronacher@active-4.com',
     description='Adds i18n/l10n support to Flask applications',
-    long_description=__doc__,
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     packages=['flask_babel'],
     zip_safe=False,
     platforms='any',
