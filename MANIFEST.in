@@ -1,4 +1,4 @@
-include Makefile LICENSE
+include Makefile LICENSE README.md
 recursive-include tests *
 recursive-exclude tests *.pyc
 recursive-exclude tests *.pyo
