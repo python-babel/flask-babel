@@ -617,7 +617,7 @@ def lazy_gettext(string, **variables):
         def index():
             return unicode(hello)
     """
-    return LazyString(gettext, string, **variables)
+    return LazyString(gettext, string, enable_cache=False, **variables)
 
 
 def lazy_pgettext(context, string, **variables):
@@ -626,7 +626,13 @@ def lazy_pgettext(context, string, **variables):
 
     .. versionadded:: 0.7
     """
-    return LazyString(pgettext, context, string, **variables)
+    return LazyString(
+        pgettext,
+        context,
+        string,
+        enable_cache=False,
+        **variables
+    )
 
 
 def _get_current_context():
