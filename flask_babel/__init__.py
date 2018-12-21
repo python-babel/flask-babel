@@ -76,6 +76,7 @@ class Babel(object):
         app.config.setdefault('BABEL_DEFAULT_LOCALE', self._default_locale)
         app.config.setdefault('BABEL_DEFAULT_TIMEZONE', self._default_timezone)
         app.config.setdefault('BABEL_DOMAIN', self._default_domain)
+
         if self._date_formats is None:
             self._date_formats = self.default_date_formats.copy()
 
@@ -147,7 +148,7 @@ class Babel(object):
         """
         result = []
 
-        for dirname in self.translation_directories:
+        for dirname, _ in self.translations:
             if not os.path.isdir(dirname):
                 continue
 
@@ -187,16 +188,24 @@ class Babel(object):
 
     @property
     def translation_directories(self):
+        for dirname, _ in self.translations:
+            yield dirname
+
+    @property
+    def translations(self):
         directories = self.app.config.get(
             'BABEL_TRANSLATION_DIRECTORIES',
             'translations'
         ).split(';')
 
-        for path in directories:
-            if os.path.isabs(path):
-                yield path
+        _translations = [(dirname, self.domain) for dirname in directories]
+        _translations += self.app.config.get('BABEL_TRANSLATIONS') or []
+
+        for dirname, domain in _translations:
+            if os.path.isabs(dirname):
+                yield (dirname, domain)
             else:
-                yield os.path.join(self.app.root_path, path)
+                yield (os.path.join(self.app.root_path, dirname), domain)
 
 
 def get_translations():
@@ -215,12 +224,12 @@ def get_translations():
         translations = support.Translations()
 
         babel = current_app.extensions['babel']
-        for dirname in babel.translation_directories:
+        for dirname, domain in babel.translations:
             catalog = support.Translations.load(
-                    dirname,
-                    [get_locale()],
-                    babel.domain
-                )
+                dirname,
+                [get_locale()],
+                domain
+            )
             translations.merge(catalog)
             # FIXME: Workaround for merge() being really, really stupid. It
             # does not copy _info, plural(), or any other instance variables

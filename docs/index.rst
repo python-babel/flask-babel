@@ -56,6 +56,11 @@ change some internal defaults:
                                 ``translations``.
 `BABEL_DOMAIN`                  The message domain used by the application.
                                 Defaults to ``messages``.
+`BABEL_TRANSLATIONS`            A list of available translations with specified
+                                message domains. The list is a list of
+                                two-tuples in the format ``(translation folder,
+                                message domain)`` - for example,
+                                ``('translations', 'messages')``.
 =============================== =============================================
 
 For more complex applications you might want to have multiple applications

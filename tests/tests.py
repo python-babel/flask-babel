@@ -79,6 +79,40 @@ class IntegrationTestCase(unittest.TestCase):
 
             assert gettext(u'Good bye') == 'Auf Wiedersehen'
 
+    def test_multiple_translations(self):
+        """
+        Ensure we can load multiple translations with different text domains.
+        """
+        b = babel.Babel()
+        app = flask.Flask(__name__)
+
+        app.config.update({
+            'BABEL_TRANSLATION_DIRECTORIES': ';'.join((
+                'translations',
+                'renamed_translations'
+            )),
+            'BABEL_TRANSLATIONS': [
+                ('translations_different_domain', 'myapp')
+            ],
+            'BABEL_DEFAULT_LOCALE': 'de_DE'
+        })
+
+        b.init_app(app)
+
+        with app.test_request_context():
+            translations = b.list_translations()
+
+            assert(len(translations) == 3)
+            assert(str(translations[0]) == 'de')
+            assert(str(translations[1]) == 'de')
+            assert(str(translations[2]) == 'de')
+
+            assert gettext(
+                u'Hello %(name)s!',
+                name='Peter'
+            ) == 'Hallo Peter!'
+            assert gettext(u'Good bye') == 'Auf Wiedersehen'
+
     def test_lazy_old_style_formatting(self):
         lazy_string = lazy_gettext(u'Hello %(name)s')
         assert lazy_string % {u'name': u'test'} == u'Hello test'
