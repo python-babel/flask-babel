@@ -12,7 +12,7 @@ from decimal import Decimal
 import flask
 from datetime import datetime, timedelta
 import flask_babel as babel
-from flask_babel import gettext, ngettext, lazy_gettext, get_translations
+from flask_babel import gettext, ngettext, lazy_gettext, lazy_ngettext, get_translations
 from babel.support import NullTranslations
 from flask_babel._compat import text_type
 
@@ -265,6 +265,18 @@ class GettextTestCase(unittest.TestCase):
         with app.test_request_context():
             assert text_type(yes) == 'Yes'
             assert yes.__html__() == 'Yes'
+
+    def test_lazy_ngettext(self):
+        app = flask.Flask(__name__)
+        babel.Babel(app, default_locale='de_DE')
+        one_apple = lazy_ngettext(u'%(num)s Apple', u'%(num)s Apples', 1)
+        with app.test_request_context():
+            assert text_type(one_apple) == '1 Apfel'
+            assert one_apple.__html__() == '1 Apfel'
+        two_apples = lazy_ngettext(u'%(num)s Apple', u'%(num)s Apples', 2)
+        with app.test_request_context():
+            assert text_type(two_apples) == u'2 Äpfel'
+            assert two_apples.__html__() == u'2 Äpfel'
 
     def test_list_translations(self):
         app = flask.Flask(__name__)
