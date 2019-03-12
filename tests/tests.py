@@ -5,16 +5,16 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-import pickle
+import pickle  # noqa E402
 
-import unittest
-from decimal import Decimal
-import flask
-from datetime import datetime, timedelta
-import flask_babel as babel
-from flask_babel import gettext, ngettext, lazy_gettext, get_translations
-from babel.support import NullTranslations
-from flask_babel._compat import text_type
+import unittest  # noqa E402
+from decimal import Decimal  # noqa E402
+import flask  # noqa E402
+from datetime import datetime, timedelta  # noqa E402
+import flask_babel as babel  # noqa E402
+from flask_babel import gettext, ngettext, lazy_gettext, get_translations  # noqa E402
+from babel.support import NullTranslations  # noqa E402
+from flask_babel._compat import text_type  # noqa E402
 
 
 class IntegrationTestCase(unittest.TestCase):
@@ -237,7 +237,8 @@ class GettextTestCase(unittest.TestCase):
         app = flask.Flask(__name__)
         babel.Babel(app, default_locale='de_DE')
 
-        t = lambda x: flask.render_template_string('{{ %s }}' % x)
+        def t(x):
+            return flask.render_template_string('{{ %s }}' % x)
 
         with app.test_request_context():
             assert t("gettext('Hello %(name)s!', name='Peter')") == \

@@ -37,21 +37,21 @@ class Babel(object):
     """
 
     default_date_formats = ImmutableDict({
-        'time':             'medium',
-        'date':             'medium',
-        'datetime':         'medium',
-        'time.short':       None,
-        'time.medium':      None,
-        'time.full':        None,
-        'time.long':        None,
-        'date.short':       None,
-        'date.medium':      None,
-        'date.full':        None,
-        'date.long':        None,
-        'datetime.short':   None,
-        'datetime.medium':  None,
-        'datetime.full':    None,
-        'datetime.long':    None,
+        'time':             'medium',  # noqa: E241
+        'date':             'medium',  # noqa: E241
+        'datetime':         'medium',  # noqa: E241
+        'time.short':       None,      # noqa: E241
+        'time.medium':      None,      # noqa: E241
+        'time.full':        None,      # noqa: E241
+        'time.long':        None,      # noqa: E241
+        'date.short':       None,      # noqa: E241
+        'date.medium':      None,      # noqa: E241
+        'date.full':        None,      # noqa: E241
+        'date.long':        None,      # noqa: E241
+        'datetime.short':   None,      # noqa: E241
+        'datetime.medium':  None,      # noqa: E241
+        'datetime.full':    None,      # noqa: E241
+        'datetime.long':    None,      # noqa: E241
     })
 
     def __init__(self, app=None, default_locale='en', default_timezone='UTC',
@@ -223,10 +223,10 @@ def get_translations():
         babel = current_app.extensions['babel']
         for dirname in babel.translation_directories:
             catalog = support.Translations.load(
-                    dirname,
-                    [get_locale()],
-                    babel.domain
-                )
+                dirname,
+                [get_locale()],
+                babel.domain
+            )
             translations.merge(catalog)
             # FIXME: Workaround for merge() being really, really stupid. It
             # does not copy _info, plural(), or any other instance variables
@@ -554,6 +554,8 @@ def gettext(string, **variables):
         return string if not variables else string % variables
     s = t.ugettext(string)
     return s if not variables else s % variables
+
+
 _ = gettext
 
 
