@@ -620,6 +620,21 @@ def lazy_gettext(string, **variables):
     return LazyString(gettext, string, **variables)
 
 
+def lazy_ngettext(singular, plural, num, **variables):
+    """Like :func:`ngettext` but the string returned is lazy which means
+    it will be translated when it is used as an actual string.
+
+    Example::
+
+        apples = lazy_ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(apples))
+
+        @app.route('/')
+        def index():
+            return unicode(apples)
+    """
+    return LazyString(ngettext, singular, plural, num, **variables)
+
+
 def lazy_pgettext(context, string, **variables):
     """Like :func:`pgettext` but the string returned is lazy which means
     it will be translated when it is used as an actual string.
