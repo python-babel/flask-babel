@@ -28,7 +28,7 @@ older version you will have to upgrade or disable the Jinja support
 Configuration
 -------------
 
-To get started all you need to do is to instanciate a :class:`Babel`
+To get started all you need to do is to instantiate a :class:`Babel`
 object after configuring the application::
 
     from flask import Flask
