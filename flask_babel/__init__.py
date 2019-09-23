@@ -16,7 +16,7 @@ from contextlib import contextmanager
 from flask import current_app, request
 from flask.ctx import has_request_context
 from babel import dates, numbers, support, Locale
-from werkzeug import ImmutableDict
+from werkzeug.datastructures import ImmutableDict
 try:
     from pytz.gae import pytz
 except ImportError:
