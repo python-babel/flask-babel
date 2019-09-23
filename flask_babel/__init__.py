@@ -16,14 +16,8 @@ from contextlib import contextmanager
 from flask import current_app, request
 from flask.ctx import has_request_context
 from babel import dates, numbers, support, Locale
+from pytz import timezone, UTC
 from werkzeug.datastructures import ImmutableDict
-try:
-    from pytz.gae import pytz
-except ImportError:
-    from pytz import timezone, UTC
-else:
-    timezone = pytz.timezone
-    UTC = pytz.UTC
 
 from flask_babel._compat import string_types
 from flask_babel.speaklater import LazyString
