@@ -6,13 +6,14 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 import pickle
+from threading import Thread, Semaphore
 
 import unittest
 from decimal import Decimal
 import flask
 from datetime import datetime, timedelta
 import flask_babel as babel
-from flask_babel import gettext, ngettext, lazy_gettext, get_translations
+from flask_babel import gettext, ngettext, lazy_gettext, lazy_ngettext, get_translations
 from babel.support import NullTranslations
 from flask_babel._compat import text_type
 
@@ -204,6 +205,46 @@ class DateFormattingTestCase(unittest.TestCase):
                 assert str(babel.get_locale()) == 'en_US'
             assert str(babel.get_locale()) == 'de_DE'
 
+    def test_force_locale_with_threading(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app)
+
+        @b.localeselector
+        def select_locale():
+            return 'de_DE'
+
+        semaphore = Semaphore(value=0)
+
+        def first_request():
+            with app.test_request_context():
+                with babel.force_locale('en_US'):
+                    assert str(babel.get_locale()) == 'en_US'
+                    semaphore.acquire()
+
+        thread = Thread(target=first_request)
+        thread.start()
+
+        try:
+            with app.test_request_context():
+                assert str(babel.get_locale()) == 'de_DE'
+        finally:
+            semaphore.release()
+            thread.join()
+
+    def test_refresh_during_force_locale(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app)
+
+        @b.localeselector
+        def select_locale():
+            return 'de_DE'
+
+        with app.test_request_context():
+            with babel.force_locale('en_US'):
+                assert str(babel.get_locale()) == 'en_US'
+                babel.refresh()
+                assert str(babel.get_locale()) == 'en_US'
+
 
 class NumberFormattingTestCase(unittest.TestCase):
 
@@ -265,6 +306,18 @@ class GettextTestCase(unittest.TestCase):
         with app.test_request_context():
             assert text_type(yes) == 'Yes'
             assert yes.__html__() == 'Yes'
+
+    def test_lazy_ngettext(self):
+        app = flask.Flask(__name__)
+        babel.Babel(app, default_locale='de_DE')
+        one_apple = lazy_ngettext(u'%(num)s Apple', u'%(num)s Apples', 1)
+        with app.test_request_context():
+            assert text_type(one_apple) == '1 Apfel'
+            assert one_apple.__html__() == '1 Apfel'
+        two_apples = lazy_ngettext(u'%(num)s Apple', u'%(num)s Apples', 2)
+        with app.test_request_context():
+            assert text_type(two_apples) == u'2 Äpfel'
+            assert two_apples.__html__() == u'2 Äpfel'
 
     def test_list_translations(self):
         app = flask.Flask(__name__)

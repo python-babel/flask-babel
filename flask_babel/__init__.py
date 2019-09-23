@@ -16,8 +16,8 @@ from contextlib import contextmanager
 from flask import current_app, request
 from flask.ctx import has_request_context
 from babel import dates, numbers, support, Locale
-from werkzeug import ImmutableDict
 from pytz import timezone, UTC
+from werkzeug.datastructures import ImmutableDict
 
 from flask_babel._compat import string_types
 from flask_babel.speaklater import LazyString
@@ -299,6 +299,9 @@ def refresh():
         if hasattr(ctx, key):
             delattr(ctx, key)
 
+    if hasattr(ctx, 'forced_babel_locale'):
+        ctx.babel_locale = ctx.forced_babel_locale
+
 
 @contextmanager
 def force_locale(locale):
@@ -319,20 +322,19 @@ def force_locale(locale):
         yield
         return
 
-    babel = current_app.extensions['babel']
-
-    orig_locale_selector_func = babel.locale_selector_func
     orig_attrs = {}
     for key in ('babel_translations', 'babel_locale'):
         orig_attrs[key] = getattr(ctx, key, None)
 
     try:
-        babel.locale_selector_func = lambda: locale
-        for key in orig_attrs:
-            setattr(ctx, key, None)
+        ctx.babel_locale = Locale.parse(locale)
+        ctx.forced_babel_locale = ctx.babel_locale
+        ctx.babel_translations = None
         yield
     finally:
-        babel.locale_selector_func = orig_locale_selector_func
+        if hasattr(ctx, 'forced_babel_locale'):
+            del ctx.forced_babel_locale
+
         for key, value in orig_attrs.items():
             setattr(ctx, key, value)
 
@@ -612,6 +614,21 @@ def lazy_gettext(string, **variables):
             return unicode(hello)
     """
     return LazyString(gettext, string, **variables)
+
+
+def lazy_ngettext(singular, plural, num, **variables):
+    """Like :func:`ngettext` but the string returned is lazy which means
+    it will be translated when it is used as an actual string.
+
+    Example::
+
+        apples = lazy_ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(apples))
+
+        @app.route('/')
+        def index():
+            return unicode(apples)
+    """
+    return LazyString(ngettext, singular, plural, num, **variables)
 
 
 def lazy_pgettext(context, string, **variables):
