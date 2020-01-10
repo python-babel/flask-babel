@@ -25,13 +25,13 @@ else:
     timezone = pytz.timezone
     UTC = pytz.UTC
 
-from flask_babel._compat import string_types
-from flask_babel.speaklater import LazyString
+from flask_babel2._compat import string_types
+from flask_babel2.speaklater import LazyString
 
 
 class Babel(object):
     """Central controller class that can be used to configure how
-    Flask-Babel behaves.  Each application that wants to use Flask-Babel
+    Flask-Babel2 behaves.  Each application that wants to use Flask-Babel2
     has to create, or run :meth:`init_app` on, an instance of this class
     after the configuration was initialized.
     """
@@ -87,7 +87,7 @@ class Babel(object):
 
         #: a mapping of Babel datetime format strings that can be modified
         #: to change the defaults.  If you invoke :func:`format_datetime`
-        #: and do not provide any format string Flask-Babel will do the
+        #: and do not provide any format string Flask-Babel2 will do the
         #: following things:
         #:
         #: 1.   look up ``date_formats['datetime']``.  By default ``'medium'``

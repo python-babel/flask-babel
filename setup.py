@@ -7,16 +7,16 @@ with open(path.join(this_directory, 'README.md'), 'rb') as f:
 
 
 setup(
-    name='Flask-Babel',
+    name='Flask-Babel2',
     version='0.12.2',
-    url='http://github.com/python-babel/flask-babel',
+    url='http://github.com/python-babel/flask-babel2',
     license='BSD',
     author='Armin Ronacher',
     author_email='armin.ronacher@active-4.com',
     description='Adds i18n/l10n support to Flask applications',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    packages=['flask_babel'],
+    packages=['flask_babel2'],
     zip_safe=False,
     platforms='any',
     install_requires=[

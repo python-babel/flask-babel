@@ -1,9 +1,9 @@
-Flask-Babel
+Flask-Babel2
 ===========
 
-.. module:: flask_babel
+.. module:: flask_babel2
 
-Flask-Babel is an extension to `Flask`_ that adds i18n and l10n support to
+Flask-Babel2 is an extension to `Flask`_ that adds i18n and l10n support to
 any Flask application with the help of `babel`_, `pytz`_ and
 `speaklater`_.  It has builtin support for date formatting with timezone
 support as well as a very simple and friendly interface to :mod:`gettext`
@@ -14,13 +14,13 @@ Installation
 
 Install the extension with one of the following commands::
 
-    $ easy_install Flask-Babel
+    $ easy_install Flask-Babel2
 
 or alternatively if you have pip installed::
 
-    $ pip install Flask-Babel
+    $ pip install Flask-Babel2
 
-Please note that Flask-Babel requires Jinja 2.5.  If you are using an
+Please note that Flask-Babel2 requires Jinja 2.5.  If you are using an
 older version you will have to upgrade or disable the Jinja support 
 (see configuration).
 
@@ -32,7 +32,7 @@ To get started all you need to do is to instantiate a :class:`Babel`
 object after configuring the application::
 
     from flask import Flask
-    from flask_babel import Babel
+    from flask_babel2 import Babel
 
     app = Flask(__name__)
     app.config.from_pyfile('mysettings.cfg')
@@ -114,7 +114,7 @@ To play with the date formatting from the console, you can use the
 
 Here some examples:
 
->>> from flask_babel import format_datetime
+>>> from flask_babel2 import format_datetime
 >>> from datetime import datetime
 >>> format_datetime(datetime(1987, 3, 5, 17, 12))
 u'Mar 5, 1987 5:12:00 PM'
@@ -130,7 +130,7 @@ u'05 12 1987'
 And again with a different language:
 
 >>> app.config['BABEL_DEFAULT_LOCALE'] = 'de'
->>> from flask_babel import refresh; refresh()
+>>> from flask_babel2 import refresh; refresh()
 >>> format_datetime(datetime(1987, 3, 5, 17, 12), 'EEEE, d. MMMM yyyy H:mm')
 u'Donnerstag, 5. M\xe4rz 1987 17:12'
 
@@ -150,30 +150,30 @@ To play with the date formatting from the console, you can use the
 
 Here are some examples:
 
->>> from flask_babel import format_number
+>>> from flask_babel2 import format_number
 >>> format_number(1099)
 '1,099'
 
->>> from flask_babel import format_decimal
+>>> from flask_babel2 import format_decimal
 >>> format_decimal(1.2346)
 u'1.235'
 
->>> from flask_babel import format_currency
+>>> from flask_babel2 import format_currency
 >>> format_currency(1099.98, 'USD')
 '$1,099.98'
 
->>> from flask_babel import format_percent
+>>> from flask_babel2 import format_percent
 >>> format_percent(0.34)
 '34%'
 
->>> from flask_babel import format_scientific
+>>> from flask_babel2 import format_scientific
 >>> format_scientific(10000)
 '1E4'
 
 And again with a different language:
 
 >>> app.config['BABEL_DEFAULT_LOCALE'] = 'de'
->>> from flask_babel import refresh; refresh()
+>>> from flask_babel2 import refresh; refresh()
 
 >>> format_number(1099)
 '1.099'
@@ -206,7 +206,7 @@ There are two functions responsible for translating: :func:`gettext` and
 :func:`ngettext`.  The first to translate singular strings and the second
 to translate strings that might become plural.  Here some examples::
 
-    from flask_babel import gettext, ngettext
+    from flask_babel2 import gettext, ngettext
 
     gettext(u'A simple string')
     gettext(u'Value: %(value)s', value=42)
@@ -217,12 +217,12 @@ application and define them outside of a request, you can use a lazy
 strings.  Lazy strings will not be evaluated until they are actually used.
 To use such a lazy string, use the :func:`lazy_gettext` function::
 
-    from flask_babel import lazy_gettext
+    from flask_babel2 import lazy_gettext
 
     class MyForm(formlibrary.FormBase):
         success_message = lazy_gettext(u'The form was successfully saved.')
 
-So how does Flask-Babel find the translations?  Well first you have to
+So how does Flask-Babel2 find the translations?  Well first you have to
 create some.  Here is how you do it:
 
 Translating Applications
@@ -262,7 +262,7 @@ translation.  For example to translate to German use this command::
     $ pybabel init -i messages.pot -d translations -l de
 
 ``-d translations`` tells pybabel to store the translations in this
-folder.  This is where Flask-Babel will look for translations.  Put it
+folder.  This is where Flask-Babel2 will look for translations.  Put it
 next to your template folder.
 
 Now edit the ``translations/de/LC_MESSAGES/messages.po`` file as needed.
@@ -302,7 +302,7 @@ API
 ---
 
 This part of the documentation documents each and every public class or
-function from Flask-Babel.
+function from Flask-Babel2.
 
 Configuration
 `````````````

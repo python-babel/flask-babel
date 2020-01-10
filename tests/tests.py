@@ -11,10 +11,10 @@ import unittest
 from decimal import Decimal
 import flask
 from datetime import datetime, timedelta
-import flask_babel as babel
-from flask_babel import gettext, ngettext, lazy_gettext, lazy_ngettext, get_translations
+import flask_babel2 as babel
+from flask_babel2 import gettext, ngettext, lazy_gettext, lazy_ngettext, get_translations
 from babel.support import NullTranslations
-from flask_babel._compat import text_type
+from flask_babel2._compat import text_type
 
 
 class IntegrationTestCase(unittest.TestCase):

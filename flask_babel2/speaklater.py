@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask_babel._compat import text_type
+from flask_babel2._compat import text_type
 
 
 class LazyString(object):
