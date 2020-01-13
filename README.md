@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/hasgeek/flask-babel2.svg?branch=master)](https://travis-ci.org/hasgeek/flask-babel2)
 ![license](https://img.shields.io/github/license/hasgeek/flask-babel2.svg?maxAge=2592000)
 
-Implements i18n and l10n support for Flask.  This is based on the Python
+Implements i18n and l10n support for Flask. This is based on the Python
 [babel][] module as well as [pytz][] both of which are installed automatically
 for you if you install this library.
 

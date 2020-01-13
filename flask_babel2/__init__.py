@@ -9,14 +9,19 @@
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import absolute_import
+
+from contextlib import contextmanager
+from datetime import datetime
 import os
 
-from datetime import datetime
-from contextlib import contextmanager
+from babel import Locale, dates, numbers, support
 from flask import current_app, request
 from flask.ctx import has_request_context
-from babel import dates, numbers, support, Locale
 from werkzeug import ImmutableDict
+
+from flask_babel2._compat import string_types
+from flask_babel2.speaklater import LazyString
+
 try:
     from pytz.gae import pytz
 except ImportError:
@@ -24,9 +29,6 @@ except ImportError:
 else:
     timezone = pytz.timezone
     UTC = pytz.UTC
-
-from flask_babel2._compat import string_types
-from flask_babel2.speaklater import LazyString
 
 
 class Babel(object):
@@ -36,27 +38,35 @@ class Babel(object):
     after the configuration was initialized.
     """
 
-    default_date_formats = ImmutableDict({
-        'time':             'medium',
-        'date':             'medium',
-        'datetime':         'medium',
-        'time.short':       None,
-        'time.medium':      None,
-        'time.full':        None,
-        'time.long':        None,
-        'date.short':       None,
-        'date.medium':      None,
-        'date.full':        None,
-        'date.long':        None,
-        'datetime.short':   None,
-        'datetime.medium':  None,
-        'datetime.full':    None,
-        'datetime.long':    None,
-    })
+    default_date_formats = ImmutableDict(
+        {
+            'time': 'medium',
+            'date': 'medium',
+            'datetime': 'medium',
+            'time.short': None,
+            'time.medium': None,
+            'time.full': None,
+            'time.long': None,
+            'date.short': None,
+            'date.medium': None,
+            'date.full': None,
+            'date.long': None,
+            'datetime.short': None,
+            'datetime.medium': None,
+            'datetime.full': None,
+            'datetime.long': None,
+        }
+    )
 
-    def __init__(self, app=None, default_locale='en', default_timezone='UTC',
-                 default_domain='messages', date_formats=None,
-                 configure_jinja=True):
+    def __init__(
+        self,
+        app=None,
+        default_locale='en',
+        default_timezone='UTC',
+        default_domain='messages',
+        date_formats=None,
+        configure_jinja=True,
+    ):
         self._default_locale = default_locale
         self._default_timezone = default_timezone
         self._default_domain = default_domain
@@ -104,7 +114,6 @@ class Babel(object):
                 dateformat=format_date,
                 timeformat=format_time,
                 timedeltaformat=format_timedelta,
-
                 numberformat=format_number,
                 decimalformat=format_decimal,
                 currencyformat=format_currency,
@@ -115,7 +124,7 @@ class Babel(object):
             app.jinja_env.install_gettext_callables(
                 lambda x: get_translations().ugettext(x),
                 lambda s, p, n: get_translations().ungettext(s, p, n),
-                newstyle=True
+                newstyle=True,
             )
 
     def localeselector(self, f):
@@ -126,8 +135,9 @@ class Babel(object):
 
         This has to return the locale as string (eg: ``'de_AT'``, ``'en_US'``)
         """
-        assert self.locale_selector_func is None, \
-            'a localeselector function is already registered'
+        assert (
+            self.locale_selector_func is None
+        ), 'a localeselector function is already registered'
         self.locale_selector_func = f
         return f
 
@@ -139,8 +149,9 @@ class Babel(object):
 
         This has to return the timezone as string (eg: ``'Europe/Vienna'``)
         """
-        assert self.timezone_selector_func is None, \
-            'a timezoneselector function is already registered'
+        assert (
+            self.timezone_selector_func is None
+        ), 'a timezoneselector function is already registered'
         self.timezone_selector_func = f
         return f
 
@@ -194,8 +205,7 @@ class Babel(object):
     @property
     def translation_directories(self):
         directories = self.app.config.get(
-            'BABEL_TRANSLATION_DIRECTORIES',
-            'translations'
+            'BABEL_TRANSLATION_DIRECTORIES', 'translations'
         ).split(';')
 
         for path in directories:
@@ -222,11 +232,7 @@ def get_translations():
 
         babel = current_app.extensions['babel']
         for dirname in babel.translation_directories:
-            catalog = support.Translations.load(
-                    dirname,
-                    [get_locale()],
-                    babel.domain
-                )
+            catalog = support.Translations.load(dirname, [get_locale()], babel.domain)
             translations.merge(catalog)
             # FIXME: Workaround for merge() being really, really stupid. It
             # does not copy _info, plural(), or any other instance variables
@@ -440,8 +446,9 @@ def format_time(time=None, format=None, rebase=True):
     return _date_format(dates.format_time, time, format, rebase)
 
 
-def format_timedelta(datetime_or_timedelta, granularity='second',
-                     add_direction=False, threshold=0.85):
+def format_timedelta(
+    datetime_or_timedelta, granularity='second', add_direction=False, threshold=0.85
+):
     """Format the elapsed time from the given date to now or the given
     timedelta.
 
@@ -455,7 +462,7 @@ def format_timedelta(datetime_or_timedelta, granularity='second',
         granularity,
         threshold=threshold,
         add_direction=add_direction,
-        locale=get_locale()
+        locale=get_locale(),
     )
 
 
@@ -491,8 +498,9 @@ def format_decimal(number, format=None):
     return numbers.format_decimal(number, format=format, locale=locale)
 
 
-def format_currency(number, currency, format=None, currency_digits=True,
-                    format_type='standard'):
+def format_currency(
+    number, currency, format=None, currency_digits=True, format_type='standard'
+):
     """Return the given number formatted for the locale in request
 
     :param number: the number to format
@@ -512,7 +520,7 @@ def format_currency(number, currency, format=None, currency_digits=True,
         format=format,
         locale=locale,
         currency_digits=currency_digits,
-        format_type=format_type
+        format_type=format_type,
     )
 
 
@@ -554,6 +562,8 @@ def gettext(string, **variables):
         return string if not variables else string % variables
     s = t.ugettext(string)
     return s if not variables else s % variables
+
+
 _ = gettext
 
 

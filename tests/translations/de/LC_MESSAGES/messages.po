@@ -32,4 +32,3 @@ msgstr[1] "%(num)s Äpfel"
 #: tests.py:119
 msgid "Yes"
 msgstr "Ja"
-

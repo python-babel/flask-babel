@@ -32,4 +32,3 @@ msgstr[1] ""
 #: tests.py:119
 msgid "Yes"
 msgstr ""
-

@@ -21,7 +21,7 @@ or alternatively if you have pip installed::
     $ pip install Flask-Babel2
 
 Please note that Flask-Babel2 requires Jinja 2.5.  If you are using an
-older version you will have to upgrade or disable the Jinja support 
+older version you will have to upgrade or disable the Jinja support
 (see configuration).
 
 
@@ -38,7 +38,7 @@ object after configuring the application::
     app.config.from_pyfile('mysettings.cfg')
     babel = Babel(app)
 
-To disable jinja support, include ``configure_jinja=False`` in the Babel 
+To disable jinja support, include ``configure_jinja=False`` in the Babel
 constructor call.  The babel object itself can be used to configure the babel support
 further.  Babel has the following configuration values that can be used to
 change some internal defaults:

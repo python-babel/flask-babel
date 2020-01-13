@@ -1,0 +1,24 @@
+# Default tool config file. See also setup.cfg for tools that don't yet
+# support pyproject.toml.
+
+[tool.black]
+line-length = 88
+target_version = ['py27']
+skip-string-normalization = true
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | __pycache__
+  | buck-out
+  | build
+  | dist
+  | node_modules
+)/
+'''

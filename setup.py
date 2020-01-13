@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
+from os import path
+
 from setuptools import setup
 
-from os import path
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), 'rb') as f:
     long_description = f.read().decode('utf-8')
@@ -19,11 +21,7 @@ setup(
     packages=['flask_babel2'],
     zip_safe=False,
     platforms='any',
-    install_requires=[
-        'Flask',
-        'Babel>=2.3',
-        'Jinja2>=2.5'
-    ],
+    install_requires=['Flask', 'Babel>=2.3', 'Jinja2>=2.5'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
@@ -35,6 +33,6 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-        'Topic :: Software Development :: Libraries :: Python Modules'
-    ]
+        'Topic :: Software Development :: Libraries :: Python Modules',
+    ],
 )

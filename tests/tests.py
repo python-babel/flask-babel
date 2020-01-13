@@ -1,20 +1,27 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-
-import pickle
-
-import unittest
-from decimal import Decimal
-import flask
 from datetime import datetime, timedelta
-import flask_babel2 as babel
-from flask_babel2 import gettext, ngettext, lazy_gettext, lazy_ngettext, get_translations
+from decimal import Decimal
+import os
+import pickle
+import sys
+import unittest
+
 from babel.support import NullTranslations
+import flask
+
+from flask_babel2 import (
+    get_translations,
+    gettext,
+    lazy_gettext,
+    lazy_ngettext,
+    ngettext,
+)
 from flask_babel2._compat import text_type
+import flask_babel2 as babel
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 
 class IntegrationTestCase(unittest.TestCase):
@@ -33,27 +40,25 @@ class IntegrationTestCase(unittest.TestCase):
         b = babel.Babel()
         app = flask.Flask(__name__)
 
-        app.config.update({
-            'BABEL_TRANSLATION_DIRECTORIES': ';'.join((
-                'translations',
-                'renamed_translations'
-            )),
-            'BABEL_DEFAULT_LOCALE': 'de_DE'
-        })
+        app.config.update(
+            {
+                'BABEL_TRANSLATION_DIRECTORIES': ';'.join(
+                    ('translations', 'renamed_translations')
+                ),
+                'BABEL_DEFAULT_LOCALE': 'de_DE',
+            }
+        )
 
         b.init_app(app)
 
         with app.test_request_context():
             translations = b.list_translations()
 
-            assert(len(translations) == 2)
-            assert(str(translations[0]) == 'de')
-            assert(str(translations[1]) == 'de')
+            assert len(translations) == 2
+            assert str(translations[0]) == 'de'
+            assert str(translations[1]) == 'de'
 
-            assert gettext(
-                u'Hello %(name)s!',
-                name='Peter'
-            ) == 'Hallo Peter!'
+            assert gettext(u'Hello %(name)s!', name='Peter') == 'Hallo Peter!'
 
     def test_different_domain(self):
         """
@@ -62,19 +67,21 @@ class IntegrationTestCase(unittest.TestCase):
         b = babel.Babel()
         app = flask.Flask(__name__)
 
-        app.config.update({
-            'BABEL_TRANSLATION_DIRECTORIES': 'translations_different_domain',
-            'BABEL_DEFAULT_LOCALE': 'de_DE',
-            'BABEL_DOMAIN': 'myapp'
-        })
+        app.config.update(
+            {
+                'BABEL_TRANSLATION_DIRECTORIES': 'translations_different_domain',
+                'BABEL_DEFAULT_LOCALE': 'de_DE',
+                'BABEL_DOMAIN': 'myapp',
+            }
+        )
 
         b.init_app(app)
 
         with app.test_request_context():
             translations = b.list_translations()
 
-            assert(len(translations) == 1)
-            assert(str(translations[0]) == 'de')
+            assert len(translations) == 1
+            assert str(translations[0]) == 'de'
 
             assert gettext(u'Good bye') == 'Auf Wiedersehen'
 
@@ -94,7 +101,6 @@ class IntegrationTestCase(unittest.TestCase):
 
 
 class DateFormattingTestCase(unittest.TestCase):
-
     def test_basics(self):
         app = flask.Flask(__name__)
         babel.Babel(app)
@@ -116,8 +122,7 @@ class DateFormattingTestCase(unittest.TestCase):
 
         with app.test_request_context():
             app.config['BABEL_DEFAULT_LOCALE'] = 'de_DE'
-            assert babel.format_datetime(d, 'long') == \
-                '12. April 2010 um 15:46:00 MESZ'
+            assert babel.format_datetime(d, 'long') == '12. April 2010 um 15:46:00 MESZ'
 
     def test_init_app(self):
         b = babel.Babel()
@@ -138,14 +143,12 @@ class DateFormattingTestCase(unittest.TestCase):
 
         with app.test_request_context():
             app.config['BABEL_DEFAULT_LOCALE'] = 'de_DE'
-            assert babel.format_datetime(d, 'long') == \
-                '12. April 2010 um 15:46:00 MESZ'
+            assert babel.format_datetime(d, 'long') == '12. April 2010 um 15:46:00 MESZ'
 
     def test_custom_formats(self):
         app = flask.Flask(__name__)
         app.config.update(
-            BABEL_DEFAULT_LOCALE='en_US',
-            BABEL_DEFAULT_TIMEZONE='Pacific/Johnston'
+            BABEL_DEFAULT_LOCALE='en_US', BABEL_DEFAULT_TIMEZONE='Pacific/Johnston'
         )
         b = babel.Babel(app)
         b.date_formats['datetime'] = 'long'
@@ -206,7 +209,6 @@ class DateFormattingTestCase(unittest.TestCase):
 
 
 class NumberFormattingTestCase(unittest.TestCase):
-
     def test_basics(self):
         app = flask.Flask(__name__)
         babel.Babel(app)
@@ -221,38 +223,45 @@ class NumberFormattingTestCase(unittest.TestCase):
 
 
 class GettextTestCase(unittest.TestCase):
-
     def test_basics(self):
         app = flask.Flask(__name__)
         babel.Babel(app, default_locale='de_DE')
 
         with app.test_request_context():
             assert gettext(u'Hello %(name)s!', name='Peter') == 'Hallo Peter!'
-            assert ngettext(u'%(num)s Apple', u'%(num)s Apples', 3) == \
-                u'3 Äpfel'
-            assert ngettext(u'%(num)s Apple', u'%(num)s Apples', 1) == \
-                u'1 Apfel'
+            assert ngettext(u'%(num)s Apple', u'%(num)s Apples', 3) == u'3 Äpfel'
+            assert ngettext(u'%(num)s Apple', u'%(num)s Apples', 1) == u'1 Apfel'
 
     def test_template_basics(self):
         app = flask.Flask(__name__)
         babel.Babel(app, default_locale='de_DE')
 
-        t = lambda x: flask.render_template_string('{{ %s }}' % x)
+        def t(x):
+            return flask.render_template_string('{{ %s }}' % x)
 
         with app.test_request_context():
-            assert t("gettext('Hello %(name)s!', name='Peter')") == \
-                u'Hallo Peter!'
-            assert t("ngettext('%(num)s Apple', '%(num)s Apples', 3)") == \
-                u'3 Äpfel'
-            assert t("ngettext('%(num)s Apple', '%(num)s Apples', 1)") == \
-                u'1 Apfel'
-            assert flask.render_template_string('''
+            assert t("gettext('Hello %(name)s!', name='Peter')") == u'Hallo Peter!'
+            assert t("ngettext('%(num)s Apple', '%(num)s Apples', 3)") == u'3 Äpfel'
+            assert t("ngettext('%(num)s Apple', '%(num)s Apples', 1)") == u'1 Apfel'
+            assert (
+                flask.render_template_string(
+                    '''
                 {% trans %}Hello {{ name }}!{% endtrans %}
-            ''', name='Peter').strip() == 'Hallo Peter!'
-            assert flask.render_template_string('''
+            ''',
+                    name='Peter',
+                ).strip()
+                == 'Hallo Peter!'
+            )
+            assert (
+                flask.render_template_string(
+                    '''
                 {% trans num=3 %}{{ num }} Apple
                 {%- pluralize %}{{ num }} Apples{% endtrans %}
-            ''', name='Peter').strip() == u'3 Äpfel'
+            ''',
+                    name='Peter',
+                ).strip()
+                == u'3 Äpfel'
+            )
 
     def test_lazy_gettext(self):
         app = flask.Flask(__name__)
