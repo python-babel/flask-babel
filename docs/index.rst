@@ -50,10 +50,6 @@ change some internal defaults:
 `BABEL_DEFAULT_TIMEZONE`        The timezone to use for user facing dates.
                                 This defaults to ``'UTC'`` which also is the
                                 timezone your application must use internally.
-`BABEL_TRANSLATION_DIRECTORIES` A semi-colon (``;``) separated string of
-                                absolute and relative (to the app root) paths
-                                to translation folders. Defaults to
-                                ``translations``.
 `BABEL_DOMAIN`                  The message domain used by the application.
                                 Defaults to ``messages``.
 =============================== =============================================
@@ -282,6 +278,86 @@ out if a translation matched a changed key).  If you have fuzzy entries,
 make sure to check them by hand and remove the fuzzy flag before
 compiling.
 
+Flask-Babel2 looks for message catalogs in ``translations`` directory
+which should be located under Flask application directory. Default
+domain is "messages".
+
+For example, if you want to have translations for German, Spanish and French,
+directory structure should look like this:
+
+    translations/de/LC_MESSAGES/messages.mo
+    translations/sp/LC_MESSAGES/messages.mo
+    translations/fr/LC_MESSAGES/messages.mo
+
+Translation Domains
+-------------------
+
+By default, Flask-Babel2 will use "messages" domain, which will make it use translations
+from the ``messages.mo`` file. It is not very convenient for third-party Flask extensions,
+which might want to localize themselves without requiring user to merge their translations
+into "messages" domain.
+
+Flask-Babel2 allows extension developers to specify which translation domain to
+use::
+
+    from flask_babel2 import Domain
+
+    mydomain = Domain(domain='myext')
+
+    mydomain.lazy_gettext('Hello World!')
+
+:class:`Domain` contains all gettext-related methods (:meth:`~Domain.gettext`,
+:meth:`~Domain.ngettext`, etc).
+
+In previous example, localizations will be read from the ``myext.mo`` files, but
+they have to be located in ``translations`` directory under users Flask application.
+If extension is distributed with the localizations, it is possible to specify
+their location::
+
+    from flask_babel2 import Domain
+
+    from flask.ext.myext import translations
+    mydomain = Domain(translations.__path__[0])
+
+``mydomain`` will look for translations in extension directory with default (messages)
+domain.
+
+It is also possible to change the translation domain used by default,
+either for each app or per request.
+
+To set the :class:`Domain` that will be used in an app, pass it to
+:class:`Babel` on initialization::
+
+    from flask import Flask
+    from flask_babel2 import Babel, Domain
+
+    app = Flask(__name__)
+    domain = Domain(domain='myext')
+    babel = Babel(app, default_domain=domain)
+
+Translations will then come from the ``myext.mo`` files by default.
+
+To change the default domain in a request context, call the
+:meth:`~Domain.as_default` method from within the request context::
+
+    from flask import Flask
+    from flask_babel2 import Babel, Domain, gettext
+
+    app = Flask(__name__)
+    domain = Domain(domain='myext')
+    babel = Babel(app)
+
+    @app.route('/path')
+    def demopage():
+        domain.as_default()
+
+        return gettext('Hello World!')
+
+``Hello World!`` will get translated using the ``myext.mo`` files, but
+other requests will use the default ``messages.mo``. Note that a
+:class:`Babel` must be initialized for the app for translations to
+work at all.
+
 Troubleshooting
 ---------------
 
@@ -318,6 +394,12 @@ Context Functions
 .. autofunction:: get_locale
 
 .. autofunction:: get_timezone
+
+Translation domains
+```````````````````
+
+.. autoclass:: Domain
+    :members:
 
 Datetime Functions
 ``````````````````

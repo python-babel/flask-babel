@@ -10,7 +10,7 @@ with open(path.join(this_directory, 'README.md'), 'rb') as f:
 
 setup(
     name='Flask-Babel2',
-    version='0.12.2',
+    version='0.12.3',
     url='http://github.com/python-babel/flask-babel2',
     license='BSD',
     author='Armin Ronacher',

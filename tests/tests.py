@@ -33,58 +33,6 @@ class IntegrationTestCase(unittest.TestCase):
         with app.app_context():
             assert isinstance(get_translations(), NullTranslations)
 
-    def test_multiple_directories(self):
-        """
-        Ensure we can load translations from multiple directories.
-        """
-        b = babel.Babel()
-        app = flask.Flask(__name__)
-
-        app.config.update(
-            {
-                'BABEL_TRANSLATION_DIRECTORIES': ';'.join(
-                    ('translations', 'renamed_translations')
-                ),
-                'BABEL_DEFAULT_LOCALE': 'de_DE',
-            }
-        )
-
-        b.init_app(app)
-
-        with app.test_request_context():
-            translations = b.list_translations()
-
-            assert len(translations) == 2
-            assert str(translations[0]) == 'de'
-            assert str(translations[1]) == 'de'
-
-            assert gettext(u'Hello %(name)s!', name='Peter') == 'Hallo Peter!'
-
-    def test_different_domain(self):
-        """
-        Ensure we can load translations from multiple directories.
-        """
-        b = babel.Babel()
-        app = flask.Flask(__name__)
-
-        app.config.update(
-            {
-                'BABEL_TRANSLATION_DIRECTORIES': 'translations_different_domain',
-                'BABEL_DEFAULT_LOCALE': 'de_DE',
-                'BABEL_DOMAIN': 'myapp',
-            }
-        )
-
-        b.init_app(app)
-
-        with app.test_request_context():
-            translations = b.list_translations()
-
-            assert len(translations) == 1
-            assert str(translations[0]) == 'de'
-
-            assert gettext(u'Good bye') == 'Auf Wiedersehen'
-
     def test_lazy_old_style_formatting(self):
         lazy_string = lazy_gettext(u'Hello %(name)s')
         assert lazy_string % {u'name': u'test'} == u'Hello test'
@@ -207,6 +155,12 @@ class DateFormattingTestCase(unittest.TestCase):
                 assert str(babel.get_locale()) == 'en_US'
             assert str(babel.get_locale()) == 'de_DE'
 
+    def test_non_initialized(self):
+        app = flask.Flask(__name__)
+        d = datetime(2010, 4, 12, 13, 46)
+        with app.test_request_context():
+            assert babel.format_datetime(d) == 'Apr 12, 2010, 1:46:00 PM'
+
 
 class NumberFormattingTestCase(unittest.TestCase):
     def test_basics(self):
@@ -215,7 +169,7 @@ class NumberFormattingTestCase(unittest.TestCase):
         n = 1099
 
         with app.test_request_context():
-            assert babel.format_number(n) == u'1,099'
+            assert babel.format_decimal(n) == u'1,099'
             assert babel.format_decimal(Decimal('1010.99')) == u'1,010.99'
             assert babel.format_currency(n, 'USD') == '$1,099.00'
             assert babel.format_percent(0.19) == '19%'
@@ -287,12 +241,16 @@ class GettextTestCase(unittest.TestCase):
             assert text_type(two_apples) == u'2 Äpfel'
             assert two_apples.__html__() == u'2 Äpfel'
 
-    def test_list_translations(self):
+    def test_lazy_gettext_defaultdomain(self):
         app = flask.Flask(__name__)
-        b = babel.Babel(app, default_locale='de_DE')
-        translations = b.list_translations()
-        assert len(translations) == 1
-        assert str(translations[0]) == 'de'
+        domain = babel.Domain(domain='test')
+        babel.Babel(app, default_locale='de_DE', default_domain=domain)
+        first = lazy_gettext('first')
+        with app.test_request_context():
+            assert text_type(first) == 'erste'
+        app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
+        with app.test_request_context():
+            assert text_type(first) == 'first'
 
     def test_no_formatting(self):
         """
@@ -305,6 +263,53 @@ class GettextTestCase(unittest.TestCase):
             assert gettext(u'Test %s') == u'Test %s'
             assert gettext(u'Test %(name)s', name=u'test') == u'Test test'
             assert gettext(u'Test %s') % 'test' == u'Test test'
+
+    def test_domain(self):
+        app = flask.Flask(__name__)
+        babel.Babel(app, default_locale='de_DE')
+        domain = babel.Domain(domain='test')
+
+        with app.test_request_context():
+            assert domain.gettext('first') == 'erste'
+            assert babel.gettext('first') == 'first'
+
+    def test_as_default(self):
+        app = flask.Flask(__name__)
+        babel.Babel(app, default_locale='de_DE')
+        domain = babel.Domain(domain='test')
+
+        with app.test_request_context():
+            assert babel.gettext('first') == 'first'
+            domain.as_default()
+            assert babel.gettext('first') == 'erste'
+
+    def test_default_domain(self):
+        app = flask.Flask(__name__)
+        domain = babel.Domain(domain='test')
+        babel.Babel(app, default_locale='de_DE', default_domain=domain)
+
+        with app.test_request_context():
+            assert babel.gettext('first') == 'erste'
+
+    def test_non_initialized(self):
+        app = flask.Flask(__name__)
+        with app.test_request_context():
+            assert babel.gettext('first') == 'first'
+
+    def test_multiple_apps(self):
+        app1 = flask.Flask(__name__)
+        b1 = babel.Babel(app1, default_locale='de_DE')
+
+        app2 = flask.Flask(__name__)
+        b2 = babel.Babel(app2, default_locale='de_DE')
+
+        with app1.test_request_context():
+            assert babel.gettext('Yes') == 'Ja'
+
+            assert 'de_DE' in b1._default_domain.cache
+
+        with app2.test_request_context():
+            assert 'de_DE' not in b2._default_domain.cache
 
 
 if __name__ == '__main__':

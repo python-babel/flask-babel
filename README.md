@@ -1,4 +1,4 @@
-# Flask Babel - 0.12.2
+# Flask Babel2 - 0.12.3
 
 [![Build Status](https://travis-ci.org/hasgeek/flask-babel2.svg?branch=master)](https://travis-ci.org/hasgeek/flask-babel2)
 ![license](https://img.shields.io/github/license/hasgeek/flask-babel2.svg?maxAge=2592000)
@@ -7,7 +7,15 @@ Implements i18n and l10n support for Flask. This is based on the Python
 [babel][] module as well as [pytz][] both of which are installed automatically
 for you if you install this library.
 
-This release merges additional functionality from Flask-BabelEx.
+This release merges additional functionality from Flask-BabelEx:
+
+1. It is possible to use multiple language catalogs in one Flask application;
+2. Localization domains: your extension can package localization file(s) and use them
+   if necessary;
+3. Does not reload localizations for each request.
+
+Flask-Babel2 is API-compatible with Flask-Babel.
+
 
 # Documention
 
