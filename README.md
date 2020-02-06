@@ -13,6 +13,22 @@ for you if you install this library.
 
 The latest documentation is available [here][docs].
 
+# Changelog
+
+## v1.0.0 - 06/02/2020
+
+Starting with version 1, flask-babel has changed to
+[Semantic Versioning][semver].
+
+### Changed
+
+- pytz is an explicit dependency. (#14)
+- pytz.gae, used for Google App Engine, is no longer necessary and has been
+  removed. (#153)
+- Fixed a deprecated werkzeug import (#158).
+- Fix issues switching locales in threaded contexts (#125).
+
 [babel]: https://github.com/python-babel/babel
 [pytz]: https://pypi.python.org/pypi/pytz/
 [docs]: https://pythonhosted.org/Flask-Babel/
+[semver]: https://semver.org/
