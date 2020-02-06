@@ -8,7 +8,7 @@ with open(path.join(this_directory, 'README.md'), 'rb') as f:
 
 setup(
     name='Flask-Babel',
-    version='0.12.2',
+    version='1.0.0',
     url='http://github.com/python-babel/flask-babel',
     license='BSD',
     author='Armin Ronacher',
