@@ -68,6 +68,17 @@ def test_lazy_ngettext():
         assert two_apples.__html__() == u'2 Äpfel'
 
 
+def test_lazy_gettext_defaultdomain():
+    app = flask.Flask(__name__)
+    b = babel.Babel(app, default_locale='de_DE', default_domain='test')
+    first = lazy_gettext('first')
+    with app.test_request_context():
+        assert text_type(first) == 'erste'
+    app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
+    with app.test_request_context():
+        assert text_type(first) == 'first'
+
+
 def test_list_translations():
     app = flask.Flask(__name__)
     b = babel.Babel(app, default_locale='de_DE')
@@ -87,3 +98,104 @@ def test_no_formatting():
         assert gettext(u'Test %s') == u'Test %s'
         assert gettext(u'Test %(name)s', name=u'test') == u'Test test'
         assert gettext(u'Test %s') % 'test' == u'Test test'
+
+
+def test_domain():
+    app = flask.Flask(__name__)
+    b = babel.Babel(app, default_locale='de_DE')
+    domain = babel.Domain(domain='test')
+
+    with app.test_request_context():
+        assert domain.gettext('first') == 'erste'
+        assert babel.gettext('first') == 'first'
+
+
+def test_as_default():
+    app = flask.Flask(__name__)
+    b = babel.Babel(app, default_locale='de_DE')
+    domain = babel.Domain(domain='test')
+
+    with app.test_request_context():
+        assert babel.gettext('first') == 'first'
+        domain.as_default()
+        assert babel.gettext('first') == 'erste'
+
+
+def test_default_domain():
+    app = flask.Flask(__name__)
+    b = babel.Babel(app, default_locale='de_DE', default_domain='test')
+
+    with app.test_request_context():
+        assert babel.gettext('first') == 'erste'
+
+
+def test_multiple_apps():
+    app1 = flask.Flask(__name__)
+    b1 = babel.Babel(app1, default_locale='de_DE')
+
+    app2 = flask.Flask(__name__)
+    b2 = babel.Babel(app2, default_locale='de_DE')
+
+    with app1.test_request_context() as ctx:
+        assert babel.gettext('Yes') == 'Ja'
+
+        assert ('de_DE', 'messages') in b1.domain_instance.get_translations_cache(ctx)
+
+    with app2.test_request_context() as ctx:
+        assert 'de_DE', 'messages' not in b2.domain_instance.get_translations_cache(ctx)
+
+
+def test_cache(mocker):
+    load_mock = mocker.patch(
+        "babel.support.Translations.load", side_effect=babel.support.Translations.load
+    )
+
+    app = flask.Flask(__name__)
+    b = babel.Babel(app, default_locale="de_DE")
+
+    @b.localeselector
+    def select_locale():
+        return the_locale
+
+    # first request, should load en_US
+    the_locale = "en_US"
+    with app.test_request_context() as ctx:
+        assert b.domain_instance.get_translations_cache(ctx) == {}
+        assert babel.gettext("Yes") == "Yes"
+    assert load_mock.call_count == 1
+
+    # second request, should use en_US from cache
+    with app.test_request_context() as ctx:
+        assert set(b.domain_instance.get_translations_cache(ctx)) == {
+            ("en_US", "messages")
+        }
+        assert babel.gettext("Yes") == "Yes"
+    assert load_mock.call_count == 1
+
+    # third request, should load de_DE from cache
+    the_locale = "de_DE"
+    with app.test_request_context() as ctx:
+        assert set(b.domain_instance.get_translations_cache(ctx)) == {
+            ("en_US", "messages")
+        }
+        assert babel.gettext("Yes") == "Ja"
+    assert load_mock.call_count == 2
+
+    # now everything is cached, so no more loads should happen!
+    the_locale = "en_US"
+    with app.test_request_context() as ctx:
+        assert set(b.domain_instance.get_translations_cache(ctx)) == {
+            ("en_US", "messages"),
+            ("de_DE", "messages"),
+        }
+        assert babel.gettext("Yes") == "Yes"
+    assert load_mock.call_count == 2
+
+    the_locale = "de_DE"
+    with app.test_request_context() as ctx:
+        assert set(b.domain_instance.get_translations_cache(ctx)) == {
+            ("en_US", "messages"),
+            ("de_DE", "messages"),
+        }
+        assert babel.gettext("Yes") == "Ja"
+    assert load_mock.call_count == 2
