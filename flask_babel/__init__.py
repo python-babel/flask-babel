@@ -472,7 +472,7 @@ def format_number(number):
     :rtype: unicode
     """
     locale = get_locale()
-    return numbers.format_number(number, locale=locale)
+    return numbers.format_decimal(number, locale=locale)
 
 
 def format_decimal(number, format=None):
