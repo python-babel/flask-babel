@@ -524,6 +524,8 @@ class Domain(object):
     """
 
     def __init__(self, translation_directories=None, domain='messages'):
+        if isinstance(translation_directories, string_types):
+            translation_directories = [translation_directories]
         self._translation_directories = translation_directories
         self.domain = domain
         self.cache = {}
