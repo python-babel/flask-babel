@@ -37,5 +37,11 @@ setup(
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules'
-    ]
+    ],
+    extras_require={
+        'dev': [
+            'pytest',
+            'pytest-mock'
+        ]
+    }
 )
