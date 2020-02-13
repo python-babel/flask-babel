@@ -530,6 +530,9 @@ class Domain(object):
         self.domain = domain
         self.cache = {}
 
+    def __repr__(self):
+        return '<Domain({!r}, {!r})>'.format(self._translation_directories, self.domain)
+
     @property
     def translation_directories(self):
         if self._translation_directories is not None:
