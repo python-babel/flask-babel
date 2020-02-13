@@ -49,6 +49,39 @@ def test_multiple_directories():
         ) == 'Hallo Peter!'
 
 
+def test_multiple_directories_different_domain():
+    """
+    Ensure we can load translations from multiple directories with a
+    custom domain.
+    """
+    b = babel.Babel()
+    app = flask.Flask(__name__)
+
+    app.config.update({
+        'BABEL_TRANSLATION_DIRECTORIES': ';'.join((
+            'translations_different_domain',
+            'renamed_translations'
+        )),
+        'BABEL_DEFAULT_LOCALE': 'de_DE',
+        'BABEL_DOMAIN': 'myapp'
+    })
+
+    b.init_app(app)
+
+    with app.test_request_context():
+        translations = b.list_translations()
+
+        assert(len(translations) == 2)
+        assert(str(translations[0]) == 'de')
+        assert(str(translations[1]) == 'de')
+
+        assert gettext(
+            u'Hello %(name)s!',
+            name='Peter'
+        ) == 'Hallo Peter!'
+        assert gettext(u'Good bye') == 'Auf Wiedersehen'
+
+
 def test_different_domain():
     """
     Ensure we can load translations from multiple directories.
