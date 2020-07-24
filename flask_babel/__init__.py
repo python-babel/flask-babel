@@ -543,13 +543,13 @@ def gettext(string, **variables):
     ::
 
         gettext(u'Hello World!')
-        gettext(u'Hello %(name)s!', name='World')
+        gettext(u'Hello {name}!', name='World')
     """
     t = get_translations()
     if t is None:
-        return string if not variables else string % variables
+        return string if not variables else string.format(**variables)
     s = t.ugettext(string)
-    return s if not variables else s % variables
+    return s if not variables else s.format(**variables)
 _ = gettext
 
 
@@ -558,21 +558,21 @@ def ngettext(singular, plural, num, **variables):
     given keyword arguments as mapping to a string formatting string.
     The `num` parameter is used to dispatch between singular and various
     plural forms of the message.  It is available in the format string
-    as ``%(num)d`` or ``%(num)s``.  The source language should be
+    as ``{num}``.  The source language should be
     English or a similar language which only has one plural form.
 
     ::
 
-        ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(apples))
+        ngettext(u'{num} Apple', u'{num} Apples', num=len(apples))
     """
     variables.setdefault('num', num)
     t = get_translations()
     if t is None:
         s = singular if num == 1 else plural
-        return s if not variables else s % variables
+        return s if not variables else s.format(**variables)
 
     s = t.ungettext(singular, plural, num)
-    return s if not variables else s % variables
+    return s if not variables else s.format(**variables)
 
 
 def pgettext(context, string, **variables):
@@ -582,9 +582,9 @@ def pgettext(context, string, **variables):
     """
     t = get_translations()
     if t is None:
-        return string if not variables else string % variables
+        return string if not variables else string.format(**variables)
     s = t.upgettext(context, string)
-    return s if not variables else s % variables
+    return s if not variables else s.format(**variables)
 
 
 def npgettext(context, singular, plural, num, **variables):
@@ -596,9 +596,9 @@ def npgettext(context, singular, plural, num, **variables):
     t = get_translations()
     if t is None:
         s = singular if num == 1 else plural
-        return s if not variables else s % variables
+        return s if not variables else s.format(**variables)
     s = t.unpgettext(context, singular, plural, num)
-    return s if not variables else s % variables
+    return s if not variables else s.format(**variables)
 
 
 def lazy_gettext(string, **variables):
@@ -622,7 +622,7 @@ def lazy_ngettext(singular, plural, num, **variables):
 
     Example::
 
-        apples = lazy_ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(apples))
+        apples = lazy_ngettext(u'{num} Apple', u'{num} Apples', num=len(apples))
 
         @app.route('/')
         def index():
