@@ -107,9 +107,17 @@ class Babel(object):
             )
             app.jinja_env.add_extension('jinja2.ext.i18n')
             app.jinja_env.install_gettext_callables(
-                lambda x: get_translations().ugettext(x),
-                lambda s, p, n: get_translations().ungettext(s, p, n),
-                newstyle=True
+                # Use Flask-Babel's own gettext functions
+                lambda x, **v: gettext(x, **v),
+                lambda s, p, n, **v: ngettext(s, p, n, **v),
+                # Jinja's "newstyle" wrappers aren't necessary,
+                # Flask-Babel's own gettext functions handle everything.
+                newstyle=False
+                # NOTE: Jinja's "newstyle" wrappers mark strings
+                # as "safe" with MarkupSafe, while Flask-Babel's own
+                # gettext functions do not. This means HTML in PO-files
+                # will be rendered as text. This is intentional:
+                # translation files should not contain markup.
             )
 
     def localeselector(self, f):
