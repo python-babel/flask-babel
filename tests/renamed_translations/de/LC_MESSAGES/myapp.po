@@ -1,0 +1,35 @@
+# German translations for PROJECT.
+# Copyright (C) 2010 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2010-05-29 17:00+0200\n"
+"PO-Revision-Date: 2010-05-30 12:56+0200\n"
+"Last-Translator: Armin Ronacher <armin.ronacher@active-4.com>\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 0.9.5\n"
+
+#: tests.py:94
+#, python-format
+msgid "Hello %(name)s!"
+msgstr "Hallo %(name)s!"
+
+#: tests.py:95 tests.py:96
+#, python-format
+msgid "%(num)s Apple"
+msgid_plural "%(num)s Apples"
+msgstr[0] "%(num)s Apfel"
+msgstr[1] "%(num)s Äpfel"
+
+#: tests.py:119
+msgid "Yes"
+msgstr "Ja"
+
