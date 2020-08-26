@@ -48,7 +48,8 @@ setup(
             'pytest-mock',
             'bumpversion',
             'ghp-import',
-            'sphinx'
+            'sphinx',
+            'Pallets-Sphinx-Themes'
         ]
     }
 )
