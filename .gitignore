@@ -7,3 +7,4 @@ docs/_build
 .tox/
 .vscode
 *.code-workspace
+venv

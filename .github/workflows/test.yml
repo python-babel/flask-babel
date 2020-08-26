@@ -1,0 +1,32 @@
+name: Tests
+
+on: [push]
+
+jobs:
+  build:
+    name: Running tests.
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.5, 3.6, 3.7, 3.8, '3.9.0-alpha - 3.9.0', pypy3]
+
+    steps:
+      # Python needs to be setup before checkout to prevent files from being
+      # left in the source tree. See setup-python/issues/106.
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - uses: actions/checkout@v2
+
+    - name: Installing python dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools
+        pip install -e '.[dev]'
+
+    - name: Running tests
+      run: |
+        pytest
