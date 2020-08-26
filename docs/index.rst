@@ -12,15 +12,11 @@ translations.
 Installation
 ------------
 
-Install the extension with one of the following commands::
-
-    $ easy_install Flask-Babel
-
-or alternatively if you have pip installed::
+Install the extension from PyPi::
 
     $ pip install Flask-Babel
 
-Please note that Flask-Babel requires Jinja 2.5.  If you are using an
+Please note that Flask-Babel requires Jinja >=2.5.  If you are using an
 older version you will have to upgrade or disable the Jinja support 
 (see configuration).
 
