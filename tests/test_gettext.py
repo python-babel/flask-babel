@@ -5,7 +5,6 @@ import flask
 
 import flask_babel as babel
 from flask_babel import gettext, lazy_gettext, lazy_ngettext, ngettext
-from flask_babel._compat import text_type
 
 
 def test_basics():
@@ -47,11 +46,12 @@ def test_lazy_gettext():
     babel.Babel(app, default_locale='de_DE')
     yes = lazy_gettext(u'Yes')
     with app.test_request_context():
-        assert text_type(yes) == 'Ja'
+        assert str(yes) == 'Ja'
         assert yes.__html__() == 'Ja'
+
     app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
     with app.test_request_context():
-        assert text_type(yes) == 'Yes'
+        assert str(yes) == 'Yes'
         assert yes.__html__() == 'Yes'
 
 
@@ -60,11 +60,11 @@ def test_lazy_ngettext():
     babel.Babel(app, default_locale='de_DE')
     one_apple = lazy_ngettext(u'%(num)s Apple', u'%(num)s Apples', 1)
     with app.test_request_context():
-        assert text_type(one_apple) == '1 Apfel'
+        assert str(one_apple) == '1 Apfel'
         assert one_apple.__html__() == '1 Apfel'
     two_apples = lazy_ngettext(u'%(num)s Apple', u'%(num)s Apples', 2)
     with app.test_request_context():
-        assert text_type(two_apples) == u'2 Äpfel'
+        assert str(two_apples) == u'2 Äpfel'
         assert two_apples.__html__() == u'2 Äpfel'
 
 
@@ -73,10 +73,10 @@ def test_lazy_gettext_defaultdomain():
     b = babel.Babel(app, default_locale='de_DE', default_domain='test')
     first = lazy_gettext('first')
     with app.test_request_context():
-        assert text_type(first) == 'erste'
+        assert str(first) == 'erste'
     app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
     with app.test_request_context():
-        assert text_type(first) == 'first'
+        assert str(first) == 'first'
 
 
 def test_list_translations():

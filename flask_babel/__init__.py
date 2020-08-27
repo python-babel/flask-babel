@@ -19,7 +19,6 @@ from babel import dates, numbers, support, Locale
 from pytz import timezone, UTC
 from werkzeug.datastructures import ImmutableDict
 
-from flask_babel._compat import string_types
 from flask_babel.speaklater import LazyString
 
 
@@ -249,10 +248,7 @@ def get_timezone():
             if rv is None:
                 tzinfo = babel.default_timezone
             else:
-                if isinstance(rv, string_types):
-                    tzinfo = timezone(rv)
-                else:
-                    tzinfo = rv
+                tzinfo = timezone(rv) if isinstance(rv, str) else rv
         ctx.babel_tzinfo = tzinfo
     return tzinfo
 
@@ -519,7 +515,7 @@ class Domain(object):
     """
 
     def __init__(self, translation_directories=None, domain='messages'):
-        if isinstance(translation_directories, string_types):
+        if isinstance(translation_directories, str):
             translation_directories = [translation_directories]
         self._translation_directories = translation_directories
         self.domain = domain
