@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     flaskext.babel
     ~~~~~~~~~~~~~~
@@ -593,8 +592,6 @@ class Domain(object):
             gettext(u'Hello %(name)s!', name='World')
         """
         t = self.get_translations()
-        if t is None:
-            return string if not variables else string % variables
         s = t.ugettext(string)
         return s if not variables else s % variables
 
@@ -612,10 +609,6 @@ class Domain(object):
         """
         variables.setdefault('num', num)
         t = self.get_translations()
-        if t is None:
-            s = singular if num == 1 else plural
-            return s if not variables else s % variables
-
         s = t.ungettext(singular, plural, num)
         return s if not variables else s % variables
 
@@ -625,8 +618,6 @@ class Domain(object):
         .. versionadded:: 0.7
         """
         t = self.get_translations()
-        if t is None:
-            return string if not variables else string % variables
         s = t.upgettext(context, string)
         return s if not variables else s % variables
 
@@ -637,9 +628,6 @@ class Domain(object):
         """
         variables.setdefault('num', num)
         t = self.get_translations()
-        if t is None:
-            s = singular if num == 1 else plural
-            return s if not variables else s % variables
         s = t.unpgettext(context, singular, plural, num)
         return s if not variables else s % variables
 
