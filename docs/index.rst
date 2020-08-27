@@ -56,7 +56,7 @@ change some internal defaults:
 
 For more complex applications you might want to have multiple applications
 for different users which is where selector functions come in handy.  The
-first time the babel extension needs the locale (language code) of the
+first time the babel extension needs the locale (locale code/ID) of the
 current user it will call a :meth:`~Babel.localeselector` function, and
 the first time the timezone is needed it will call a
 :meth:`~Babel.timezoneselector` function.
