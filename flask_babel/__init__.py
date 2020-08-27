@@ -522,7 +522,10 @@ class Domain(object):
         self.cache = {}
 
     def __repr__(self):
-        return '<Domain({!r}, {!r})>'.format(self._translation_directories, self.domain)
+        return '<Domain({!r}, {!r})>'.format(
+            self._translation_directories,
+            self.domain
+        )
 
     @property
     def translation_directories(self):
@@ -565,9 +568,9 @@ class Domain(object):
                 )
                 translations.merge(catalog)
                 # FIXME: Workaround for merge() being really, really stupid. It
-                # does not copy _info, plural(), or any other instance variables
-                # populated by GNUTranslations. We probably want to stop using
-                # `support.Translations.merge` entirely.
+                # does not copy _info, plural(), or any other instance
+                # variables populated by GNUTranslations. We probably want to
+                # stop using `support.Translations.merge` entirely.
                 if hasattr(catalog, 'plural'):
                     translations.plural = catalog.plural
 
@@ -629,7 +632,7 @@ class Domain(object):
 
         Example::
 
-            hello = lazy_gettext(u'Hello World')
+            hello = lazy_gettext('Hello World')
 
             @app.route('/')
             def index():
@@ -643,7 +646,11 @@ class Domain(object):
 
         Example::
 
-            apples = lazy_ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(apples))
+            apples = lazy_ngettext(
+                '%(num)d Apple',
+                '%(num)d Apples',
+                num=len(apples)
+            )
 
             @app.route('/')
             def index():
@@ -687,6 +694,8 @@ def get_domain():
 # Create shortcuts for the default Flask domain
 def gettext(*args, **kwargs):
     return get_domain().gettext(*args, **kwargs)
+
+
 _ = gettext
 
 
