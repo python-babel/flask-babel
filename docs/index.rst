@@ -47,9 +47,9 @@ change some internal defaults:
                                 This defaults to ``'UTC'`` which also is the
                                 timezone your application must use internally.
 `BABEL_TRANSLATION_DIRECTORIES` A semi-colon (``;``) separated string of
-                                absolute and relative (to the app root) paths
-                                to translation folders. Defaults to
-                                ``translations``.
+                                absolute and relative (to the `root_path` of
+                                the application object) paths to translation
+                                folders. Defaults to ``translations``.
 `BABEL_DOMAIN`                  The message domain used by the application.
                                 Defaults to ``messages``.
 =============================== =============================================
@@ -249,9 +249,8 @@ time to create a ``.pot`` file.  A ``.pot`` file contains all the strings
 and is the template for a ``.po`` file which contains the translated
 strings.  Babel can do all that for you.
 
-First of all you have to get into the folder where you have your
-application and create a mapping file.  For typical Flask applications, this
-is what you want in there:
+First of all you have to create a mapping file. For typical Flask applications,
+this is what you want in there:
 
 .. sourcecode:: ini
 
@@ -276,9 +275,10 @@ translation.  For example to translate to German use this command::
 
     $ pybabel init -i messages.pot -d translations -l de
 
-``-d translations`` tells pybabel to store the translations in this
-folder.  This is where Flask-Babel will look for translations.  Put it
-next to your template folder.
+``-d translations`` tells pybabel to store the translations in a directory
+called "translations".  This is the default folder where Flask-Babel will look
+for translations unless you changed `BABEL_TRANSLATION_DIRECTORIES` and should
+be at the root of your application.
 
 Now edit the ``translations/de/LC_MESSAGES/messages.po`` file as needed.
 Check out some gettext tutorials if you feel lost.
