@@ -18,7 +18,6 @@ class Babel(object):
         self._default_domain = default_domain
         self._configure_jinja = configure_jinja
 
-        self.app = app
         self.locale_selector_func = None
         self.timezone_selector_func = None
 
@@ -29,8 +28,6 @@ class Babel(object):
         """Set up this instance for use with *app*, if no app was passed to
         the constructor.
         """
-        self.app = app
-
         if not hasattr(app, 'extensions'):
             app.extensions = {}
 
@@ -139,7 +136,7 @@ class Babel(object):
 
     @property
     def translation_directories(self):
-        directories = self.app.config.get(
+        directories = current_app.config.get(
             'BABEL_TRANSLATION_DIRECTORIES',
             'translations'
         ).split(';')
@@ -148,7 +145,7 @@ class Babel(object):
             if os.path.isabs(path):
                 yield path
             else:
-                yield os.path.join(self.app.root_path, path)
+                yield os.path.join(current_app.root_path, path)
 
 
 def get_translations():
