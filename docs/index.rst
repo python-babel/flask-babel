@@ -3,11 +3,7 @@ Flask-Babel
 
 .. module:: flask_babel
 
-Flask-Babel is an extension to `Flask`_ that adds i18n and l10n support to
-any Flask application with the help of `babel`_, `pytz`_ and
-`speaklater`_.  It has builtin support for date formatting with timezone
-support as well as a very simple and friendly interface to :mod:`gettext`
-translations.
+Easy integration of `Flask`_ and `babel`_.
 
 Installation
 ------------
@@ -35,9 +31,9 @@ object after configuring the application::
     babel = Babel(app)
 
 To disable jinja support, include ``configure_jinja=False`` in the Babel 
-constructor call.  The babel object itself can be used to configure the babel support
-further.  Babel has the following configuration values that can be used to
-change some internal defaults:
+constructor call.  The babel object itself can be used to configure the babel
+support further.  Babel has the following configuration values that can be used
+to change some internal defaults:
 
 =============================== =============================================
 `BABEL_DEFAULT_LOCALE`          The default locale to use if no locale
@@ -72,7 +68,7 @@ Example selector functions::
     from flask import g, request
 
     @babel.localeselector
-    def get_locale():
+    def get_user_locale():
         # if a user is logged in, use the locale from the user settings
         user = getattr(g, 'user', None)
         if user is not None:
@@ -83,129 +79,13 @@ Example selector functions::
         return request.accept_languages.best_match(['de', 'fr', 'en'])
 
     @babel.timezoneselector
-    def get_timezone():
+    def get_user_timezone():
         user = getattr(g, 'user', None)
         if user is not None:
             return user.timezone
 
 The example above assumes that the current user is stored on the
 :data:`flask.g` object.
-
-Jinja Filters
--------------
-
-Several commonly used formatters are added as jinja template filters after
-calling `init_app().` For dates and times, these are:
-
-- `<datetime>|datetimeformat` -> `format_datetime`
-- `<date>|dateformat` -> `format_date`
-- `<time>|timeformat` -> `format_time`
-- `<timedelta>|timedeltaformat` -> `format_timedelta`
-
-And for numbers, these are:
-
-- `<number>|numberformat` -> `format_number`
-- `<number>|decimalformat` -> `format_decimal`
-- `<number>|currencyformat` -> `format_currency`
-- `<number>|percentformat` -> `format_percent`
-- `<number>|scientificformat` -> `format_scientific`
-
-Formatting Dates
-----------------
-
-To format dates you can use the :func:`format_datetime`,
-:func:`format_date`, :func:`format_time` and :func:`format_timedelta`
-functions.  They all accept a :class:`datetime.datetime` (or
-:class:`datetime.date`, :class:`datetime.time` and
-:class:`datetime.timedelta`) object as first parameter and then optionally
-a format string.  The application should use naive datetime objects
-internally that use UTC as timezone.  On formatting it will automatically
-convert into the user's timezone in case it differs from UTC.
-
-To play with the date formatting from the console, you can use the
-:meth:`~flask.Flask.test_request_context` method:
-
->>> app.test_request_context().push()
-
-Here some examples:
-
->>> from flask_babel import format_datetime
->>> from datetime import datetime
->>> format_datetime(datetime(1987, 3, 5, 17, 12))
-u'Mar 5, 1987 5:12:00 PM'
->>> format_datetime(datetime(1987, 3, 5, 17, 12), 'full')
-u'Thursday, March 5, 1987 5:12:00 PM World (GMT) Time'
->>> format_datetime(datetime(1987, 3, 5, 17, 12), 'short')
-u'3/5/87 5:12 PM'
->>> format_datetime(datetime(1987, 3, 5, 17, 12), 'dd mm yyy')
-u'05 12 1987'
->>> format_datetime(datetime(1987, 3, 5, 17, 12), 'dd mm yyyy')
-u'05 12 1987'
-
-And again with a different language:
-
->>> app.config['BABEL_DEFAULT_LOCALE'] = 'de'
->>> from flask_babel import refresh; refresh()
->>> format_datetime(datetime(1987, 3, 5, 17, 12), 'EEEE, d. MMMM yyyy H:mm')
-u'Donnerstag, 5. M\xe4rz 1987 17:12'
-
-For more format examples head over to the `babel`_ documentation.
-
-Formatting Numbers
-------------------
-
-To format numbers you can use the :func:`format_number`,
-:func:`format_decimal`, :func:`format_currency`, :func:`format_percent` and :func:`format_scientific`
-functions.
-
-To play with the date formatting from the console, you can use the
-:meth:`~flask.Flask.test_request_context` method:
-
->>> app.test_request_context().push()
-
-Here are some examples:
-
->>> from flask_babel import format_number
->>> format_number(1099)
-'1,099'
-
->>> from flask_babel import format_decimal
->>> format_decimal(1.2346)
-u'1.235'
-
->>> from flask_babel import format_currency
->>> format_currency(1099.98, 'USD')
-'$1,099.98'
-
->>> from flask_babel import format_percent
->>> format_percent(0.34)
-'34%'
-
->>> from flask_babel import format_scientific
->>> format_scientific(10000)
-'1E4'
-
-And again with a different language:
-
->>> app.config['BABEL_DEFAULT_LOCALE'] = 'de'
->>> from flask_babel import refresh; refresh()
-
->>> format_number(1099)
-'1.099'
-
->>> format_decimal(1.2346)
-'1,235'
-
->>> format_currency(1099.98, 'USD')
-'1.099,98\xa0$'
-
->>> format_percent(0.34)
-'34\xa0%'
-
->>> format_scientific(10000)
-'1E4'
-
-For more format examples head over to the `babel`_ documentation.
 
 Using Translations
 ------------------
@@ -239,6 +119,41 @@ To use such a lazy string, use the :func:`lazy_gettext` function::
 
 So how does Flask-Babel find the translations?  Well first you have to
 create some.  Here is how you do it:
+
+Dates, Times, and Numbers
+-------------------------
+Babel provides many utilities for dealing with dates, times, and numbers
+beyond what the built-in Python `gettext`_ module supports. You can easily
+use these with Flask-Babel::
+
+    from datetime import datetime
+    from babel.numbers import format_decimal
+    from babel.dates import format_datetime
+    from flask_babel import get_locale, get_timezone
+
+    @app.route('/currency')
+    def currency():
+        return format_currency(1000.99, 'CAD', locale=get_locale())
+
+    @app.route('/date')
+    def date():
+        return format_datetime(
+            datetime.utcnow(),
+            'H:mm zzzz',
+            tzinfo=get_timezone(),
+            locale=get_locale()
+        )
+
+All of the formatting methods in babel.numbers and .dates take a `locale`
+parameter, which we populate with our Flask-Babel `get_locale()`.
+
+.. note::
+
+   Prior to version 3.0.0, every Babel `format_*` method was duplicated in
+   Flask-Babel, which was needless duplication and meant that Flask-Babel
+   was always out of date with changes in Babel. Instead, we just provide
+   the glue and you (the user) just import directly from babel. This is the
+   same approach that other integrations such as Flask-WTF started using.
 
 Translating Applications
 ------------------------
@@ -334,34 +249,6 @@ Context Functions
 
 .. autofunction:: get_timezone
 
-Datetime Functions
-``````````````````
-
-.. autofunction:: to_user_timezone
-
-.. autofunction:: to_utc
-
-.. autofunction:: format_datetime
-
-.. autofunction:: format_date
-
-.. autofunction:: format_time
-
-.. autofunction:: format_timedelta
-
-Number Functions
-``````````````````
-
-.. autofunction:: format_number
-
-.. autofunction:: format_decimal
-
-.. autofunction:: format_currency
-
-.. autofunction:: format_percent
-
-.. autofunction:: format_scientific
-
 Gettext Functions
 `````````````````
 
@@ -389,3 +276,4 @@ Low-Level API
 .. _babel: http://babel.edgewall.org/
 .. _pytz: http://pytz.sourceforge.net/
 .. _speaklater: http://pypi.python.org/pypi/speaklater
+.. _gettext: https://docs.python.org/3/library/gettext.html
