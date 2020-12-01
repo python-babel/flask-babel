@@ -297,6 +297,21 @@ out if a translation matched a changed key).  If you have fuzzy entries,
 make sure to check them by hand and remove the fuzzy flag before
 compiling.
 
+Reloading Translations
+----------------------
+
+The compiled translations will only be loaded initially. This means you have
+to restart the server whenever you compile translations and want to see
+those changes. To automatically reload translations you can tell the reloader
+to watch the compiled ``.mo`` files::
+
+    $ flask run --extra-files app/translations/en_GB/LC_MESSAGES/messages.mo
+    # or
+    $ export FLASK_RUN_EXTRA_FILES=app/translations/en_GB/LC_MESSAGES/messages.mo
+    $ flask run
+
+See `reloader`_ for more details.
+
 Troubleshooting
 ---------------
 
@@ -389,3 +404,4 @@ Low-Level API
 .. _babel: http://babel.edgewall.org/
 .. _pytz: http://pytz.sourceforge.net/
 .. _speaklater: http://pypi.python.org/pypi/speaklater
+.. _reloader: https://flask.palletsprojects.com/en/1.1.x/cli/#watch-extra-files-with-the-reloader
