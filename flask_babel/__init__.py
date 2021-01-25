@@ -19,6 +19,7 @@ from babel import dates, numbers, support, Locale
 from pytz import timezone, UTC
 from werkzeug.datastructures import ImmutableDict
 
+from flask_babel.cli import register_cli
 from flask_babel.speaklater import LazyString
 
 
@@ -110,6 +111,8 @@ class Babel(object):
                 lambda s, p, n: get_translations().ungettext(s, p, n),
                 newstyle=True
             )
+
+        register_cli(app)
 
     def localeselector(self, f):
         """Registers a callback function for locale selection.  The default
