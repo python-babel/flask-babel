@@ -1,6 +1,6 @@
 """
-    flaskext.babel
-    ~~~~~~~~~~~~~~
+    flask_babel
+    ~~~~~~~~~~~
 
     Implements i18n/l10n support for Flask applications based on Babel.
 
