@@ -1,6 +1,6 @@
 """
-    flaskext.babel
-    ~~~~~~~~~~~~~~
+    flask_babel
+    ~~~~~~~~~~~
 
     Implements i18n/l10n support for Flask applications based on Babel.
 
@@ -151,7 +151,7 @@ class Babel(object):
                 if not os.path.isdir(locale_dir):
                     continue
 
-                if filter(lambda x: x.endswith('.mo'), os.listdir(locale_dir)):
+                if any(x.endswith('.mo') for x in os.listdir(locale_dir)):
                     result.append(Locale.parse(folder))
 
         # If not other translations are found, add the default locale.

@@ -22,6 +22,9 @@ def test_no_request_context():
 def test_multiple_directories():
     """
     Ensure we can load translations from multiple directories.
+
+    This also ensures that directories without any translation files
+    are not taken into account.
     """
     b = babel.Babel()
     app = flask.Flask(__name__)
