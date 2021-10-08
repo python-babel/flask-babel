@@ -514,11 +514,12 @@ class Domain(object):
     be called ``messages.mo``.
     """
 
-    def __init__(self, translation_directories=None, domain='messages'):
+    def __init__(self, translation_directories=None, domain='messages', locale=None):
         if isinstance(translation_directories, str):
             translation_directories = [translation_directories]
         self._translation_directories = translation_directories
         self.domain = domain
+        self.locale = locale
         self.cache = {}
 
     def __repr__(self):
@@ -551,7 +552,7 @@ class Domain(object):
             return support.NullTranslations()
 
         cache = self.get_translations_cache(ctx)
-        locale = get_locale()
+        locale = self.locale or get_locale()
         try:
             return cache[str(locale), self.domain]
         except KeyError:
