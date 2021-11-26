@@ -329,7 +329,7 @@ def to_user_timezone(datetime):
     """Convert a datetime object to the user's timezone.  This automatically
     happens on all date formatting unless rebasing is disabled.  If you need
     to convert a :class:`datetime.datetime` object at any time to the user's
-    timezone (as returned by :func:`get_timezone` this function can be used).
+    timezone (as returned by :func:`get_timezone`) this function can be used.
     """
     if datetime.tzinfo is None:
         datetime = datetime.replace(tzinfo=UTC)
@@ -355,7 +355,7 @@ def format_datetime(datetime=None, format=None, rebase=True):
     time.
 
     The format parameter can either be ``'short'``, ``'medium'``,
-    ``'long'`` or ``'full'`` (in which cause the language's default for
+    ``'long'`` or ``'full'`` (in which case the language's default for
     that setting is used, or the default from the :attr:`Babel.date_formats`
     mapping is used) or a format string as documented by Babel.
 
@@ -375,7 +375,7 @@ def format_date(date=None, format=None, rebase=True):
     of a :class:`~datetime.datetime` object.
 
     The format parameter can either be ``'short'``, ``'medium'``,
-    ``'long'`` or ``'full'`` (in which cause the language's default for
+    ``'long'`` or ``'full'`` (in which case the language's default for
     that setting is used, or the default from the :attr:`Babel.date_formats`
     mapping is used) or a format string as documented by Babel.
 
@@ -397,7 +397,7 @@ def format_time(time=None, format=None, rebase=True):
     time.
 
     The format parameter can either be ``'short'``, ``'medium'``,
-    ``'long'`` or ``'full'`` (in which cause the language's default for
+    ``'long'`` or ``'full'`` (in which case the language's default for
     that setting is used, or the default from the :attr:`Babel.date_formats`
     mapping is used) or a format string as documented by Babel.
 
