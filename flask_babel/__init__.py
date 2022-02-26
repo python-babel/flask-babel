@@ -184,7 +184,7 @@ class Babel(object):
     def domain_instance(self):
         """The message domain for the translations.
         """
-        return Domain(domain=self.app.config['BABEL_DOMAIN'])
+        return Domain(domain=self.domain)
 
     @property
     def translation_directories(self):
