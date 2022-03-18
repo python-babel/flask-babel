@@ -52,6 +52,14 @@ change some internal defaults:
                                 folders. Defaults to ``translations``.
 `BABEL_DOMAIN`                  The message domain used by the application.
                                 Defaults to ``messages``.
+
+                                It can also be a semi-colon (``;``) separated
+                                string of different domains for each of the
+                                translation directories, eg::
+
+                                    BABEL_TRANSLATION_DIRECTORIES=/path/to/translations;/another/path/
+                                    BABEL_DOMAINS=messages;myapp
+
 =============================== =============================================
 
 For more complex applications you might want to have multiple applications
