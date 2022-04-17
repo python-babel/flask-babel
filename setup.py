@@ -24,7 +24,7 @@ setup(
         'pytz',
         'Flask',
         'Babel>=2.3',
-        'Jinja2>=2.5'
+        'Jinja2>=2.5, <3.0.0'
     ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
