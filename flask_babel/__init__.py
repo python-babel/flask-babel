@@ -117,7 +117,7 @@ class Babel(object):
         time.  If `None` is returned, the locale falls back to the one from
         the configuration.
 
-        This has to return the locale as string (eg: ``'de_AT'``, ``'en_US'``)
+        This has to return the locale as string (e.g., ``'de_AT'``, ``'en_US'``).
         """
         self.locale_selector_func = f
         return f
@@ -128,7 +128,7 @@ class Babel(object):
         time.  If `None` is returned, the timezone falls back to the one from
         the configuration.
 
-        This has to return the timezone as string (eg: ``'Europe/Vienna'``)
+        This has to return the timezone as string (e.g., ``'Europe/Vienna'``).
         """
         self.timezone_selector_func = f
         return f
@@ -154,7 +154,7 @@ class Babel(object):
                 if any(x.endswith('.mo') for x in os.listdir(locale_dir)):
                     result.append(Locale.parse(folder))
 
-        # If not other translations are found, add the default locale.
+        # If no other translations are found, add the default locale
         if not result:
             result.append(Locale.parse(self._default_locale))
 
@@ -162,14 +162,14 @@ class Babel(object):
 
     @property
     def default_locale(self):
-        """The default locale from the configuration as instance of a
+        """The default locale from the configuration as an instance of a
         `babel.Locale` object.
         """
         return Locale.parse(self.app.config['BABEL_DEFAULT_LOCALE'])
 
     @property
     def default_timezone(self):
-        """The default timezone from the configuration as instance of a
+        """The default timezone from the configuration as an instance of a
         `pytz.timezone` object.
         """
         return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
@@ -281,7 +281,7 @@ def force_locale(locale):
 
     Sometimes it is useful to switch the current locale to different one, do
     some tasks and then revert back to the original one. For example, if the
-    user uses German on the web site, but you want to send them an email in
+    user uses German on the website, but you want to send them an email in
     English, you can use this function as a context manager::
 
         with force_locale('en_US'):
@@ -349,7 +349,7 @@ def to_utc(datetime):
 def format_datetime(datetime=None, format=None, rebase=True):
     """Return a date formatted according to the given pattern.  If no
     :class:`~datetime.datetime` object is passed, the current time is
-    assumed.  By default rebasing happens which causes the object to
+    assumed.  By default, rebasing happens, which causes the object to
     be converted to the users's timezone (as returned by
     :func:`to_user_timezone`).  This function formats both date and
     time.
@@ -369,7 +369,7 @@ def format_datetime(datetime=None, format=None, rebase=True):
 def format_date(date=None, format=None, rebase=True):
     """Return a date formatted according to the given pattern.  If no
     :class:`~datetime.datetime` or :class:`~datetime.date` object is passed,
-    the current time is assumed.  By default rebasing happens which causes
+    the current time is assumed.  By default, rebasing happens, which causes
     the object to be converted to the users's timezone (as returned by
     :func:`to_user_timezone`).  This function only formats the date part
     of a :class:`~datetime.datetime` object.
@@ -391,7 +391,7 @@ def format_date(date=None, format=None, rebase=True):
 def format_time(time=None, format=None, rebase=True):
     """Return a time formatted according to the given pattern.  If no
     :class:`~datetime.datetime` object is passed, the current time is
-    assumed.  By default rebasing happens which causes the object to
+    assumed.  By default, rebasing happens, which causes the object to
     be converted to the users's timezone (as returned by
     :func:`to_user_timezone`).  This function formats both date and
     time.
@@ -448,7 +448,7 @@ def format_number(number):
 
 
 def format_decimal(number, format=None):
-    """Return the given decimal number formatted for the locale in request
+    """Return the given decimal number formatted for the locale in the request.
 
     :param number: the number to format
     :param format: the format to use
@@ -461,7 +461,7 @@ def format_decimal(number, format=None):
 
 def format_currency(number, currency, format=None, currency_digits=True,
                     format_type='standard'):
-    """Return the given number formatted for the locale in request
+    """Return the given number formatted for the locale in the request.
 
     :param number: the number to format
     :param currency: the currency code
@@ -485,7 +485,7 @@ def format_currency(number, currency, format=None, currency_digits=True,
 
 
 def format_percent(number, format=None):
-    """Return formatted percent value for the locale in request
+    """Return formatted percent value for the locale in the request.
 
     :param number: the number to format
     :param format: the format to use
@@ -509,7 +509,7 @@ def format_scientific(number, format=None):
 
 
 class Domain(object):
-    """Localization domain. By default will use look for tranlations in Flask
+    """Localization domain. By default, it will look for translations in the Flask
     application directory and "messages" domain - all message catalogs should
     be called ``messages.mo``.
     """
