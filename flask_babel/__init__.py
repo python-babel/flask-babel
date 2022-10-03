@@ -108,7 +108,9 @@ class Babel(object):
             app.jinja_env.install_gettext_callables(
                 lambda x: get_translations().ugettext(x),
                 lambda s, p, n: get_translations().ungettext(s, p, n),
-                newstyle=True
+                newstyle=True,
+                pgettext=lambda c, x: get_translations().upgettext(c, x),
+                npgettext=lambda c, s, p, n: get_translations().unpgettext(c, s, p, n),
             )
 
     def localeselector(self, f):
