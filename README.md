@@ -13,5 +13,5 @@ The latest documentation is available [here][docs].
 
 [babel]: https://github.com/python-babel/babel
 [pytz]: https://pypi.python.org/pypi/pytz/
-[docs]: https://flask-babel.tkte.ch/
+[docs]: https://python-babel.github.io/flask-babel/
 [semver]: https://semver.org/
