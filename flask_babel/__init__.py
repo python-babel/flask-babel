@@ -509,7 +509,7 @@ def format_scientific(number, format=None):
 
 
 class Domain(object):
-    """Localization domain. By default will use look for tranlations in Flask
+    """Localization domain. By default will use look for translations in Flask
     application directory and "messages" domain - all message catalogs should
     be called ``messages.mo``.
     """
