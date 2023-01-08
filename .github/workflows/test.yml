@@ -20,11 +20,12 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Installing python dependencies
-      run: |
-        python -m pip install --upgrade pip setuptools
-        pip install -e '.[dev]'
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+
+    - name: Installing
+      run: poetry install --no-interaction
 
     - name: Running tests
       run: |
-        pytest
+        poetry run pytest --cov=flask_babel --cov-report=xml
