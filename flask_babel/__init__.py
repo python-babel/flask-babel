@@ -106,9 +106,11 @@ class Babel(object):
             )
             app.jinja_env.add_extension('jinja2.ext.i18n')
             app.jinja_env.install_gettext_callables(
-                lambda x: get_translations().ugettext(x),
-                lambda s, p, n: get_translations().ungettext(s, p, n),
-                newstyle=True
+                gettext=lambda s: get_translations().ugettext(s),
+                ngettext=lambda s, p, n: get_translations().ungettext(s, p, n),
+                newstyle=True,
+                pgettext=lambda c, s: get_translations().upgettext(c, s),
+                npgettext=lambda c, s, p, n: get_translations().unpgettext(c, s, p, n),
             )
 
     def localeselector(self, f):
