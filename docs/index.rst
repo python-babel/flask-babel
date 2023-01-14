@@ -17,7 +17,7 @@ Install the extension from PyPi::
     $ pip install Flask-Babel
 
 Please note that Flask-Babel requires Jinja >=2.5.  If you are using an
-older version you will have to upgrade or disable the Jinja support 
+older version you will have to upgrade or disable the Jinja support
 (see configuration).
 
 
@@ -34,7 +34,7 @@ object after configuring the application::
     app.config.from_pyfile('mysettings.cfg')
     babel = Babel(app)
 
-To disable jinja support, include ``configure_jinja=False`` in the Babel 
+To disable jinja support, include ``configure_jinja=False`` in the Babel
 constructor call.  The babel object itself can be used to configure the babel support
 further.  Babel has the following configuration values that can be used to
 change some internal defaults:
@@ -52,6 +52,14 @@ change some internal defaults:
                                 folders. Defaults to ``translations``.
 `BABEL_DOMAIN`                  The message domain used by the application.
                                 Defaults to ``messages``.
+
+                                It can also be a semi-colon (``;``) separated
+                                string of different domains for each of the
+                                translation directories, eg::
+
+                                    BABEL_TRANSLATION_DIRECTORIES=/path/to/translations;/another/path/
+                                    BABEL_DOMAINS=messages;myapp
+
 =============================== =============================================
 
 For more complex applications you might want to have multiple applications
@@ -256,7 +264,6 @@ this is what you want in there:
 
     [python: **.py]
     [jinja2: **/templates/**.html]
-    extensions=jinja2.ext.autoescape,jinja2.ext.with_
 
 Save it as ``babel.cfg`` or something similar next to your application.
 Then it's time to run the `pybabel` command that comes with Babel to

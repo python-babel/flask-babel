@@ -1,0 +1,7 @@
+v3.0.0
+
+Major version bump as this version removes support for Python 3.5 and 3.6.
+
+- Dropped support for end-of-life Python 3.5 and 3.6, added tests for 3.10 and 3.11.
+- Fixes to documentation to address outdated links and settings (#204, 201)
+- Jinja version 3 or greater is now required (released 2021)

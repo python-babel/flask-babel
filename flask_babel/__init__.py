@@ -106,9 +106,11 @@ class Babel(object):
             )
             app.jinja_env.add_extension('jinja2.ext.i18n')
             app.jinja_env.install_gettext_callables(
-                lambda x: get_translations().ugettext(x),
-                lambda s, p, n: get_translations().ungettext(s, p, n),
-                newstyle=True
+                gettext=lambda s: get_translations().ugettext(s),
+                ngettext=lambda s, p, n: get_translations().ungettext(s, p, n),
+                newstyle=True,
+                pgettext=lambda c, s: get_translations().upgettext(c, s),
+                npgettext=lambda c, s, p, n: get_translations().unpgettext(c, s, p, n),
             )
 
     def localeselector(self, f):
@@ -512,13 +514,30 @@ class Domain(object):
     """Localization domain. By default, it will look for translations in the Flask
     application directory and "messages" domain - all message catalogs should
     be called ``messages.mo``.
+    
+    Additional domains are supported passing a list of domain names to the ``domain``
+    argument, but note that in this case they must match a list passed
+    to ``translation_directories``, eg::
+
+        Domain(
+            translation_directories=[
+                "/path/to/translations/with/messages/domain",
+                "/another/path/to/translations/with/another/domain",
+            ],
+            domains=[
+                "messages",
+                "myapp",
+            ]
+        )
     """
 
     def __init__(self, translation_directories=None, domain='messages'):
         if isinstance(translation_directories, str):
             translation_directories = [translation_directories]
         self._translation_directories = translation_directories
-        self.domain = domain
+
+        self.domain = domain.split(';')
+
         self.cache = {}
 
     def __repr__(self):
@@ -553,15 +572,22 @@ class Domain(object):
         cache = self.get_translations_cache(ctx)
         locale = get_locale()
         try:
-            return cache[str(locale), self.domain]
+            return cache[str(locale), self.domain[0]]
         except KeyError:
             translations = support.Translations()
 
-            for dirname in self.translation_directories:
+            for index, dirname in enumerate(self.translation_directories):
+
+                domain = (
+                    self.domain[0]
+                    if len(self.domain) == 1
+                    else self.domain[index]
+                )
+
                 catalog = support.Translations.load(
                     dirname,
                     [locale],
-                    self.domain
+                    domain
                 )
                 translations.merge(catalog)
                 # FIXME: Workaround for merge() being really, really stupid. It
@@ -571,7 +597,7 @@ class Domain(object):
                 if hasattr(catalog, 'plural'):
                     translations.plural = catalog.plural
 
-            cache[str(locale), self.domain] = translations
+            cache[str(locale), self.domain[0]] = translations
             return translations
 
     def gettext(self, string, **variables):
