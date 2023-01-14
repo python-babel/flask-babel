@@ -9,11 +9,11 @@
 """
 from __future__ import absolute_import
 import os
+from types import SimpleNamespace
 
 from datetime import datetime
 from contextlib import contextmanager
-from flask import current_app, request
-from flask.ctx import has_request_context
+from flask import current_app, g
 from flask.helpers import locked_cached_property
 from babel import dates, numbers, support, Locale
 from pytz import timezone, UTC
@@ -661,11 +661,13 @@ class Domain(object):
 
 
 def _get_current_context():
-    if has_request_context():
-        return request
+    if not g:
+        return None
 
-    if current_app:
-        return current_app
+    if not hasattr(g, "_flask_babel"):
+        g._flask_babel = SimpleNamespace()
+
+    return g._flask_babel
 
 
 def get_domain():
