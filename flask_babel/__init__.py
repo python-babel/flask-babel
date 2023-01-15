@@ -746,3 +746,7 @@ def lazy_pgettext(*args, **kwargs):
 
 def lazy_ngettext(*args, **kwargs):
     return LazyString(ngettext, *args, **kwargs)
+
+
+def lazy_npgettext(*args, **kwargs):
+    return LazyString(npgettext, *args, **kwargs)
