@@ -7,12 +7,12 @@
     :copyright: (c) 2013 by Armin Ronacher, Daniel Neuhäuser.
     :license: BSD, see LICENSE for more details.
 """
-from __future__ import absolute_import
 import os
 from types import SimpleNamespace
-
 from datetime import datetime
 from contextlib import contextmanager
+from typing import Literal
+
 from flask import current_app, g
 from flask.helpers import locked_cached_property
 from babel import dates, numbers, support, Locale
@@ -22,7 +22,18 @@ from werkzeug.datastructures import ImmutableDict
 from flask_babel.speaklater import LazyString
 
 
-class Babel(object):
+Granularity = Literal[
+    "year",
+    "month",
+    "week",
+    "day",
+    "hour",
+    "minute",
+    "second"
+]
+
+
+class Babel:
     """Central controller class that can be used to configure how
     Flask-Babel behaves.  Each application that wants to use Flask-Babel
     has to create, or run :meth:`init_app` on, an instance of this class
@@ -53,7 +64,7 @@ class Babel(object):
         self._default_locale = default_locale
         self._default_timezone = default_timezone
         self._default_domain = default_domain
-        self._date_formats = date_formats
+        self.date_formats = date_formats
         self._configure_jinja = configure_jinja
         self.app = app
         self.locale_selector_func = None
@@ -75,21 +86,20 @@ class Babel(object):
         app.config.setdefault('BABEL_DEFAULT_LOCALE', self._default_locale)
         app.config.setdefault('BABEL_DEFAULT_TIMEZONE', self._default_timezone)
         app.config.setdefault('BABEL_DOMAIN', self._default_domain)
-        if self._date_formats is None:
-            self._date_formats = self.default_date_formats.copy()
 
-        #: a mapping of Babel datetime format strings that can be modified
-        #: to change the defaults.  If you invoke :func:`format_datetime`
-        #: and do not provide any format string Flask-Babel will do the
-        #: following things:
-        #:
-        #: 1.   look up ``date_formats['datetime']``.  By default ``'medium'``
-        #:      is returned to enforce medium length datetime formats.
-        #: 2.   ``date_formats['datetime.medium'] (if ``'medium'`` was
-        #:      returned in step one) is looked up.  If the return value
-        #:      is anything but `None` this is used as new format string.
-        #:      otherwise the default for that language is used.
-        self.date_formats = self._date_formats
+        # a mapping of Babel datetime format strings that can be modified
+        # to change the defaults.  If you invoke :func:`format_datetime`
+        # and do not provide any format string Flask-Babel will do the
+        # following things:
+        #
+        # 1.   look up ``date_formats['datetime']``.  By default, ``'medium'``
+        #      is returned to enforce medium length datetime formats.
+        # 2.   ``date_formats['datetime.medium'] (if ``'medium'`` was
+        #      returned in step one) is looked up.  If the return value
+        #      is anything but `None` this is used as new format string.
+        #      otherwise the default for that language is used.
+        if self.date_formats is None:
+            self.date_formats = self.default_date_formats.copy()
 
         if self._configure_jinja:
             app.jinja_env.filters.update(
@@ -205,8 +215,7 @@ class Babel(object):
 def get_translations():
     """Returns the correct gettext translations that should be used for
     this request.  This will never fail and return a dummy translation
-    object if used outside of the request or if a translation cannot be
-    found.
+    object if used outside the request or if a translation cannot be found.
     """
     return get_domain().get_translations()
 
@@ -394,9 +403,8 @@ def format_time(time=None, format=None, rebase=True):
     """Return a time formatted according to the given pattern.  If no
     :class:`~datetime.datetime` object is passed, the current time is
     assumed.  By default, rebasing happens, which causes the object to
-    be converted to the users's timezone (as returned by
-    :func:`to_user_timezone`).  This function formats both date and
-    time.
+    be converted to the user's timezone (as returned by
+    :func:`to_user_timezone`).  This function formats both date and time.
 
     The format parameter can either be ``'short'``, ``'medium'``,
     ``'long'`` or ``'full'`` (in which case the language's default for
@@ -410,7 +418,7 @@ def format_time(time=None, format=None, rebase=True):
     return _date_format(dates.format_time, time, format, rebase)
 
 
-def format_timedelta(datetime_or_timedelta, granularity='second',
+def format_timedelta(datetime_or_timedelta, granularity: Granularity = 'second',
                      add_direction=False, threshold=0.85):
     """Format the elapsed time from the given date to now or the given
     timedelta.
@@ -511,13 +519,13 @@ def format_scientific(number, format=None):
 
 
 class Domain(object):
-    """Localization domain. By default, it will look for translations in the Flask
-    application directory and "messages" domain - all message catalogs should
-    be called ``messages.mo``.
+    """Localization domain. By default, it will look for translations in the
+    Flask application directory and "messages" domain - all message catalogs
+    should be called ``messages.mo``.
     
-    Additional domains are supported passing a list of domain names to the ``domain``
-    argument, but note that in this case they must match a list passed
-    to ``translation_directories``, eg::
+    Additional domains are supported passing a list of domain names to the
+    ``domain`` argument, but note that in this case they must match a list
+    passed to ``translation_directories``, eg::
 
         Domain(
             translation_directories=[
@@ -541,7 +549,10 @@ class Domain(object):
         self.cache = {}
 
     def __repr__(self):
-        return '<Domain({!r}, {!r})>'.format(self._translation_directories, self.domain)
+        return '<Domain({!r}, {!r})>'.format(
+            self._translation_directories,
+            self.domain
+        )
 
     @property
     def translation_directories(self):
@@ -669,7 +680,11 @@ class Domain(object):
 
         Example::
 
-            apples = lazy_ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(apples))
+            apples = lazy_ngettext(
+                u'%(num)d Apple',
+                u'%(num)d Apples',
+                num=len(apples)
+            )
 
             @app.route('/')
             def index():
@@ -715,6 +730,8 @@ def get_domain():
 # Create shortcuts for the default Flask domain
 def gettext(*args, **kwargs):
     return get_domain().gettext(*args, **kwargs)
+
+
 _ = gettext
 
 
