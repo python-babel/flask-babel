@@ -137,6 +137,11 @@ class Babel:
         """Returns a list of all the locales translations exist for. The list
         returned will be filled with actual locale objects and not just strings.
 
+        .. note::
+
+            The default locale will always be returned, even if no translation
+            files exist for it.
+
         .. versionadded:: 0.6
         """
         result = []
@@ -153,10 +158,7 @@ class Babel:
                 if any(x.endswith('.mo') for x in os.listdir(locale_dir)):
                     result.append(Locale.parse(folder))
 
-        # If no other translations are found, add the default locale
-        if not result:
-            result.append(self.default_locale)
-
+        result.append(self.default_locale)
         return result
 
     @property
