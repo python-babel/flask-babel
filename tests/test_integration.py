@@ -42,9 +42,10 @@ def test_multiple_directories():
     with app.test_request_context():
         translations = b.list_translations()
 
-        assert(len(translations) == 2)
+        assert(len(translations) == 3)
         assert(str(translations[0]) == 'de')
         assert(str(translations[1]) == 'de')
+        assert(str(translations[2]) == 'de_DE')
 
         assert gettext(
             u'Hello %(name)s!',
@@ -77,9 +78,10 @@ def test_multiple_directories_multiple_domains():
     with app.test_request_context():
         translations = b.list_translations()
 
-        assert(len(translations) == 2)
+        assert(len(translations) == 3)
         assert(str(translations[0]) == 'de')
         assert(str(translations[1]) == 'de')
+        assert(str(translations[2]) == 'de_DE')
 
         assert gettext(
             u'Hello %(name)s!',
@@ -110,9 +112,10 @@ def test_multiple_directories_different_domain():
     with app.test_request_context():
         translations = b.list_translations()
 
-        assert(len(translations) == 2)
+        assert(len(translations) == 3)
         assert(str(translations[0]) == 'de')
         assert(str(translations[1]) == 'de')
+        assert(str(translations[2]) == 'de_DE')
 
         assert gettext(
             u'Hello %(name)s!',
@@ -139,8 +142,9 @@ def test_different_domain():
     with app.test_request_context():
         translations = b.list_translations()
 
-        assert(len(translations) == 1)
+        assert(len(translations) == 2)
         assert(str(translations[0]) == 'de')
+        assert(str(translations[1]) == 'de_DE')
 
         assert gettext(u'Good bye') == 'Auf Wiedersehen'
 

@@ -83,8 +83,9 @@ def test_list_translations():
     app = flask.Flask(__name__)
     b = babel.Babel(app, default_locale='de_DE')
     translations = b.list_translations()
-    assert len(translations) == 1
+    assert len(translations) == 2
     assert str(translations[0]) == 'de'
+    assert str(translations[1]) == 'de_DE'
 
 
 def test_no_formatting():
