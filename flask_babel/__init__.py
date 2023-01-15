@@ -11,7 +11,6 @@ import os
 from types import SimpleNamespace
 from datetime import datetime
 from contextlib import contextmanager
-from typing import Literal
 
 from flask import current_app, g
 from flask.helpers import locked_cached_property
@@ -20,17 +19,6 @@ from pytz import timezone, UTC
 from werkzeug.datastructures import ImmutableDict
 
 from flask_babel.speaklater import LazyString
-
-
-Granularity = Literal[
-    "year",
-    "month",
-    "week",
-    "day",
-    "hour",
-    "minute",
-    "second"
-]
 
 
 class Babel:
@@ -418,7 +406,7 @@ def format_time(time=None, format=None, rebase=True):
     return _date_format(dates.format_time, time, format, rebase)
 
 
-def format_timedelta(datetime_or_timedelta, granularity: Granularity = 'second',
+def format_timedelta(datetime_or_timedelta, granularity: str = 'second',
                      add_direction=False, threshold=0.85):
     """Format the elapsed time from the given date to now or the given
     timedelta.
