@@ -123,7 +123,7 @@ class Babel:
         return f
 
     def timezoneselector(self, f):
-        """Registers a callback function for timezone selection.  The default
+        """Registers a callback function for timezone selection. The default
         behaves as if a function was registered that returns `None` all the
         time.  If `None` is returned, the timezone falls back to the one from
         the configuration.
@@ -134,9 +134,8 @@ class Babel:
         return f
 
     def list_translations(self):
-        """Returns a list of all the locales translations exist for.  The
-        list returned will be filled with actual locale objects and not just
-        strings.
+        """Returns a list of all the locales translations exist for. The list
+        returned will be filled with actual locale objects and not just strings.
 
         .. versionadded:: 0.6
         """
@@ -156,7 +155,7 @@ class Babel:
 
         # If no other translations are found, add the default locale
         if not result:
-            result.append(Locale.parse(self._default_locale))
+            result.append(self.default_locale)
 
         return result
 
