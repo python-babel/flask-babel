@@ -22,7 +22,7 @@ copyright = '2020, Armin Ronacher'
 author = 'Armin Ronacher'
 
 # The full version, including alpha/beta/rc tags
-release = '2.0.0'
+release = '3.0.0'
 
 
 # -- General configuration ---------------------------------------------------

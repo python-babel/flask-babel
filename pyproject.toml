@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "flask-babel"
-version = "2.0.0"
+version = "3.0.0"
 description = "Adds i18n/l10n support fo Flask applications."
 authors = ["Armin Ronacher"]
 maintainers = ["Tyler Kennedy <tk@tkte.ch>"]
@@ -31,7 +31,7 @@ include = [
 [tool.poetry.dependencies]
 python = "^3.7"
 pytz = "^2022.7"
-Flask = "^2.0.0"
+Flask = "^3.0.0"
 Babel = "^2.11.0"
 Jinja2 = "^3.1.2"
 
