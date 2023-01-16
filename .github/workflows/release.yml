@@ -23,6 +23,17 @@ jobs:
     - name: Install Poetry
       uses: snok/install-poetry@v1
 
+    - name: Installing
+      run: poetry install --no-interaction
+
+    - name: Building documentation
+      run: |
+        cd docs && make clean && make html
+
+    - name: Publishing documentation
+      run: |
+        ghp-import -f -n docs/_build/html
+
     - name: Publishing
       env:
         PYPI_TOKEN: ${{ secrets.PYPI_PASSWORD }}

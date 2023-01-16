@@ -43,6 +43,7 @@ ghp-import = "^2.1.0"
 Sphinx = "^5.3.0"
 coverage = "^6.4.4"
 pytest-cov = "^3.0.0"
+furo = "^2022.12.7"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
