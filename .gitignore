@@ -8,3 +8,5 @@ docs/_build
 .vscode
 *.code-workspace
 venv
+poetry.lock
+.idea

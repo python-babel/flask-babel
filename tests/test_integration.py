@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import with_statement
 
 import pickle
@@ -42,14 +41,52 @@ def test_multiple_directories():
     with app.test_request_context():
         translations = b.list_translations()
 
-        assert(len(translations) == 2)
+        assert(len(translations) == 3)
         assert(str(translations[0]) == 'de')
         assert(str(translations[1]) == 'de')
+        assert(str(translations[2]) == 'de_DE')
 
         assert gettext(
             u'Hello %(name)s!',
             name='Peter'
         ) == 'Hallo Peter!'
+
+
+def test_multiple_directories_multiple_domains():
+    """
+    Ensure we can load translations from multiple directories with a
+    custom domain.
+    """
+    b = babel.Babel()
+    app = flask.Flask(__name__)
+
+    app.config.update({
+        'BABEL_TRANSLATION_DIRECTORIES': ';'.join((
+            'renamed_translations',
+            'translations_different_domain',
+        )),
+        'BABEL_DEFAULT_LOCALE': 'de_DE',
+        'BABEL_DOMAIN': ';'.join((
+            'messages',
+            'myapp',
+        )),
+    })
+
+    b.init_app(app)
+
+    with app.test_request_context():
+        translations = b.list_translations()
+
+        assert(len(translations) == 3)
+        assert(str(translations[0]) == 'de')
+        assert(str(translations[1]) == 'de')
+        assert(str(translations[2]) == 'de_DE')
+
+        assert gettext(
+            u'Hello %(name)s!',
+            name='Peter'
+        ) == 'Hallo Peter!'
+        assert gettext(u'Good bye') == 'Auf Wiedersehen'
 
 
 def test_multiple_directories_different_domain():
@@ -74,9 +111,10 @@ def test_multiple_directories_different_domain():
     with app.test_request_context():
         translations = b.list_translations()
 
-        assert(len(translations) == 2)
+        assert(len(translations) == 3)
         assert(str(translations[0]) == 'de')
         assert(str(translations[1]) == 'de')
+        assert(str(translations[2]) == 'de_DE')
 
         assert gettext(
             u'Hello %(name)s!',
@@ -103,8 +141,9 @@ def test_different_domain():
     with app.test_request_context():
         translations = b.list_translations()
 
-        assert(len(translations) == 1)
+        assert(len(translations) == 2)
         assert(str(translations[0]) == 'de')
+        assert(str(translations[1]) == 'de_DE')
 
         assert gettext(u'Good bye') == 'Auf Wiedersehen'
 

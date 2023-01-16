@@ -7,11 +7,7 @@ import flask_babel as babel
 
 def test_force_locale():
     app = flask.Flask(__name__)
-    b = babel.Babel(app)
-
-    @b.localeselector
-    def select_locale():
-        return 'de_DE'
+    babel.Babel(app, locale_selector=lambda: 'de_DE')
 
     with app.test_request_context():
         assert str(babel.get_locale()) == 'de_DE'
@@ -22,11 +18,7 @@ def test_force_locale():
 
 def test_force_locale_with_threading():
     app = flask.Flask(__name__)
-    b = babel.Babel(app)
-
-    @b.localeselector
-    def select_locale():
-        return 'de_DE'
+    babel.Babel(app, locale_selector=lambda: 'de_DE')
 
     semaphore = Semaphore(value=0)
 
@@ -49,11 +41,7 @@ def test_force_locale_with_threading():
 
 def test_force_locale_with_threading_and_app_context():
     app = flask.Flask(__name__)
-    b = babel.Babel(app)
-
-    @b.localeselector
-    def select_locale():
-        return 'de_DE'
+    babel.Babel(app, locale_selector=lambda: 'de_DE')
 
     semaphore = Semaphore(value=0)
 
@@ -76,11 +64,7 @@ def test_force_locale_with_threading_and_app_context():
 
 def test_refresh_during_force_locale():
     app = flask.Flask(__name__)
-    b = babel.Babel(app)
-
-    @b.localeselector
-    def select_locale():
-        return 'de_DE'
+    babel.Babel(app, locale_selector=lambda: 'de_DE')
 
     with app.test_request_context():
         with babel.force_locale('en_US'):
