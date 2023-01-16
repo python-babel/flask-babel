@@ -8,9 +8,11 @@
     :license: BSD, see LICENSE for more details.
 """
 import os
+from dataclasses import dataclass
 from types import SimpleNamespace
 from datetime import datetime
 from contextlib import contextmanager
+from typing import List, Callable, Optional
 
 from flask import current_app, g
 from flask.helpers import locked_cached_property
@@ -19,6 +21,26 @@ from pytz import timezone, UTC
 from werkzeug.datastructures import ImmutableDict
 
 from flask_babel.speaklater import LazyString
+
+
+@dataclass
+class BabelConfiguration:
+    """Application-specific configuration for Babel."""
+    default_locale: str
+    default_timezone: str
+    default_domain: str
+    default_directories: List[str]
+    translation_directories: List[str]
+
+    instance: 'Babel'
+
+    locale_selector: Optional[Callable] = None
+    timezone_selector: Optional[Callable] = None
+
+
+def get_babel(app=None) -> 'BabelConfiguration':
+    app = app or current_app
+    return app.extensions['babel']
 
 
 class Babel:
@@ -46,34 +68,69 @@ class Babel:
         'datetime.long':    None,
     })
 
-    def __init__(self, app=None, default_locale='en', default_timezone='UTC',
-                 default_domain='messages', date_formats=None,
-                 configure_jinja=True):
-        self._default_locale = default_locale
-        self._default_timezone = default_timezone
-        self._default_domain = default_domain
-        self.date_formats = date_formats
+    def __init__(self, app=None, date_formats=None, configure_jinja=True, *args,
+                 **kwargs):
+        """Creates a new Babel instance.
+
+        If an application is passed, it will be configured with the provided
+        arguments. Otherwise, :meth:`init_app` can be used to configure the
+        application later.
+        """
         self._configure_jinja = configure_jinja
-        self.app = app
-        self.locale_selector_func = None
-        self.timezone_selector_func = None
+        self.date_formats = date_formats
 
         if app is not None:
-            self.init_app(app)
+            self.init_app(app, *args, **kwargs)
 
-    def init_app(self, app):
-        """Set up this instance for use with *app*, if no app was passed to
-        the constructor.
+    def init_app(self, app, default_locale='en', default_domain='messages',
+                 default_translation_directories='translations',
+                 default_timezone='UTC', locale_selector=None,
+                 timezone_selector=None):
         """
-        self.app = app
-        app.babel_instance = self
+        Initializes the Babel instance for use with this specific application.
+
+        :param app: The application to configure
+        :param default_locale: The default locale to use for this application
+        :param default_domain: The default domain to use for this application
+        :param default_translation_directories: The default translation
+                                                directories to use for this
+                                                application
+        :param default_timezone: The default timezone to use for this
+                                 application
+        :param locale_selector: The function to use to select the locale
+                                for a request
+        :param timezone_selector: The function to use to select the
+                                  timezone for a request
+        """
         if not hasattr(app, 'extensions'):
             app.extensions = {}
-        app.extensions['babel'] = self
 
-        app.config.setdefault('BABEL_DEFAULT_LOCALE', self._default_locale)
-        app.config.setdefault('BABEL_DEFAULT_TIMEZONE', self._default_timezone)
-        app.config.setdefault('BABEL_DOMAIN', self._default_domain)
+        directories = app.config.get(
+            'BABEL_TRANSLATION_DIRECTORIES',
+            default_translation_directories
+        ).split(';')
+
+        app.extensions['babel'] = BabelConfiguration(
+            default_locale=app.config.get(
+                'BABEL_DEFAULT_LOCALE',
+                default_locale
+            ),
+            default_timezone=app.config.get(
+                'BABEL_DEFAULT_TIMEZONE',
+                default_timezone
+            ),
+            default_domain=app.config.get(
+                'BABEL_DOMAIN',
+                default_domain
+            ),
+            default_directories=directories,
+            translation_directories=list(
+                self._resolve_directories(directories, app)
+            ),
+            instance=self,
+            locale_selector=locale_selector,
+            timezone_selector=timezone_selector
+        )
 
         # a mapping of Babel datetime format strings that can be modified
         # to change the defaults.  If you invoke :func:`format_datetime`
@@ -95,7 +152,6 @@ class Babel:
                 dateformat=format_date,
                 timeformat=format_time,
                 timedeltaformat=format_timedelta,
-
                 numberformat=format_number,
                 decimalformat=format_decimal,
                 currencyformat=format_currency,
@@ -108,30 +164,12 @@ class Babel:
                 ngettext=lambda s, p, n: get_translations().ungettext(s, p, n),
                 newstyle=True,
                 pgettext=lambda c, s: get_translations().upgettext(c, s),
-                npgettext=lambda c, s, p, n: get_translations().unpgettext(c, s, p, n),
+                npgettext=lambda c, s, p, n: get_translations().unpgettext(
+                    c,
+                    s, p,
+                    n
+                ),
             )
-
-    def localeselector(self, f):
-        """Registers a callback function for locale selection.  The default
-        behaves as if a function was registered that returns `None` all the
-        time.  If `None` is returned, the locale falls back to the one from
-        the configuration.
-
-        This has to return the locale as string (e.g., ``'de_AT'``, ``'en_US'``).
-        """
-        self.locale_selector_func = f
-        return f
-
-    def timezoneselector(self, f):
-        """Registers a callback function for timezone selection. The default
-        behaves as if a function was registered that returns `None` all the
-        time.  If `None` is returned, the timezone falls back to the one from
-        the configuration.
-
-        This has to return the timezone as string (e.g., ``'Europe/Vienna'``).
-        """
-        self.timezone_selector_func = f
-        return f
 
     def list_translations(self):
         """Returns a list of all the locales translations exist for. The list
@@ -146,7 +184,7 @@ class Babel:
         """
         result = []
 
-        for dirname in self.translation_directories:
+        for dirname in get_babel().translation_directories:
             if not os.path.isdir(dirname):
                 continue
 
@@ -162,43 +200,40 @@ class Babel:
         return result
 
     @property
-    def default_locale(self):
+    def default_locale(self) -> Locale:
         """The default locale from the configuration as an instance of a
         `babel.Locale` object.
         """
-        return Locale.parse(self.app.config['BABEL_DEFAULT_LOCALE'])
+        return Locale.parse(get_babel().default_locale)
 
     @property
-    def default_timezone(self):
+    def default_timezone(self) -> timezone:
         """The default timezone from the configuration as an instance of a
         `pytz.timezone` object.
         """
-        return timezone(self.app.config['BABEL_DEFAULT_TIMEZONE'])
+        return timezone(get_babel().default_timezone)
 
     @property
-    def domain(self):
+    def domain(self) -> str:
         """The message domain for the translations as a string.
         """
-        return self.app.config['BABEL_DOMAIN']
+        return get_babel().default_domain
 
     @locked_cached_property
     def domain_instance(self):
         """The message domain for the translations.
         """
-        return Domain(domain=self.app.config['BABEL_DOMAIN'])
+        return Domain(domain=self.domain)
 
-    @property
-    def translation_directories(self):
-        directories = self.app.config.get(
-            'BABEL_TRANSLATION_DIRECTORIES',
-            'translations'
-        ).split(';')
-
+    @staticmethod
+    def _resolve_directories(directories: List[str], app=None):
         for path in directories:
             if os.path.isabs(path):
                 yield path
-            else:
-                yield os.path.join(self.app.root_path, path)
+            elif app is not None:
+                # We can only resolve relative paths if we have an application
+                # context.
+                yield os.path.join(app.root_path, path)
 
 
 def get_translations():
@@ -211,19 +246,18 @@ def get_translations():
 
 def get_locale():
     """Returns the locale that should be used for this request as
-    `babel.Locale` object.  This returns `None` if used outside of
-    a request.
+    `babel.Locale` object.  This returns `None` if used outside a request.
     """
     ctx = _get_current_context()
     if ctx is None:
         return None
     locale = getattr(ctx, 'babel_locale', None)
     if locale is None:
-        babel = current_app.extensions['babel']
-        if babel.locale_selector_func is None:
+        babel = get_babel()
+        if babel.locale_selector is None:
             locale = babel.default_locale
         else:
-            rv = babel.locale_selector_func()
+            rv = babel.locale_selector()
             if rv is None:
                 locale = babel.default_locale
             else:
@@ -240,13 +274,13 @@ def get_timezone():
     ctx = _get_current_context()
     tzinfo = getattr(ctx, 'babel_tzinfo', None)
     if tzinfo is None:
-        babel = current_app.extensions['babel']
-        if babel.timezone_selector_func is None:
-            tzinfo = babel.default_timezone
+        babel = get_babel()
+        if babel.timezone_selector is None:
+            tzinfo = babel.instance.default_timezone
         else:
-            rv = babel.timezone_selector_func()
+            rv = babel.timezone_selector()
             if rv is None:
-                tzinfo = babel.default_timezone
+                tzinfo = babel.instance.default_timezone
             else:
                 tzinfo = timezone(rv) if isinstance(rv, str) else rv
         ctx.babel_tzinfo = tzinfo
@@ -315,11 +349,11 @@ def _get_format(key, format):
     """A small helper for the datetime formatting functions.  Looks up
     format defaults for different kinds.
     """
-    babel = current_app.extensions['babel']
+    babel = get_babel()
     if format is None:
-        format = babel.date_formats[key]
+        format = babel.instance.date_formats[key]
     if format in ('short', 'medium', 'full', 'long'):
-        rv = babel.date_formats['%s.%s' % (key, format)]
+        rv = babel.instance.date_formats['%s.%s' % (key, format)]
         if rv is not None:
             format = rv
     return format
@@ -350,7 +384,7 @@ def format_datetime(datetime=None, format=None, rebase=True):
     """Return a date formatted according to the given pattern.  If no
     :class:`~datetime.datetime` object is passed, the current time is
     assumed.  By default, rebasing happens, which causes the object to
-    be converted to the users's timezone (as returned by
+    be converted to the user's timezone (as returned by
     :func:`to_user_timezone`).  This function formats both date and
     time.
 
@@ -547,8 +581,7 @@ class Domain(object):
     def translation_directories(self):
         if self._translation_directories is not None:
             return self._translation_directories
-        babel = current_app.extensions['babel']
-        return babel.translation_directories
+        return get_babel().translation_directories
 
     def as_default(self):
         """Set this domain as default for the current request"""
@@ -711,8 +744,7 @@ def get_domain():
     except AttributeError:
         pass
 
-    babel = current_app.extensions['babel']
-    ctx.babel_domain = babel.domain_instance
+    ctx.babel_domain = get_babel().instance.domain_instance
     return ctx.babel_domain
 
 

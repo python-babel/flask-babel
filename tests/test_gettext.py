@@ -4,7 +4,8 @@ from __future__ import with_statement
 import flask
 
 import flask_babel as babel
-from flask_babel import gettext, lazy_gettext, lazy_ngettext, ngettext
+from flask_babel import gettext, lazy_gettext, lazy_ngettext, ngettext, \
+    get_babel
 
 
 def test_basics():
@@ -23,7 +24,8 @@ def test_template_basics():
     app = flask.Flask(__name__)
     babel.Babel(app, default_locale='de_DE')
 
-    t = lambda x: flask.render_template_string('{{ %s }}' % x)
+    def t(x):
+        return flask.render_template_string('{{ %s }}' % x)
 
     with app.test_request_context():
         assert t("gettext('Hello %(name)s!', name='Peter')") == \
@@ -49,7 +51,7 @@ def test_lazy_gettext():
         assert str(yes) == 'Ja'
         assert yes.__html__() == 'Ja'
 
-    app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
+    get_babel(app).default_locale = 'en_US'
     with app.test_request_context():
         assert str(yes) == 'Yes'
         assert yes.__html__() == 'Yes'
@@ -70,11 +72,13 @@ def test_lazy_ngettext():
 
 def test_lazy_gettext_defaultdomain():
     app = flask.Flask(__name__)
-    b = babel.Babel(app, default_locale='de_DE', default_domain='test')
+    babel.Babel(app, default_locale='de_DE', default_domain='test')
     first = lazy_gettext('first')
+
     with app.test_request_context():
         assert str(first) == 'erste'
-    app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
+
+    get_babel(app).default_locale = 'en_US'
     with app.test_request_context():
         assert str(first) == 'first'
 
@@ -82,10 +86,12 @@ def test_lazy_gettext_defaultdomain():
 def test_list_translations():
     app = flask.Flask(__name__)
     b = babel.Babel(app, default_locale='de_DE')
-    translations = b.list_translations()
-    assert len(translations) == 2
-    assert str(translations[0]) == 'de'
-    assert str(translations[1]) == 'de_DE'
+
+    with app.app_context():
+        translations = b.list_translations()
+        assert len(translations) == 2
+        assert str(translations[0]) == 'de'
+        assert str(translations[1]) == 'de_DE'
 
 
 def test_no_formatting():
@@ -148,15 +154,16 @@ def test_multiple_apps():
 
 def test_cache(mocker):
     load_mock = mocker.patch(
-        "babel.support.Translations.load", side_effect=babel.support.Translations.load
+        "babel.support.Translations.load",
+        side_effect=babel.support.Translations.load
     )
 
     app = flask.Flask(__name__)
-    b = babel.Babel(app, default_locale="de_DE")
-
-    @b.localeselector
-    def select_locale():
-        return the_locale
+    b = babel.Babel(
+        app,
+        default_locale="de_DE",
+        locale_selector=lambda: the_locale
+    )
 
     # first request, should load en_US
     the_locale = "en_US"
