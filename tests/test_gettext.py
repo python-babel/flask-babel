@@ -1,11 +1,13 @@
-# -*- coding: utf-8 -*-
-from __future__ import with_statement
-
 import flask
 
 import flask_babel as babel
-from flask_babel import gettext, lazy_gettext, lazy_ngettext, ngettext, \
+from flask_babel import (
+    gettext,
+    lazy_gettext,
+    lazy_ngettext,
+    ngettext,
     get_babel
+)
 
 
 def test_basics():
