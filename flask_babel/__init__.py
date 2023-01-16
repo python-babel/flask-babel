@@ -315,8 +315,8 @@ def force_locale(locale):
 
     Sometimes it is useful to switch the current locale to different one, do
     some tasks and then revert back to the original one. For example, if the
-    user uses German on the website, but you want to send them an email in
-    English, you can use this function as a context manager::
+    user uses German on the website, but you want to email them in English,
+    you can use this function as a context manager::
 
         with force_locale('en_US'):
             send_email(gettext('Hello!'), ...)

@@ -31,13 +31,12 @@ object after configuring the application::
     from flask_babel import Babel
 
     app = Flask(__name__)
-    app.config.from_pyfile('mysettings.cfg')
     babel = Babel(app)
 
 To disable jinja support, include ``configure_jinja=False`` in the Babel
-constructor call.  The babel object itself can be used to configure the babel support
-further.  Babel has the following configuration values that can be used to
-change some internal defaults:
+constructor call. The babel object itself can be used to configure the babel
+support further. Babel has the following configuration values that can be used
+to change some internal defaults:
 
 =============================== =============================================
 `BABEL_DEFAULT_LOCALE`          The default locale to use if no locale
@@ -63,7 +62,7 @@ change some internal defaults:
 =============================== =============================================
 
 For more complex applications you might want to have multiple applications
-for different users which is where selector functions come in handy.  The
+for different users which is where selector functions come in handy. The
 first time the babel extension needs the locale (locale code/ID) of the
 current user it will call a :meth:`~Babel.localeselector` function, and
 the first time the timezone is needed it will call a
@@ -79,7 +78,6 @@ Example selector functions::
 
     from flask import g, request
 
-    @babel.localeselector
     def get_locale():
         # if a user is logged in, use the locale from the user settings
         user = getattr(g, 'user', None)
@@ -90,11 +88,13 @@ Example selector functions::
         # example.  The best match wins.
         return request.accept_languages.best_match(['de', 'fr', 'en'])
 
-    @babel.timezoneselector
     def get_timezone():
         user = getattr(g, 'user', None)
         if user is not None:
             return user.timezone
+
+    app = Flask(__name__)
+    babel = Babel(app, locale_selector=get_locale, timezone_selector=get_timezone)
 
 The example above assumes that the current user is stored on the
 :data:`flask.g` object.
@@ -398,6 +398,8 @@ Gettext Functions
 .. autofunction:: lazy_gettext
 
 .. autofunction:: lazy_pgettext
+
+.. autofunction:: lazy_npgettext
 
 Low-Level API
 `````````````
