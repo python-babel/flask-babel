@@ -40,6 +40,8 @@ class BabelConfiguration:
 
 def get_babel(app=None) -> 'BabelConfiguration':
     app = app or current_app
+    if not hasattr(app, 'extensions'):
+        app.extensions = {}
     return app.extensions['babel']
 
 
