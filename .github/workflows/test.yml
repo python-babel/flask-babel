@@ -29,3 +29,7 @@ jobs:
     - name: Running tests
       run: |
         poetry run pytest --cov=flask_babel --cov-report=xml
+
+    - name: Building documentation
+      run: |
+        cd docs && poetry run make clean && poetry run make html
