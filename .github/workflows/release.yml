@@ -33,7 +33,7 @@ jobs:
 
     - name: Publishing documentation
       run: |
-        poetry run ghp-import -f -n docs/_build/html
+        poetry run ghp-import -f -n -p docs/_build/html
 
     - name: Publishing
       env:
