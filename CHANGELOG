@@ -1,4 +1,5 @@
 v3.0.0
+------
 
 Major version bump as this version removes support for Python 3.5 and 3.6, along with multiple
 major breaking changes. Hope you've been following SemVer :)
@@ -14,3 +15,17 @@ major breaking changes. Hope you've been following SemVer :)
   having a single Babel object for multiple Flask apps (#107) as well as to simplify settings
   and multi-threaded state.
 - Most configuration options can be passed directly through init_app().
+
+v2.0.0
+------
+
+Starting with version 2, flask-babel drops official support for Python2.
+Python versions 3.5 through 3.9-beta1 are tested and supported, as well as pypy3.
+
+- Tests moved from unittest to pytest (#163)
+- Domain and caching support from Flask-BabelEx (#163)
+- Documentation moved from python-hosted to Github Pages.
+- CI moved from Travisci to Github Actions
+- Small documentation improvements.
+- Removed uncessary checks on get_translations() (#127, #126)
+- localeselector and timezoneselector can be changed after creation.
