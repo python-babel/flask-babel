@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from types import SimpleNamespace
 from datetime import datetime
 from contextlib import contextmanager
-from typing import List, Callable, Optional
+from typing import List, Callable, Optional, Union
 
 from babel.support import Translations, NullTranslations
 from flask import current_app, g
@@ -237,7 +237,7 @@ class Babel:
                 yield os.path.join(app.root_path, path)
 
 
-def get_translations() -> Translations | NullTranslations:
+def get_translations() -> Union[Translations, NullTranslations]:
     """Returns the correct gettext translations that should be used for
     this request.  This will never fail and return a dummy translation
     object if used outside the request or if a translation cannot be found.
