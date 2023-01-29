@@ -12,11 +12,11 @@ def test_multiple_apps():
     b.init_app(app2, default_locale='en_US')
 
     with app1.test_request_context():
-        assert babel.get_locale() == 'de_DE'
+        assert str(babel.get_locale()) == 'de_DE'
         assert babel.gettext(u'Hello %(name)s!', name='Peter') == \
                'Hallo Peter!'
 
     with app2.test_request_context():
-        assert babel.get_locale() == 'en_US'
+        assert str(babel.get_locale()) == 'en_US'
         assert babel.gettext(u'Hello %(name)s!', name='Peter') == \
                'Hello Peter!'

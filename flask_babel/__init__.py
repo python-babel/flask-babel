@@ -14,6 +14,7 @@ from datetime import datetime
 from contextlib import contextmanager
 from typing import List, Callable, Optional
 
+from babel.support import Translations, NullTranslations
 from flask import current_app, g
 from flask.helpers import locked_cached_property
 from babel import dates, numbers, support, Locale
@@ -236,7 +237,7 @@ class Babel:
                 yield os.path.join(app.root_path, path)
 
 
-def get_translations():
+def get_translations() -> Translations | NullTranslations:
     """Returns the correct gettext translations that should be used for
     this request.  This will never fail and return a dummy translation
     object if used outside the request or if a translation cannot be found.
@@ -244,32 +245,33 @@ def get_translations():
     return get_domain().get_translations()
 
 
-def get_locale():
+def get_locale() -> Optional[Locale]:
     """Returns the locale that should be used for this request as
     `babel.Locale` object.  This returns `None` if used outside a request.
     """
     ctx = _get_current_context()
     if ctx is None:
         return None
+
     locale = getattr(ctx, 'babel_locale', None)
     if locale is None:
         babel = get_babel()
         if babel.locale_selector is None:
-            locale = babel.default_locale
+            locale = babel.instance.default_locale
         else:
             rv = babel.locale_selector()
             if rv is None:
-                locale = babel.default_locale
+                locale = babel.instance.default_locale
             else:
                 locale = Locale.parse(rv)
         ctx.babel_locale = locale
+
     return locale
 
 
-def get_timezone():
+def get_timezone() -> Optional[timezone]:
     """Returns the timezone that should be used for this request as
-    `pytz.timezone` object.  This returns `None` if used outside of
-    a request.
+    a `pytz.timezone` object.  This returns `None` if used outside a request.
     """
     ctx = _get_current_context()
     tzinfo = getattr(ctx, 'babel_tzinfo', None)
@@ -345,7 +347,7 @@ def force_locale(locale):
             setattr(ctx, key, value)
 
 
-def _get_format(key, format):
+def _get_format(key, format) -> Optional[str]:
     """A small helper for the datetime formatting functions.  Looks up
     format defaults for different kinds.
     """
@@ -469,7 +471,7 @@ def _date_format(formatter, obj, format, rebase, **extra):
     return formatter(obj, format, locale=locale, **extra)
 
 
-def format_number(number):
+def format_number(number) -> str:
     """Return the given number formatted for the locale in request
 
     :param number: the number to format
@@ -480,7 +482,7 @@ def format_number(number):
     return numbers.format_decimal(number, locale=locale)
 
 
-def format_decimal(number, format=None):
+def format_decimal(number, format=None) -> str:
     """Return the given decimal number formatted for the locale in the request.
 
     :param number: the number to format
@@ -493,7 +495,7 @@ def format_decimal(number, format=None):
 
 
 def format_currency(number, currency, format=None, currency_digits=True,
-                    format_type='standard'):
+                    format_type='standard') -> str:
     """Return the given number formatted for the locale in the request.
 
     :param number: the number to format
@@ -517,7 +519,7 @@ def format_currency(number, currency, format=None, currency_digits=True,
     )
 
 
-def format_percent(number, format=None):
+def format_percent(number, format=None) -> str:
     """Return formatted percent value for the locale in the request.
 
     :param number: the number to format
@@ -529,7 +531,7 @@ def format_percent(number, format=None):
     return numbers.format_percent(number, format=format, locale=locale)
 
 
-def format_scientific(number, format=None):
+def format_scientific(number, format=None) -> str:
     """Return value formatted in scientific notation for the locale in request
 
     :param number: the number to format
@@ -723,17 +725,17 @@ class Domain(object):
         return LazyString(self.pgettext, context, string, **variables)
 
 
-def _get_current_context():
+def _get_current_context() -> Optional[SimpleNamespace]:
     if not g:
         return None
 
     if not hasattr(g, "_flask_babel"):
         g._flask_babel = SimpleNamespace()
 
-    return g._flask_babel
+    return g._flask_babel  # noqa
 
 
-def get_domain():
+def get_domain() -> Domain:
     ctx = _get_current_context()
     if ctx is None:
         # this will use NullTranslations
@@ -749,36 +751,36 @@ def get_domain():
 
 
 # Create shortcuts for the default Flask domain
-def gettext(*args, **kwargs):
+def gettext(*args, **kwargs) -> str:
     return get_domain().gettext(*args, **kwargs)
 
 
 _ = gettext
 
 
-def ngettext(*args, **kwargs):
+def ngettext(*args, **kwargs) -> str:
     return get_domain().ngettext(*args, **kwargs)
 
 
-def pgettext(*args, **kwargs):
+def pgettext(*args, **kwargs) -> str:
     return get_domain().pgettext(*args, **kwargs)
 
 
-def npgettext(*args, **kwargs):
+def npgettext(*args, **kwargs) -> str:
     return get_domain().npgettext(*args, **kwargs)
 
 
-def lazy_gettext(*args, **kwargs):
+def lazy_gettext(*args, **kwargs) -> LazyString:
     return LazyString(gettext, *args, **kwargs)
 
 
-def lazy_pgettext(*args, **kwargs):
+def lazy_pgettext(*args, **kwargs) -> LazyString:
     return LazyString(pgettext, *args, **kwargs)
 
 
-def lazy_ngettext(*args, **kwargs):
+def lazy_ngettext(*args, **kwargs) -> LazyString:
     return LazyString(ngettext, *args, **kwargs)
 
 
-def lazy_npgettext(*args, **kwargs):
+def lazy_npgettext(*args, **kwargs) -> LazyString:
     return LazyString(npgettext, *args, **kwargs)
