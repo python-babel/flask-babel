@@ -4,9 +4,9 @@ Flask-Babel
 .. module:: flask_babel
 
 Flask-Babel is an extension to `Flask`_ that adds i18n and l10n support to
-any Flask application with the help of `babel`_, `pytz`_ and
-`speaklater`_.  It has builtin support for date formatting with timezone
-support as well as a very simple and friendly interface to :mod:`gettext`
+any Flask application with the help of `babel`_, `pytz`_ and its own copy of
+`speaklater`_.  It has built-in support for date formatting including timezones,
+as well as a very simple and friendly interface to :mod:`gettext`
 translations.
 
 Installation
@@ -409,8 +409,8 @@ Low-Level API
 .. autofunction:: force_locale
 
 
-.. _Flask: http://flask.pocoo.org/
-.. _babel: http://babel.edgewall.org/
-.. _pytz: http://pytz.sourceforge.net/
-.. _speaklater: http://pypi.python.org/pypi/speaklater
+.. _Flask: https://palletsprojects.com/p/flask/
+.. _babel: https://babel.pocoo.org/en/latest/
+.. _pytz: https://pythonhosted.org/pytz/
+.. _speaklater: https://pypi.python.org/pypi/speaklater
 .. _reloader: https://flask.palletsprojects.com/en/1.1.x/cli/#watch-extra-files-with-the-reloader
