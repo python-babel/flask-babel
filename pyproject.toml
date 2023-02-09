@@ -6,6 +6,8 @@ authors = ["Armin Ronacher"]
 maintainers = ["Tyler Kennedy <tk@tkte.ch>"]
 license = "BSD-3-Clause"
 readme = "README.md"
+repository = "https://github.com/python-babel/flask-babel"
+documentation = "https://python-babel.github.io/flask-babel/"
 classifiers = [
     'Development Status :: 5 - Production/Stable',
     'Environment :: Web Environment',
