@@ -197,7 +197,8 @@ class Babel:
                 if any(x.endswith('.mo') for x in os.listdir(locale_dir)):
                     result.append(Locale.parse(folder))
 
-        result.append(self.default_locale)
+        if self.default_locale not in result:
+            result.append(self.default_locale)
         return result
 
     @property
