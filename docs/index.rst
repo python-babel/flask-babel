@@ -57,7 +57,7 @@ to change some internal defaults:
                                 translation directories, eg::
 
                                     BABEL_TRANSLATION_DIRECTORIES=/path/to/translations;/another/path/
-                                    BABEL_DOMAINS=messages;myapp
+                                    BABEL_DOMAIN=messages;myapp
 
 =============================== =============================================
 
