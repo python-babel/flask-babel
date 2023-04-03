@@ -13,22 +13,22 @@ def test_basics():
     delta = timedelta(days=6)
 
     with app.test_request_context():
-        assert babel.format_datetime(d) == 'Apr 12, 2010, 1:46:00 PM'
+        assert babel.format_datetime(d) == 'Apr 12, 2010, 1:46:00\u202fPM'
         assert babel.format_date(d) == 'Apr 12, 2010'
-        assert babel.format_time(d) == '1:46:00 PM'
+        assert babel.format_time(d) == '1:46:00\u202fPM'
         assert babel.format_timedelta(delta) == '1 week'
         assert babel.format_timedelta(delta, threshold=1) == '6 days'
 
     with app.test_request_context():
         get_babel(app).default_timezone = 'Europe/Vienna'
-        assert babel.format_datetime(d) == 'Apr 12, 2010, 3:46:00 PM'
+        assert babel.format_datetime(d) == 'Apr 12, 2010, 3:46:00\u202fPM'
         assert babel.format_date(d) == 'Apr 12, 2010'
-        assert babel.format_time(d) == '3:46:00 PM'
+        assert babel.format_time(d) == '3:46:00\u202fPM'
 
     with app.test_request_context():
         get_babel(app).default_locale = 'de_DE'
         assert babel.format_datetime(d, 'long') == \
-            '12. April 2010 um 15:46:00 MESZ'
+            '12. April 2010, 15:46:00 MESZ'
 
 
 def test_custom_formats():
@@ -64,7 +64,7 @@ def test_custom_locale_selector():
     get_babel(app).timezone_selector = select_timezone
 
     with app.test_request_context():
-        assert babel.format_datetime(d) == 'Apr 12, 2010, 1:46:00 PM'
+        assert babel.format_datetime(d) == 'Apr 12, 2010, 1:46:00\u202fPM'
 
     the_locale = 'de_DE'
     the_timezone = 'Europe/Vienna'
@@ -78,7 +78,7 @@ def test_refreshing():
     babel.Babel(app)
     d = datetime(2010, 4, 12, 13, 46)
     with app.test_request_context():
-        assert babel.format_datetime(d) == 'Apr 12, 2010, 1:46:00 PM'
+        assert babel.format_datetime(d) == 'Apr 12, 2010, 1:46:00\u202fPM'
         get_babel(app).default_timezone = 'Europe/Vienna'
         babel.refresh()
-        assert babel.format_datetime(d) == 'Apr 12, 2010, 3:46:00 PM'
+        assert babel.format_datetime(d) == 'Apr 12, 2010, 3:46:00\u202fPM'

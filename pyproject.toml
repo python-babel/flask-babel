@@ -32,7 +32,7 @@ include = [
 python = "^3.7"
 pytz = "^2022.7"
 Flask = "^2.0.0"
-Babel = "^2.11.0"
+Babel = "^2.12.0"
 Jinja2 = "^3.1.2"
 
 [tool.poetry.dev-dependencies]
