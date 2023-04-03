@@ -96,6 +96,16 @@ def test_list_translations():
         assert str(translations[1]) == 'de_DE'
 
 
+def test_list_translations_default_locale_exists():
+    app = flask.Flask(__name__)
+    b = babel.Babel(app, default_locale='de')
+
+    with app.app_context():
+        translations = b.list_translations()
+        assert len(translations) == 1
+        assert str(translations[0]) == 'de'
+
+
 def test_no_formatting():
     """
     Ensure we don't format strings unless a variable is passed.
