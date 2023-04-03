@@ -25,9 +25,9 @@ classifiers = [
     'Topic :: Software Development :: Libraries :: Python Modules'
 ]
 include = [
-    "CHANGELOG",
-    "README.md",
-    "LICENSE"
+    { path = "CHANGELOG", format = "sdist" },
+    { path = "README.md", format = "sdist" },
+    { path = "LICENSE", format = "sdist" },
 ]
 
 [tool.poetry.dependencies]
