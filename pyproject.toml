@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "flask-babel"
 version = "3.0.1"
-description = "Adds i18n/l10n support fo Flask applications."
+description = "Adds i18n/l10n support for Flask applications."
 authors = ["Armin Ronacher"]
 maintainers = ["Tyler Kennedy <tk@tkte.ch>"]
 license = "BSD-3-Clause"
