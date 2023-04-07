@@ -1,3 +1,12 @@
+v3.1.0
+------
+
+- Documentation and packaging improvements. (#226, #223, #218, #217, #215)
+- Don't return the default locale twice (#219)
+- Fix tests breaking against babel 12.2, which changed localized times to use non-breaking-spaces. Babel 12.2 or greater
+  is now required. (#222)
+- Relax version requirements for dependencies. (#227, #225)
+
 v3.0.0
 ------
 
