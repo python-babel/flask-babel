@@ -10,7 +10,7 @@
 import os
 from dataclasses import dataclass
 from types import SimpleNamespace
-from datetime import datetime
+from datetime import datetime, timezone as stdlib_timezone
 from contextlib import contextmanager
 from typing import List, Callable, Optional, Union
 
@@ -453,7 +453,16 @@ def format_timedelta(datetime_or_timedelta, granularity: str = 'second',
     named `timedeltaformat`.
     """
     if isinstance(datetime_or_timedelta, datetime):
-        datetime_or_timedelta = datetime.utcnow() - datetime_or_timedelta
+        is_aware = (
+            datetime_or_timedelta.tzinfo is not None
+            and datetime_or_timedelta.tzinfo.utcoffset(datetime_or_timedelta)
+            is not None
+        )
+        if is_aware:
+            now = datetime.now(stdlib_timezone.utc)
+        else:
+            now = datetime.utcnow()
+        datetime_or_timedelta = now - datetime_or_timedelta
     return dates.format_timedelta(
         datetime_or_timedelta,
         granularity,
