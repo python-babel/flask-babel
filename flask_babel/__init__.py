@@ -16,10 +16,10 @@ from typing import List, Callable, Optional, Union
 
 from babel.support import Translations, NullTranslations
 from flask import current_app, g
-from flask.helpers import locked_cached_property
 from babel import dates, numbers, support, Locale
 from pytz import timezone, UTC
 from werkzeug.datastructures import ImmutableDict
+from werkzeug.utils import cached_property
 
 from flask_babel.speaklater import LazyString
 
@@ -221,7 +221,7 @@ class Babel:
         """
         return get_babel().default_domain
 
-    @locked_cached_property
+    @cached_property
     def domain_instance(self):
         """The message domain for the translations.
         """
