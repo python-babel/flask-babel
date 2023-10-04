@@ -186,8 +186,10 @@ u'1.235'
 '$1,099.98'
 
 >>> from flask_babel import format_percent
->>> format_percent(0.34)
+>>> format_percent(0.3399)
 '34%'
+>>> format_percent(0.3399, decimal_quantization=False)
+'33.99%'
 
 >>> from flask_babel import format_scientific
 >>> format_scientific(10000)

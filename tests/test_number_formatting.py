@@ -15,4 +15,6 @@ def test_basics():
         assert babel.format_decimal(Decimal('1010.99')) == u'1,010.99'
         assert babel.format_currency(n, 'USD') == '$1,099.00'
         assert babel.format_percent(0.19) == '19%'
+        assert babel.format_percent(0.1999,
+                                    decimal_quantization=False) == '19.99%'
         assert babel.format_scientific(10000) == u'1E4'
