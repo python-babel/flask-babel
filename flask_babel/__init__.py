@@ -520,16 +520,18 @@ def format_currency(number, currency, format=None, currency_digits=True,
     )
 
 
-def format_percent(number, format=None) -> str:
+def format_percent(number, format=None, decimal_quantization=True) -> str:
     """Return formatted percent value for the locale in the request.
 
     :param number: the number to format
     :param format: the format to use
+    :param decimal_quantization: Truncate and round high-precision numbers to
+                                 the format pattern. Defaults to `True`.
     :return: the formatted percent number
     :rtype: unicode
     """
     locale = get_locale()
-    return numbers.format_percent(number, format=format, locale=locale)
+    return numbers.format_percent(number, format=format, locale=locale, decimal_quantization=decimal_quantization)
 
 
 def format_scientific(number, format=None) -> str:
