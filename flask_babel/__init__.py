@@ -630,7 +630,7 @@ class Domain(object):
                 # does not copy _info, plural(), or any other instance variables
                 # populated by GNUTranslations. We probably want to stop using
                 # `support.Translations.merge` entirely.
-                if hasattr(catalog, 'plural'):
+                if catalog.info() and hasattr(catalog, 'plural'):
                     translations.plural = catalog.plural
 
             cache[str(locale), self.domain[0]] = translations
