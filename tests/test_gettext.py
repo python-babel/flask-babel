@@ -91,9 +91,10 @@ def test_list_translations():
 
     with app.app_context():
         translations = b.list_translations()
-        assert len(translations) == 2
+        assert len(translations) == 3
         assert str(translations[0]) == 'de'
-        assert str(translations[1]) == 'de_DE'
+        assert str(translations[1]) == 'ja'
+        assert str(translations[2]) == 'de_DE'
 
 
 def test_list_translations_default_locale_exists():
@@ -102,8 +103,9 @@ def test_list_translations_default_locale_exists():
 
     with app.app_context():
         translations = b.list_translations()
-        assert len(translations) == 1
+        assert len(translations) == 2
         assert str(translations[0]) == 'de'
+        assert str(translations[1]) == 'ja'
 
 
 def test_no_formatting():
@@ -219,3 +221,58 @@ def test_cache(mocker):
         }
         assert babel.gettext("Yes") == "Ja"
     assert load_mock.call_count == 2
+
+
+def test_plurals():
+
+    app = flask.Flask(__name__)
+
+    def set_locale():
+        return flask.request.environ["LANG"]
+
+    babel.Babel(app, locale_selector=set_locale)
+
+    # Plural-Forms: nplurals=2; plural=(n != 1)
+    with app.test_request_context(environ_overrides={"LANG": "de_DE"}):
+
+        assert ngettext("%(num)s Apple", "%(num)s Apples", 1) == "1 Apfel"
+        assert ngettext("%(num)s Apple", "%(num)s Apples", 2) == "2 Äpfel"
+
+    # Plural-Forms: nplurals=1; plural=0;
+    with app.test_request_context(environ_overrides={"LANG": "ja"}):
+
+        assert ngettext("%(num)s Apple", "%(num)s Apples", 1) == "リンゴ 1 個"
+        assert ngettext("%(num)s Apple", "%(num)s Apples", 2) == "リンゴ 2 個"
+
+
+def test_plurals_different_domains():
+
+    app = flask.Flask(__name__)
+
+    app.config.update({
+        'BABEL_TRANSLATION_DIRECTORIES': ';'.join((
+            'translations',
+            'translations_different_domain',
+        )),
+        'BABEL_DOMAIN': ';'.join((
+            'messages',
+            'myapp',
+        )),
+    })
+
+    def set_locale():
+        return flask.request.environ["LANG"]
+
+    babel.Babel(app, locale_selector=set_locale)
+
+    # Plural-Forms: nplurals=2; plural=(n != 1)
+    with app.test_request_context(environ_overrides={"LANG": "de_DE"}):
+
+        assert ngettext("%(num)s Apple", "%(num)s Apples", 1) == "1 Apfel"
+        assert ngettext("%(num)s Apple", "%(num)s Apples", 2) == "2 Äpfel"
+
+    # Plural-Forms: nplurals=1; plural=0;
+    with app.test_request_context(environ_overrides={"LANG": "ja"}):
+
+        assert ngettext("%(num)s Apple", "%(num)s Apples", 1) == "リンゴ 1 個"
+        assert ngettext("%(num)s Apple", "%(num)s Apples", 2) == "リンゴ 2 個"
