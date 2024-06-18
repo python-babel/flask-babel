@@ -13,4 +13,5 @@ jobs:
     with:
       use_poetry: true
       use_sphinx: true
+      use_black: true
       python_version: ${{ matrix.python-version }}
