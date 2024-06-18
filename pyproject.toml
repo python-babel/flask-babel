@@ -36,7 +36,8 @@ Flask = ">=2.0"
 Babel = ">=2.12"
 Jinja2 = ">=3.1"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
+black = "^24.4.2"
 pytest = "^7.2.0"
 pytest-mock = "^3.10.0"
 bumpversion = "^0.6.0"
