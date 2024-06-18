@@ -7,6 +7,7 @@
     :copyright: (c) 2013 by Armin Ronacher, Daniel Neuhäuser.
     :license: BSD, see LICENSE for more details.
 """
+
 import os
 from dataclasses import dataclass
 from types import SimpleNamespace
@@ -27,23 +28,24 @@ from flask_babel.speaklater import LazyString
 @dataclass
 class BabelConfiguration:
     """Application-specific configuration for Babel."""
+
     default_locale: str
     default_timezone: str
     default_domain: str
     default_directories: List[str]
     translation_directories: List[str]
 
-    instance: 'Babel'
+    instance: "Babel"
 
     locale_selector: Optional[Callable] = None
     timezone_selector: Optional[Callable] = None
 
 
-def get_babel(app=None) -> 'BabelConfiguration':
+def get_babel(app=None) -> "BabelConfiguration":
     app = app or current_app
-    if not hasattr(app, 'extensions'):
+    if not hasattr(app, "extensions"):
         app.extensions = {}
-    return app.extensions['babel']
+    return app.extensions["babel"]
 
 
 class Babel:
@@ -53,26 +55,29 @@ class Babel:
     after the configuration was initialized.
     """
 
-    default_date_formats = ImmutableDict({
-        'time':             'medium',
-        'date':             'medium',
-        'datetime':         'medium',
-        'time.short':       None,
-        'time.medium':      None,
-        'time.full':        None,
-        'time.long':        None,
-        'date.short':       None,
-        'date.medium':      None,
-        'date.full':        None,
-        'date.long':        None,
-        'datetime.short':   None,
-        'datetime.medium':  None,
-        'datetime.full':    None,
-        'datetime.long':    None,
-    })
+    default_date_formats = ImmutableDict(
+        {
+            "time": "medium",
+            "date": "medium",
+            "datetime": "medium",
+            "time.short": None,
+            "time.medium": None,
+            "time.full": None,
+            "time.long": None,
+            "date.short": None,
+            "date.medium": None,
+            "date.full": None,
+            "date.long": None,
+            "datetime.short": None,
+            "datetime.medium": None,
+            "datetime.full": None,
+            "datetime.long": None,
+        }
+    )
 
-    def __init__(self, app=None, date_formats=None, configure_jinja=True, *args,
-                 **kwargs):
+    def __init__(
+        self, app=None, date_formats=None, configure_jinja=True, *args, **kwargs
+    ):
         """Creates a new Babel instance.
 
         If an application is passed, it will be configured with the provided
@@ -85,10 +90,16 @@ class Babel:
         if app is not None:
             self.init_app(app, *args, **kwargs)
 
-    def init_app(self, app, default_locale='en', default_domain='messages',
-                 default_translation_directories='translations',
-                 default_timezone='UTC', locale_selector=None,
-                 timezone_selector=None):
+    def init_app(
+        self,
+        app,
+        default_locale="en",
+        default_domain="messages",
+        default_translation_directories="translations",
+        default_timezone="UTC",
+        locale_selector=None,
+        timezone_selector=None,
+    ):
         """
         Initializes the Babel instance for use with this specific application.
 
@@ -105,34 +116,22 @@ class Babel:
         :param timezone_selector: The function to use to select the
                                   timezone for a request
         """
-        if not hasattr(app, 'extensions'):
+        if not hasattr(app, "extensions"):
             app.extensions = {}
 
         directories = app.config.get(
-            'BABEL_TRANSLATION_DIRECTORIES',
-            default_translation_directories
-        ).split(';')
+            "BABEL_TRANSLATION_DIRECTORIES", default_translation_directories
+        ).split(";")
 
-        app.extensions['babel'] = BabelConfiguration(
-            default_locale=app.config.get(
-                'BABEL_DEFAULT_LOCALE',
-                default_locale
-            ),
-            default_timezone=app.config.get(
-                'BABEL_DEFAULT_TIMEZONE',
-                default_timezone
-            ),
-            default_domain=app.config.get(
-                'BABEL_DOMAIN',
-                default_domain
-            ),
+        app.extensions["babel"] = BabelConfiguration(
+            default_locale=app.config.get("BABEL_DEFAULT_LOCALE", default_locale),
+            default_timezone=app.config.get("BABEL_DEFAULT_TIMEZONE", default_timezone),
+            default_domain=app.config.get("BABEL_DOMAIN", default_domain),
             default_directories=directories,
-            translation_directories=list(
-                self._resolve_directories(directories, app)
-            ),
+            translation_directories=list(self._resolve_directories(directories, app)),
             instance=self,
             locale_selector=locale_selector,
-            timezone_selector=timezone_selector
+            timezone_selector=timezone_selector,
         )
 
         # a mapping of Babel datetime format strings that can be modified
@@ -161,15 +160,13 @@ class Babel:
                 percentformat=format_percent,
                 scientificformat=format_scientific,
             )
-            app.jinja_env.add_extension('jinja2.ext.i18n')
+            app.jinja_env.add_extension("jinja2.ext.i18n")
             app.jinja_env.install_gettext_callables(
                 gettext=lambda s: get_translations().ugettext(s),
                 ngettext=lambda s, p, n: get_translations().ungettext(s, p, n),
                 newstyle=True,
                 pgettext=lambda c, s: get_translations().upgettext(c, s),
-                npgettext=lambda c, s, p, n: get_translations().unpgettext(
-                    c, s, p, n
-                ),
+                npgettext=lambda c, s, p, n: get_translations().unpgettext(c, s, p, n),
             )
 
     def list_translations(self):
@@ -190,11 +187,11 @@ class Babel:
                 continue
 
             for folder in os.listdir(dirname):
-                locale_dir = os.path.join(dirname, folder, 'LC_MESSAGES')
+                locale_dir = os.path.join(dirname, folder, "LC_MESSAGES")
                 if not os.path.isdir(locale_dir):
                     continue
 
-                if any(x.endswith('.mo') for x in os.listdir(locale_dir)):
+                if any(x.endswith(".mo") for x in os.listdir(locale_dir)):
                     result.append(Locale.parse(folder))
 
         if self.default_locale not in result:
@@ -217,14 +214,12 @@ class Babel:
 
     @property
     def domain(self) -> str:
-        """The message domain for the translations as a string.
-        """
+        """The message domain for the translations as a string."""
         return get_babel().default_domain
 
     @cached_property
     def domain_instance(self):
-        """The message domain for the translations.
-        """
+        """The message domain for the translations."""
         return Domain(domain=self.domain)
 
     @staticmethod
@@ -254,7 +249,7 @@ def get_locale() -> Optional[Locale]:
     if ctx is None:
         return None
 
-    locale = getattr(ctx, 'babel_locale', None)
+    locale = getattr(ctx, "babel_locale", None)
     if locale is None:
         babel = get_babel()
         if babel.locale_selector is None:
@@ -275,7 +270,7 @@ def get_timezone() -> Optional[timezone]:
     a `pytz.timezone` object.  This returns `None` if used outside a request.
     """
     ctx = _get_current_context()
-    tzinfo = getattr(ctx, 'babel_tzinfo', None)
+    tzinfo = getattr(ctx, "babel_tzinfo", None)
     if tzinfo is None:
         babel = get_babel()
         if babel.timezone_selector is None:
@@ -304,11 +299,11 @@ def refresh():
     return English text and a now German page.
     """
     ctx = _get_current_context()
-    for key in 'babel_locale', 'babel_tzinfo', 'babel_translations':
+    for key in "babel_locale", "babel_tzinfo", "babel_translations":
         if hasattr(ctx, key):
             delattr(ctx, key)
 
-    if hasattr(ctx, 'forced_babel_locale'):
+    if hasattr(ctx, "forced_babel_locale"):
         ctx.babel_locale = ctx.forced_babel_locale
 
 
@@ -332,7 +327,7 @@ def force_locale(locale):
         return
 
     orig_attrs = {}
-    for key in ('babel_translations', 'babel_locale'):
+    for key in ("babel_translations", "babel_locale"):
         orig_attrs[key] = getattr(ctx, key, None)
 
     try:
@@ -341,7 +336,7 @@ def force_locale(locale):
         ctx.babel_translations = None
         yield
     finally:
-        if hasattr(ctx, 'forced_babel_locale'):
+        if hasattr(ctx, "forced_babel_locale"):
             del ctx.forced_babel_locale
 
         for key, value in orig_attrs.items():
@@ -355,8 +350,8 @@ def _get_format(key, format) -> Optional[str]:
     babel = get_babel()
     if format is None:
         format = babel.instance.date_formats[key]
-    if format in ('short', 'medium', 'full', 'long'):
-        rv = babel.instance.date_formats['%s.%s' % (key, format)]
+    if format in ("short", "medium", "full", "long"):
+        rv = babel.instance.date_formats["%s.%s" % (key, format)]
         if rv is not None:
             format = rv
     return format
@@ -399,7 +394,7 @@ def format_datetime(datetime=None, format=None, rebase=True):
     This function is also available in the template context as filter
     named `datetimeformat`.
     """
-    format = _get_format('datetime', format)
+    format = _get_format("datetime", format)
     return _date_format(dates.format_datetime, datetime, format, rebase)
 
 
@@ -421,7 +416,7 @@ def format_date(date=None, format=None, rebase=True):
     """
     if rebase and isinstance(date, datetime):
         date = to_user_timezone(date)
-    format = _get_format('date', format)
+    format = _get_format("date", format)
     return _date_format(dates.format_date, date, format, rebase)
 
 
@@ -440,12 +435,16 @@ def format_time(time=None, format=None, rebase=True):
     This function is also available in the template context as filter
     named `timeformat`.
     """
-    format = _get_format('time', format)
+    format = _get_format("time", format)
     return _date_format(dates.format_time, time, format, rebase)
 
 
-def format_timedelta(datetime_or_timedelta, granularity: str = 'second',
-                     add_direction=False, threshold=0.85):
+def format_timedelta(
+    datetime_or_timedelta,
+    granularity: str = "second",
+    add_direction=False,
+    threshold=0.85,
+):
     """Format the elapsed time from the given date to now or the given
     timedelta.
 
@@ -459,7 +458,7 @@ def format_timedelta(datetime_or_timedelta, granularity: str = 'second',
         granularity,
         threshold=threshold,
         add_direction=add_direction,
-        locale=get_locale()
+        locale=get_locale(),
     )
 
 
@@ -468,7 +467,7 @@ def _date_format(formatter, obj, format, rebase, **extra):
     locale = get_locale()
     extra = {}
     if formatter is not dates.format_date and rebase:
-        extra['tzinfo'] = get_timezone()
+        extra["tzinfo"] = get_timezone()
     return formatter(obj, format, locale=locale, **extra)
 
 
@@ -495,8 +494,9 @@ def format_decimal(number, format=None) -> str:
     return numbers.format_decimal(number, format=format, locale=locale)
 
 
-def format_currency(number, currency, format=None, currency_digits=True,
-                    format_type='standard') -> str:
+def format_currency(
+    number, currency, format=None, currency_digits=True, format_type="standard"
+) -> str:
     """Return the given number formatted for the locale in the request.
 
     :param number: the number to format
@@ -516,7 +516,7 @@ def format_currency(number, currency, format=None, currency_digits=True,
         format=format,
         locale=locale,
         currency_digits=currency_digits,
-        format_type=format_type
+        format_type=format_type,
     )
 
 
@@ -548,7 +548,7 @@ class Domain(object):
     """Localization domain. By default, it will look for translations in the
     Flask application directory and "messages" domain - all message catalogs
     should be called ``messages.mo``.
-    
+
     Additional domains are supported passing a list of domain names to the
     ``domain`` argument, but note that in this case they must match a list
     passed to ``translation_directories``, eg::
@@ -565,20 +565,17 @@ class Domain(object):
         )
     """
 
-    def __init__(self, translation_directories=None, domain='messages'):
+    def __init__(self, translation_directories=None, domain="messages"):
         if isinstance(translation_directories, str):
             translation_directories = [translation_directories]
         self._translation_directories = translation_directories
 
-        self.domain = domain.split(';')
+        self.domain = domain.split(";")
 
         self.cache = {}
 
     def __repr__(self):
-        return '<Domain({!r}, {!r})>'.format(
-            self._translation_directories,
-            self.domain
-        )
+        return "<Domain({!r}, {!r})>".format(self._translation_directories, self.domain)
 
     @property
     def translation_directories(self):
@@ -614,23 +611,15 @@ class Domain(object):
 
             for index, dirname in enumerate(self.translation_directories):
 
-                domain = (
-                    self.domain[0]
-                    if len(self.domain) == 1
-                    else self.domain[index]
-                )
+                domain = self.domain[0] if len(self.domain) == 1 else self.domain[index]
 
-                catalog = support.Translations.load(
-                    dirname,
-                    [locale],
-                    domain
-                )
+                catalog = support.Translations.load(dirname, [locale], domain)
                 translations.merge(catalog)
                 # FIXME: Workaround for merge() being really, really stupid. It
                 # does not copy _info, plural(), or any other instance variables
                 # populated by GNUTranslations. We probably want to stop using
                 # `support.Translations.merge` entirely.
-                if hasattr(catalog, 'plural'):
+                if hasattr(catalog, "plural"):
                     translations.plural = catalog.plural
 
             cache[str(locale), self.domain[0]] = translations
@@ -661,7 +650,7 @@ class Domain(object):
 
             ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(apples))
         """
-        variables.setdefault('num', num)
+        variables.setdefault("num", num)
         t = self.get_translations()
         s = t.ungettext(singular, plural, num)
         return s if not variables else s % variables
@@ -680,7 +669,7 @@ class Domain(object):
 
         .. versionadded:: 0.7
         """
-        variables.setdefault('num', num)
+        variables.setdefault("num", num)
         t = self.get_translations()
         s = t.unpgettext(context, singular, plural, num)
         return s if not variables else s % variables
