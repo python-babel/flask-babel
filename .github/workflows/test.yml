@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   test:
-    name: Running tests.
+    name: Testing
     uses: tktech/python-standard/.github/workflows/test.yml@v1
     strategy:
       fail-fast: false
