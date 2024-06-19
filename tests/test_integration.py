@@ -26,26 +26,28 @@ def test_multiple_directories():
     b = babel.Babel()
     app = flask.Flask(__name__)
 
-    app.config.update(
-        {
-            "BABEL_TRANSLATION_DIRECTORIES": ";".join(
-                ("translations", "renamed_translations")
-            ),
-            "BABEL_DEFAULT_LOCALE": "de_DE",
-        }
-    )
+    app.config.update({
+        'BABEL_TRANSLATION_DIRECTORIES': ';'.join((
+            'translations',
+            'renamed_translations'
+        )),
+        'BABEL_DEFAULT_LOCALE': 'de_DE'
+    })
 
     b.init_app(app)
 
     with app.test_request_context():
         translations = b.list_translations()
 
-        assert len(translations) == 3
-        assert str(translations[0]) == "de"
-        assert str(translations[1]) == "de"
-        assert str(translations[2]) == "de_DE"
+        assert(len(translations) == 3)
+        assert(str(translations[0]) == 'de')
+        assert(str(translations[1]) == 'de')
+        assert(str(translations[2]) == 'de_DE')
 
-        assert gettext("Hello %(name)s!", name="Peter") == "Hallo Peter!"
+        assert gettext(
+            u'Hello %(name)s!',
+            name='Peter'
+        ) == 'Hallo Peter!'
 
 
 def test_multiple_directories_multiple_domains():
@@ -56,36 +58,33 @@ def test_multiple_directories_multiple_domains():
     b = babel.Babel()
     app = flask.Flask(__name__)
 
-    app.config.update(
-        {
-            "BABEL_TRANSLATION_DIRECTORIES": ";".join(
-                (
-                    "renamed_translations",
-                    "translations_different_domain",
-                )
-            ),
-            "BABEL_DEFAULT_LOCALE": "de_DE",
-            "BABEL_DOMAIN": ";".join(
-                (
-                    "messages",
-                    "myapp",
-                )
-            ),
-        }
-    )
+    app.config.update({
+        'BABEL_TRANSLATION_DIRECTORIES': ';'.join((
+            'renamed_translations',
+            'translations_different_domain',
+        )),
+        'BABEL_DEFAULT_LOCALE': 'de_DE',
+        'BABEL_DOMAIN': ';'.join((
+            'messages',
+            'myapp',
+        )),
+    })
 
     b.init_app(app)
 
     with app.test_request_context():
         translations = b.list_translations()
 
-        assert len(translations) == 3
-        assert str(translations[0]) == "de"
-        assert str(translations[1]) == "de"
-        assert str(translations[2]) == "de_DE"
+        assert(len(translations) == 3)
+        assert(str(translations[0]) == 'de')
+        assert(str(translations[1]) == 'de')
+        assert(str(translations[2]) == 'de_DE')
 
-        assert gettext("Hello %(name)s!", name="Peter") == "Hallo Peter!"
-        assert gettext("Good bye") == "Auf Wiedersehen"
+        assert gettext(
+            u'Hello %(name)s!',
+            name='Peter'
+        ) == 'Hallo Peter!'
+        assert gettext(u'Good bye') == 'Auf Wiedersehen'
 
 
 def test_multiple_directories_different_domain():
@@ -96,28 +95,30 @@ def test_multiple_directories_different_domain():
     b = babel.Babel()
     app = flask.Flask(__name__)
 
-    app.config.update(
-        {
-            "BABEL_TRANSLATION_DIRECTORIES": ";".join(
-                ("translations_different_domain", "renamed_translations")
-            ),
-            "BABEL_DEFAULT_LOCALE": "de_DE",
-            "BABEL_DOMAIN": "myapp",
-        }
-    )
+    app.config.update({
+        'BABEL_TRANSLATION_DIRECTORIES': ';'.join((
+            'translations_different_domain',
+            'renamed_translations'
+        )),
+        'BABEL_DEFAULT_LOCALE': 'de_DE',
+        'BABEL_DOMAIN': 'myapp'
+    })
 
     b.init_app(app)
 
     with app.test_request_context():
         translations = b.list_translations()
 
-        assert len(translations) == 3
-        assert str(translations[0]) == "de"
-        assert str(translations[1]) == "de"
-        assert str(translations[2]) == "de_DE"
+        assert(len(translations) == 3)
+        assert(str(translations[0]) == 'de')
+        assert(str(translations[1]) == 'de')
+        assert(str(translations[2]) == 'de_DE')
 
-        assert gettext("Hello %(name)s!", name="Peter") == "Hallo Peter!"
-        assert gettext("Good bye") == "Auf Wiedersehen"
+        assert gettext(
+            u'Hello %(name)s!',
+            name='Peter'
+        ) == 'Hallo Peter!'
+        assert gettext(u'Good bye') == 'Auf Wiedersehen'
 
 
 def test_different_domain():
@@ -127,36 +128,34 @@ def test_different_domain():
     b = babel.Babel()
     app = flask.Flask(__name__)
 
-    app.config.update(
-        {
-            "BABEL_TRANSLATION_DIRECTORIES": "translations_different_domain",
-            "BABEL_DEFAULT_LOCALE": "de_DE",
-            "BABEL_DOMAIN": "myapp",
-        }
-    )
+    app.config.update({
+        'BABEL_TRANSLATION_DIRECTORIES': 'translations_different_domain',
+        'BABEL_DEFAULT_LOCALE': 'de_DE',
+        'BABEL_DOMAIN': 'myapp'
+    })
 
     b.init_app(app)
 
     with app.test_request_context():
         translations = b.list_translations()
 
-        assert len(translations) == 2
-        assert str(translations[0]) == "de"
-        assert str(translations[1]) == "de_DE"
+        assert(len(translations) == 2)
+        assert(str(translations[0]) == 'de')
+        assert(str(translations[1]) == 'de_DE')
 
-        assert gettext("Good bye") == "Auf Wiedersehen"
+        assert gettext(u'Good bye') == 'Auf Wiedersehen'
 
 
 def test_lazy_old_style_formatting():
-    lazy_string = lazy_gettext("Hello %(name)s")
-    assert lazy_string % {"name": "test"} == "Hello test"
+    lazy_string = lazy_gettext(u'Hello %(name)s')
+    assert lazy_string % {u'name': u'test'} == u'Hello test'
 
-    lazy_string = lazy_gettext("test")
-    assert "Hello %s" % lazy_string == "Hello test"
+    lazy_string = lazy_gettext(u'test')
+    assert u'Hello %s' % lazy_string == u'Hello test'
 
 
 def test_lazy_pickling():
-    lazy_string = lazy_gettext("Foo")
+    lazy_string = lazy_gettext(u'Foo')
     pickled = pickle.dumps(lazy_string)
     unpickled = pickle.loads(pickled)
 
