@@ -1,43 +1,18 @@
 on:
-  workflow_dispatch:
   release:
     types:
       - published
-
 name: Release
-
 jobs:
-
-  sdist:
-    name: Creating source release & pure wheel
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Set up Python
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.8
-
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-
-    - name: Installing
-      run: poetry install --no-interaction
-
-    - name: Building documentation
-      run: |
-        cd docs && poetry run make clean && poetry run make html
-
-    - name: Publishing documentation
-      run: |
-        poetry run ghp-import -f -n -p docs/_build/html
-
-    - name: Publishing
-      env:
-        PYPI_TOKEN: ${{ secrets.PYPI_PASSWORD }}
-      run: |
-        poetry config pypi-token.pypi $PYPI_TOKEN
-        poetry publish --build
+  build:
+    permissions:
+      id-token: write
+      pages: write
+    uses: tktech/python-standard/.github/workflows/release.yml@v1
+    with:
+      use_poetry: true
+      use_sphinx: true
+      python_version: '3.11'
+      platform: 'ubuntu-latest'
+    secrets:
+      PYPI_TOKEN: ${{ secrets.PYPI_PASSWORD }}
