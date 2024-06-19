@@ -39,10 +39,11 @@ def test_multiple_directories():
     with app.test_request_context():
         translations = b.list_translations()
 
-        assert(len(translations) == 3)
+        assert(len(translations) == 4)
         assert(str(translations[0]) == 'de')
-        assert(str(translations[1]) == 'de')
-        assert(str(translations[2]) == 'de_DE')
+        assert(str(translations[1]) == 'ja')
+        assert(str(translations[2]) == 'de')
+        assert(str(translations[3]) == 'de_DE')
 
         assert gettext(
             u'Hello %(name)s!',
