@@ -482,20 +482,33 @@ def format_number(number) -> str:
     return numbers.format_decimal(number, locale=locale)
 
 
-def format_decimal(number, format=None) -> str:
+def format_decimal(
+    number, format=None, decimal_quantization=True, group_separator=True
+) -> str:
     """Return the given decimal number formatted for the locale in the request.
 
     :param number: the number to format
     :param format: the format to use
+    :param decimal_quantization: Truncate and round high-precision numbers to
+                                 the format pattern. Defaults to `True`.
+    :param group_separator: Boolean to switch group separator on/off in a
+                            locale's number format.
     :return: the formatted number
     :rtype: unicode
     """
     locale = get_locale()
-    return numbers.format_decimal(number, format=format, locale=locale)
+    return numbers.format_decimal(
+        number,
+        format=format,
+        locale=locale,
+        decimal_quantization=decimal_quantization,
+        group_separator=group_separator
+    )
 
 
 def format_currency(
-    number, currency, format=None, currency_digits=True, format_type="standard"
+    number, currency, format=None, currency_digits=True,
+    format_type="standard", decimal_quantization=True, group_separator=True
 ) -> str:
     """Return the given number formatted for the locale in the request.
 
@@ -506,6 +519,10 @@ def format_currency(
                             [default: True]
     :param format_type: the currency format type to use
                         [default: standard]
+    :param decimal_quantization: Truncate and round high-precision numbers to
+                                 the format pattern. Defaults to `True`.
+    :param group_separator: Boolean to switch group separator on/off in a
+                            locale's number format.
     :return: the formatted number
     :rtype: unicode
     """
@@ -517,31 +534,52 @@ def format_currency(
         locale=locale,
         currency_digits=currency_digits,
         format_type=format_type,
+        decimal_quantization=decimal_quantization,
+        group_separator=group_separator
     )
 
 
-def format_percent(number, format=None) -> str:
+def format_percent(
+    number, format=None, decimal_quantization=True, group_separator=True
+) -> str:
     """Return formatted percent value for the locale in the request.
 
     :param number: the number to format
     :param format: the format to use
+    :param decimal_quantization: Truncate and round high-precision numbers to
+                                 the format pattern. Defaults to `True`.
+    :param group_separator: Boolean to switch group separator on/off in a
+                            locale's number format.
     :return: the formatted percent number
     :rtype: unicode
     """
     locale = get_locale()
-    return numbers.format_percent(number, format=format, locale=locale)
+    return numbers.format_percent(
+        number,
+        format=format,
+        locale=locale,
+        decimal_quantization=decimal_quantization,
+        group_separator=group_separator
+    )
 
 
-def format_scientific(number, format=None) -> str:
+def format_scientific(number, format=None, decimal_quantization=True) -> str:
     """Return value formatted in scientific notation for the locale in request
 
     :param number: the number to format
     :param format: the format to use
+    :param decimal_quantization: Truncate and round high-precision numbers to
+                                 the format pattern. Defaults to `True`.
     :return: the formatted percent number
     :rtype: unicode
     """
     locale = get_locale()
-    return numbers.format_scientific(number, format=format, locale=locale)
+    return numbers.format_scientific(
+        number,
+        format=format,
+        locale=locale,
+        decimal_quantization=decimal_quantization
+    )
 
 
 class Domain(object):
