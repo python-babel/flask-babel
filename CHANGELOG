@@ -1,3 +1,8 @@
+Unreleased
+----------
+
+- Dropped support for end-of-life Python 3.8.
+
 v3.1.0
 ------
 
