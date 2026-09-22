@@ -1,3 +1,9 @@
+Unreleased
+----------
+
+- Correct past and future directions for datetime values in
+  `format_timedelta(..., add_direction=True)` and the `timedeltaformat` filter.
+
 v3.1.0
 ------
 
