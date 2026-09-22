@@ -445,14 +445,17 @@ def format_timedelta(
     add_direction=False,
     threshold=0.85,
 ):
-    """Format the elapsed time from the given date to now or the given
-    timedelta.
+    """Format the time between now and the given date or the given timedelta.
+
+    With ``add_direction=True``, future dates and positive timedeltas use
+    wording such as "in 1 hour"; past dates and negative timedeltas use
+    "1 hour ago".
 
     This function is also available in the template context as filter
     named `timedeltaformat`.
     """
     if isinstance(datetime_or_timedelta, datetime):
-        datetime_or_timedelta = datetime.utcnow() - datetime_or_timedelta
+        datetime_or_timedelta = datetime_or_timedelta - datetime.utcnow()
     return dates.format_timedelta(
         datetime_or_timedelta,
         granularity,

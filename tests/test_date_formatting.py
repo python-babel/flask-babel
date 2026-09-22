@@ -1,9 +1,36 @@
 from datetime import datetime, timedelta
 
 import flask
+import pytest
 
 import flask_babel as babel
 from flask_babel import get_babel
+
+
+@pytest.mark.parametrize("hours, expected", [(-1, "1 hour ago"), (1, "in 1 hour")])
+@pytest.mark.parametrize("use_datetime", [True, False])
+def test_timedelta_direction(monkeypatch, hours, expected, use_datetime):
+    class FixedDatetime(datetime):
+        @classmethod
+        def utcnow(cls):
+            return cls(2026, 1, 1, 12)
+
+    monkeypatch.setattr(babel, "datetime", FixedDatetime)
+    app = flask.Flask(__name__)
+    babel.Babel(app)
+    value = timedelta(hours=hours)
+    if use_datetime:
+        value = FixedDatetime.utcnow() + value
+
+    with app.test_request_context():
+        assert babel.format_timedelta(value, add_direction=True) == expected
+        assert (
+            flask.render_template_string(
+                "{{ value|timedeltaformat(add_direction=True) }}", value=value
+            )
+            == expected
+        )
+        assert babel.format_timedelta(value) == "1 hour"
 
 
 def test_basics():
