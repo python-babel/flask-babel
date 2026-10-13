@@ -40,6 +40,10 @@ class BabelConfiguration:
     locale_selector: Optional[Callable] = None
     timezone_selector: Optional[Callable] = None
 
+    @cached_property
+    def domain_instance(self):
+        return Domain(domain=self.default_domain)
+
 
 def get_babel(app=None) -> "BabelConfiguration":
     app = app or current_app
@@ -217,10 +221,10 @@ class Babel:
         """The message domain for the translations as a string."""
         return get_babel().default_domain
 
-    @cached_property
+    @property
     def domain_instance(self):
-        """The message domain for the translations."""
-        return Domain(domain=self.domain)
+        """The message domain for the current application's translations."""
+        return get_babel().domain_instance
 
     @staticmethod
     def _resolve_directories(directories: List[str], app=None):
