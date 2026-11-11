@@ -72,4 +72,4 @@ class LazyString(object):
         return str(self) % other
 
     def __rmod__(self, other):
-        return other + str(self)
+        return other % str(self)
