@@ -259,7 +259,10 @@ def get_locale() -> Optional[Locale]:
             if rv is None:
                 locale = babel.instance.default_locale
             else:
-                locale = Locale.parse(rv)
+                try:
+                    locale = Locale.parse(rv)
+                except ValueError:
+                    locale = Locale.parse(rv, sep="-")
         ctx.babel_locale = locale
 
     return locale
