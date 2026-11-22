@@ -399,9 +399,11 @@ def format_datetime(datetime=None, format=None, rebase=True):
 
 
 def format_date(date=None, format=None, rebase=True):
-    """Return a date formatted according to the given pattern.  If no
-    :class:`~datetime.datetime` or :class:`~datetime.date` object is passed,
-    the current time is assumed.  By default, rebasing happens, which causes
+    """Return a date formatted according to the given pattern. Accepts a
+    :class:`~datetime.datetime`, :class:`~datetime.date`, or Unix timestamp
+    in seconds (an integer or float). If ``None`` is passed, the current
+    time is assumed. Timestamps are interpreted in UTC. By default,
+    rebasing happens, which causes
     the object to be converted to the users's timezone (as returned by
     :func:`to_user_timezone`).  This function only formats the date part
     of a :class:`~datetime.datetime` object.
@@ -414,6 +416,8 @@ def format_date(date=None, format=None, rebase=True):
     This function is also available in the template context as filter
     named `dateformat`.
     """
+    if isinstance(date, (int, float)):
+        date = datetime.fromtimestamp(date, UTC)
     if rebase and isinstance(date, datetime):
         date = to_user_timezone(date)
     format = _get_format("date", format)

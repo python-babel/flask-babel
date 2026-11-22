@@ -1,3 +1,8 @@
+Unreleased
+----------
+
+- Accept Unix timestamps in format_date and the dateformat template filter. (#203)
+
 v3.1.0
 ------
 
