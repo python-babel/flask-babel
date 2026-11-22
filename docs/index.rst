@@ -74,6 +74,10 @@ function is called only once and the return value then cached.  If you
 need to switch the language between a request, you can :func:`refresh` the
 cache.
 
+The locale selector may return a Babel ``Locale`` object or a locale name.
+Locale names may use underscores (``pt_BR``) or hyphens (``pt-BR``) to
+separate their components.
+
 Example selector functions::
 
     from flask import g, request
